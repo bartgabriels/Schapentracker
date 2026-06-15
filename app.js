@@ -112,9 +112,10 @@ function renderPaddock(p){
     </div>
     <div class="zone-list" ${isExpanded ? '' : 'style="display:none"'}>
       ${p.zones.map(z => {
-        const status = z.emptySince ? `Leeg sinds ${daysSince(z.emptySince)} dagen` : 'Bezet'
         const sheepNames = zoneSheepNames(p.id, z.id)
-        const sheepLabel = sheepNames.length ? sheepNames.map(name => `${sheepIcon()}${name}`).join(' ') : 'Geen schaap'
+        const sheepCount = sheepNames.length
+        const status = z.emptySince ? `Leeg sinds ${daysSince(z.emptySince)} dagen` : `Bezet${sheepCount ? ` (${sheepCount})` : ''}`
+        const sheepLabel = sheepCount ? sheepNames.map(name => `${sheepIcon()}${name}`).join(' ') : 'Geen schaap'
         return `<div class="zone-item"><div><strong>${z.name}</strong><small>${status}</small></div><div class="zone-bottom">${sheepLabel}</div></div>`
       }).join('')}
       <button type="button" class="zone-item add-zone-button" data-paddock-id="${p.id}" aria-label="Zone toevoegen">
