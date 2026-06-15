@@ -11,24 +11,86 @@
     <h1>Schapentracker</h1>
 
     <section>
-      <h2>Weides</h2>
-      <form id="paddock-form">
-        <input id="paddock-name" placeholder="Naam weide" required>
-        <button type="submit">Toevoegen</button>
-      </form>
-      <ul id="paddock-list"></ul>
+      <div class="section-header">
+        <h2>Weides</h2>
+        <button id="open-paddock-modal-btn" class="section-button">Toevoegen</button>
+      </div>
+      <div id="paddock-list"></div>
     </section>
 
     <section>
-      <h2>Schapen</h2>
-      <form id="sheep-form">
-        <input id="sheep-tag" placeholder="Tag" required>
-        <select id="sheep-paddock"></select>
-        <button type="submit">Toevoegen</button>
-      </form>
+      <div class="section-header">
+        <h2>Schapen</h2>
+        <button id="open-sheep-modal-btn" class="section-button">Toevoegen</button>
+      </div>
       <ul id="sheep-list"></ul>
     </section>
+
   </main>
+
+  <div id="paddock-modal" class="modal hidden" aria-hidden="true">
+    <div id="paddock-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="paddock-modal-close" class="modal-close">×</button>
+      <h2>Weide toevoegen</h2>
+      <form id="paddock-modal-form" class="group-form">
+        <input id="paddock-modal-name" placeholder="Naam weide" required>
+        <button type="submit">Toevoegen</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="sheep-modal" class="modal hidden" aria-hidden="true">
+    <div id="sheep-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="sheep-modal-close" class="modal-close">×</button>
+      <h2>Schaap toevoegen</h2>
+      <form id="sheep-modal-form" class="group-form">
+        <input id="sheep-modal-tag" placeholder="Tag" required>
+        <select id="sheep-paddock-modal"></select>
+        <select id="sheep-zone-modal" disabled>
+          <option value="">Kies eerst een weide</option>
+        </select>
+        <button type="submit">Toevoegen</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="zone-modal" class="modal hidden" aria-hidden="true">
+    <div id="zone-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="zone-modal-close" class="modal-close">×</button>
+      <h2>Zone toevoegen</h2>
+      <div class="modal-field">
+        <label>Weide</label>
+        <div id="zone-modal-paddock-name"></div>
+      </div>
+      <form id="zone-modal-form" class="group-form">
+        <input id="zone-modal-name" placeholder="Zone naam" required>
+        <button type="submit">Toevoegen</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="move-modal" class="modal hidden" aria-hidden="true">
+    <div id="move-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="move-modal-close" class="modal-close">×</button>
+      <h2>Verplaats schaap</h2>
+      <div class="modal-field">
+        <label>Schaap</label>
+        <div id="move-modal-sheep-name"></div>
+      </div>
+      <form id="move-modal-form" class="group-form">
+        <select id="move-paddock-modal"></select>
+        <select id="move-zone-modal" disabled>
+          <option value="">Kies eerst een weide</option>
+        </select>
+        <button type="submit">Verplaats</button>
+      </form>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
