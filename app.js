@@ -136,7 +136,7 @@ const translations = {
     'history.paddockMove.auto': 'Weide {name} verwijderd en schapen automatisch verplaatst naar {target}: {sheep}',
     'history.paddockMove.manual': 'Weide {name} verwijderd en schapen verplaatst naar {target}: {sheep}',
     'history.zone.added': 'Zone {name} toegevoegd in weide {paddock}',
-    'history.zone.updated': 'Zone bijgewerkt: {details}',
+    'history.zone.updated': 'Zone {location} bijgewerkt: {details}',
     'history.zone.deleted': 'Zone {paddock} / {name} verwijderd',
     'history.zoneMove.auto': 'Zone {paddock} / {name} verwijderd en schapen automatisch verplaatst naar {target}: {sheep}',
     'history.zoneMove.manual': 'Zone {paddock} / {name} verwijderd en schapen verplaatst naar {target}: {sheep}',
@@ -298,7 +298,7 @@ const translations = {
     'history.paddockMove.auto': 'Paddock {name} deleted and sheep auto-moved to {target}: {sheep}',
     'history.paddockMove.manual': 'Paddock {name} deleted and sheep moved to {target}: {sheep}',
     'history.zone.added': 'Zone {name} added in paddock {paddock}',
-    'history.zone.updated': 'Zone updated: {details}',
+    'history.zone.updated': 'Zone {location} updated: {details}',
     'history.zone.deleted': 'Zone {paddock} / {name} deleted',
     'history.zoneMove.auto': 'Zone {paddock} / {name} deleted and sheep auto-moved to {target}: {sheep}',
     'history.zoneMove.manual': 'Zone {paddock} / {name} deleted and sheep moved to {target}: {sheep}',
@@ -459,7 +459,7 @@ const translationsFr = {
   'history.paddockMove.auto': 'Pâturage {name} supprimé et moutons déplacés automatiquement vers {target} : {sheep}',
   'history.paddockMove.manual': 'Pâturage {name} supprimé et moutons déplacés vers {target} : {sheep}',
   'history.zone.added': 'Zone {name} ajoutée dans le pâturage {paddock}',
-  'history.zone.updated': 'Zone modifiée : {details}',
+  'history.zone.updated': 'Zone {location} modifiée : {details}',
   'history.zone.deleted': 'Zone {paddock} / {name} supprimée',
   'history.zoneMove.auto': 'Zone {paddock} / {name} supprimée et moutons déplacés automatiquement vers {target} : {sheep}',
   'history.zoneMove.manual': 'Zone {paddock} / {name} supprimée et moutons déplacés vers {target} : {sheep}',
@@ -1017,6 +1017,9 @@ function render(){
             <button type="button" class="sheep-tag-edit-button" data-id="${s.id}" aria-label="${t('aria.editSheepName', { tag: s.tag })}">✎</button>
             <span class="sheep-name-label">${s.tag}${genderIcon(s.gender)}</span>
           </div>
+          ${s.earmark ? `<small class="sheep-earmark">🏷 ${s.earmark}</small>` : `<small class="sheep-earmark sheep-earmark--empty">&nbsp;</small>`}
+          <small>${paddockName(s.paddockId)}${s.zoneId ? ' / ' + zoneName(s.paddockId, s.zoneId) : ''}</small>
+          <small>${t('labels.lastUpdated', { date: formatDate(s.lastUpdated), days: daysSince(s.lastUpdated) })}</small>
         </div>
         <div class="sheep-actions">
           <button type="button" class="move-button" data-id="${s.id}">${t('actions.move')}</button>
@@ -1074,10 +1077,17 @@ function renderPaddock(p){
     <div class="zone-list" ${isExpanded ? '' : 'style="display:none"'}>
       ${p.zones.map(z => {
         const sheepInZone = state.sheep.filter(s => s.paddockId === p.id && s.zoneId === z.id)
+        const sheepCount = sheepInZone.length
+        const zoneArea = z.area !== null ? `${z.area} m2` : ''
+        const zonePerimeter = z.perimeter !== null ? `${z.perimeter} m` : ''
+        const bulkMoveButton = sheepCount > 1 ? `<button type="button" class="zone-bulk-move-button" data-paddock-id="${p.id}" data-zone-id="${z.id}">${t('zone.bulkMove')}</button>` : ''
+        const sheepList = sheepCount
+          ? `<div class="zone-sheep-list${sheepCount > 4 ? ' is-scrollable' : ''}">${sheepInZone.map(s => `<button type="button" class="zone-sheep-link" data-sheep-id="${s.id}" aria-label="${t('aria.moveSheep', { tag: s.tag })}">${sheepIcon()}${s.tag}</button>`).join('')}</div>${bulkMoveButton}`
+          : t('zone.sheep.empty')
         const stallZone = isStalZone(p, z)
         const useStallBackground = isStalPaddock(p)
         const canDeleteZone = !stallZone && p.zones.length > 1
-        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">−</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name}</strong></div></div></div>`
+        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">−</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name}</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}<span class="zone-metric">${sheepCount}</span></div></div><div class="zone-bottom">${sheepList}</div></div>`
       }).join('')}
       <button type="button" class="zone-item add-zone-button${isStalPaddock(p) ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" aria-label="${t('aria.addZone')}">
         <span class="add-zone-icon">+</span>
@@ -1812,7 +1822,7 @@ document.getElementById('zone-edit-form')?.addEventListener('submit', e => {
     if(beforeArea !== zone.area) details.push(t('history.details.area', { from: beforeArea ?? '-', area: zone.area ?? '-' }))
     if(beforePerimeter !== zone.perimeter) details.push(t('history.details.perimeter', { from: beforePerimeter ?? '-', perimeter: zone.perimeter ?? '-' }))
     if(beforeNotes !== zone.notes) details.push(t('history.details.notesUpdated'))
-    addHistory('zone', t('history.zone.updated', { details: details.join(', ') }))
+    addHistory('zone', t('history.zone.updated', { location: `${paddock.name} / ${zone.name}`, details: details.join(', ') }))
   }
 
   save(); render(); closeEditZoneModal()

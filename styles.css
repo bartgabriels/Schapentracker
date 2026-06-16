@@ -639,7 +639,7 @@ button.add-zone-button:hover {
 }
 
 .zone-sheep-list.is-scrollable{
-  max-height:4.5em;
+  max-height:5.9em;
   overflow-y:auto;
   padding-right:3px;
   scrollbar-width:thin;
