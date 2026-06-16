@@ -1017,9 +1017,6 @@ function render(){
             <button type="button" class="sheep-tag-edit-button" data-id="${s.id}" aria-label="${t('aria.editSheepName', { tag: s.tag })}">✎</button>
             <span class="sheep-name-label">${s.tag}${genderIcon(s.gender)}</span>
           </div>
-          ${s.earmark ? `<small class="sheep-earmark">🏷 ${s.earmark}</small>` : `<small class="sheep-earmark sheep-earmark--empty">&nbsp;</small>`}
-          <small>${paddockName(s.paddockId)}${s.zoneId ? ' / ' + zoneName(s.paddockId, s.zoneId) : ''}</small>
-          <small>${t('labels.lastUpdated', { date: formatDate(s.lastUpdated), days: daysSince(s.lastUpdated) })}</small>
         </div>
         <div class="sheep-actions">
           <button type="button" class="move-button" data-id="${s.id}">${t('actions.move')}</button>
@@ -1056,18 +1053,12 @@ function render(){
 function renderPaddock(p){
   const isExpanded = !collapsedPaddockIds.has(p.id)
   const isWeatherExpanded = expandedWeatherPaddocks.has(p.id)
-  const sheepCount = state.sheep.filter(s => s.paddockId === p.id).length
-  const sheepLabel = sheepCount === 1 ? t('paddock.sheep.singular') : t('paddock.sheep.plural')
   const paddockPostcode = (p.postcode || '').trim()
   const paddockCountry = paddockPostcode ? detectPostcodeCountry(paddockPostcode) : null
   const paddockFlagCode = paddockCountry ? paddockCountry.toLowerCase() : ''
   const paddockFlagHtml = paddockFlagCode
     ? `<img class="paddock-flag" src="flags/${paddockFlagCode}.png" alt="${paddockCountry} flag">`
     : ''
-  const hasZoneArea = p.zones.some(z => z.area !== null)
-  const totalZoneArea = p.zones.reduce((sum, z) => sum + (Number.isFinite(Number(z.area)) ? Number(z.area) : 0), 0)
-  const paddockArea = hasZoneArea ? `${totalZoneArea} m2` : ''
-  const weatherHtml = renderPaddockWeather(p, isWeatherExpanded)
   const canDeletePaddock = !isStalPaddock(p)
   return `<div class="card" data-id="${p.id}" ${isExpanded ? 'data-expanded="true"' : ''}>
     <div class="card-header" data-paddock-id="${p.id}" style="user-select:none">
@@ -1075,34 +1066,18 @@ function renderPaddock(p){
         <button type="button" class="paddock-edit-button" data-paddock-id="${p.id}" aria-label="${t('aria.editPaddock')}">✎</button>
         <button type="button" class="paddock-collapse-button" data-paddock-id="${p.id}" aria-label="${isExpanded ? t('aria.collapsePaddock') : t('aria.expandPaddock')}">${isExpanded ? '▾' : '▸'}</button>
         <strong>${p.name}</strong>
-        ${paddockPostcode ? `<span class="paddock-postcode">${paddockFlagHtml}<span>${paddockPostcode}</span></span>` : ''}
-        ${paddockArea ? `<span class="paddock-metric">${paddockArea}</span>` : ''}
-        <span class="paddock-sheep-count">${sheepCount} ${sheepLabel}</span>
       </div>
       <div class="card-header-actions">
-        <span class="badge">${t('paddock.zones.badge', { count: p.zones.length })}</span>
-        <button type="button" class="weather-toggle-button" data-paddock-id="${p.id}">${t('aria.weatherForecast')}</button>
         ${canDeletePaddock ? `<button type="button" class="paddock-delete-button" data-paddock-id="${p.id}" aria-label="${t('aria.deletePaddock')}">−</button>` : ''}
       </div>
     </div>
-    ${weatherHtml}
     <div class="zone-list" ${isExpanded ? '' : 'style="display:none"'}>
       ${p.zones.map(z => {
         const sheepInZone = state.sheep.filter(s => s.paddockId === p.id && s.zoneId === z.id)
-        const sheepCount = sheepInZone.length
-        const emptyDays = z.emptySince ? daysSince(z.emptySince) : 0
-        const status = z.emptySince ? t('zone.status.empty', { days: emptyDays }) : `${t('zone.status.occupied')}${sheepCount ? ` (${sheepCount})` : ''}`
-        const zoneArea = z.area !== null ? `${z.area} m2` : ''
-        const zonePerimeter = z.perimeter !== null ? `${z.perimeter} m` : ''
-        const zoneNotes = (z.notes || '').trim()
-        const bulkMoveButton = sheepCount > 1 ? `<button type="button" class="zone-bulk-move-button" data-paddock-id="${p.id}" data-zone-id="${z.id}">${t('zone.bulkMove')}</button>` : ''
-        const sheepLabel = sheepCount
-          ? `<div class="zone-sheep-list${sheepCount > 3 ? ' is-scrollable' : ''}">${sheepInZone.map(s => `<button type="button" class="zone-sheep-link" data-sheep-id="${s.id}" aria-label="${t('aria.moveSheep', { tag: s.tag })}">${sheepIcon()}${s.tag}</button>`).join('')}</div>${bulkMoveButton}`
-          : t('zone.sheep.empty')
         const stallZone = isStalZone(p, z)
         const useStallBackground = isStalPaddock(p)
         const canDeleteZone = !stallZone && p.zones.length > 1
-        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">−</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name}</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}</div><small>${status}</small>${zoneNotes ? `<p class="entity-notes">${zoneNotes}</p>` : ''}</div><div class="zone-bottom">${sheepLabel}</div></div>`
+        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">−</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name}</strong></div></div></div>`
       }).join('')}
       <button type="button" class="zone-item add-zone-button${isStalPaddock(p) ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" aria-label="${t('aria.addZone')}">
         <span class="add-zone-icon">+</span>
