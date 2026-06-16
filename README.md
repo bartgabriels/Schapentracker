@@ -4,18 +4,6 @@
 
 ---
 
-## Changelog
-
-### Recent Updates
-- **Icon Replacements**: SVG icons replaced with PNG images for better visual customization:
-  - Syringe icon → `spuit.png`
-  - Scissors icon → `schaar.png`
-  - Calendar icon → `calender.png`
-  - Repeat icon → `repeat.png`
-  - Recycle bin icon remains as SVG
-
----
-
 ## Translator Workflow
 
 Use `locales/translations.csv` for translation work. This file is intended for translators and contains no application logic.
