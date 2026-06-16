@@ -108,7 +108,9 @@ function render(){
   const movePaddockModal = document.getElementById('move-paddock-modal')
   const moveZoneModal = document.getElementById('move-zone-modal')
 
-  paddockList.innerHTML = state.paddocks.length === 0 ? '<div class="empty">Geen weides</div>' : state.paddocks.map(p => renderPaddock(p)).join('')
+  paddockList.innerHTML = state.paddocks.length === 0 ? '<div class="empty">Geen weides</div>' : state.paddocks.map(p => renderPaddock(p)).join('') + `
+    <button type="button" class="add-paddock-block" aria-label="Weide toevoegen">+</button>
+  `
 
   sheepList.innerHTML = state.sheep.map(s => `
       <div class="sheep-card">
@@ -146,25 +148,27 @@ function render(){
 
 function renderPaddock(p){
   const isExpanded = expandedPaddocks.has(p.id)
+  const sheepCount = state.sheep.filter(s => s.paddockId === p.id).length
+  const sheepLabel = sheepCount === 1 ? 'schaap' : 'schapen'
   return `<div class="card" data-id="${p.id}" ${isExpanded ? 'data-expanded="true"' : ''}>
     <div class="card-header" data-paddock-id="${p.id}" style="cursor:pointer;user-select:none">
-      <strong>${p.name}</strong>
+      <div>
+        <strong>${p.name}</strong>
+        <span style="color:#64748b;font-size:0.75rem;">${sheepCount} ${sheepLabel}</span>
+      </div>
       <span class="badge">${p.zones.length} zone(s)</span>
     </div>
-    <div class="card-body">
-      <div class="zone-list" ${isExpanded ? '' : 'style="display:none"'}>
-        ${p.zones.map(z => {
-          const sheepNames = zoneSheepNames(p.id, z.id)
-          const sheepCount = sheepNames.length
-          const status = z.emptySince ? `Leeg sinds ${daysSince(z.emptySince)} dagen` : `Bezet${sheepCount ? ` (${sheepCount})` : ''}`
-          const sheepLabel = sheepCount ? sheepNames.map(name => `${sheepIcon()}${name}`).join(' ') : 'Geen schaap'
-          return `<div class="zone-item" data-paddock-id="${p.id}" data-zone-id="${z.id}"><button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="Zone verwijderen">−</button><div><strong>${z.name}</strong><small>${status}</small></div><div class="zone-bottom">${sheepLabel}</div></div>`
-        }).join('')}
-        <button type="button" class="zone-item add-zone-button" data-paddock-id="${p.id}" aria-label="Zone toevoegen">
-          <span class="add-zone-icon">+</span>
-        </button>
-      </div>
-      <button type="button" class="add-paddock-block" aria-label="Weide toevoegen">+</button>
+    <div class="zone-list" ${isExpanded ? '' : 'style="display:none"'}>
+      ${p.zones.map(z => {
+        const sheepNames = zoneSheepNames(p.id, z.id)
+        const sheepCount = sheepNames.length
+        const status = z.emptySince ? `Leeg sinds ${daysSince(z.emptySince)} dagen` : `Bezet${sheepCount ? ` (${sheepCount})` : ''}`
+        const sheepLabel = sheepCount ? sheepNames.map(name => `${sheepIcon()}${name}`).join(' ') : 'Geen schaap'
+        return `<div class="zone-item" data-paddock-id="${p.id}" data-zone-id="${z.id}"><button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="Zone verwijderen">−</button><div><strong>${z.name}</strong><small>${status}</small></div><div class="zone-bottom">${sheepLabel}</div></div>`
+      }).join('')}
+      <button type="button" class="zone-item add-zone-button" data-paddock-id="${p.id}" aria-label="Zone toevoegen">
+        <span class="add-zone-icon">+</span>
+      </button>
     </div>
   </div>`
 }
@@ -374,6 +378,12 @@ document.getElementById('sheep-list')?.addEventListener('click', e => {
 })
 
 document.getElementById('paddock-list').addEventListener('click', e => {
+  const addPaddockButton = e.target.closest('.add-paddock-block')
+  if(addPaddockButton){
+    openModal('paddock-modal')
+    return
+  }
+
   const deleteZoneButton = e.target.closest('.zone-delete-button')
   if(deleteZoneButton){
     const paddockId = deleteZoneButton.dataset.paddockId || deleteZoneButton.dataset.paddockId
