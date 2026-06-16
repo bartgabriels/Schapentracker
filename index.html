@@ -119,6 +119,118 @@
     </div>
   </div>
 
+  <div id="paddock-injection-modal" class="modal hidden" aria-hidden="true">
+    <div id="paddock-injection-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="paddock-injection-modal-close" class="modal-close">✕</button>
+      <h2 id="paddock-injection-modal-title">Injectie registreren</h2>
+      <div class="modal-field">
+        <label id="paddock-injection-paddock-label">Weide</label>
+        <div id="paddock-injection-paddock-name">-</div>
+      </div>
+      <form id="paddock-injection-form" class="group-form">
+        <div class="modal-field">
+          <label id="paddock-injection-sheep-list-label">Schapen</label>
+          <div id="paddock-injection-sheep-list" class="modal-sheep-grid"></div>
+        </div>
+        <div class="modal-field">
+          <label id="paddock-injection-date-label" for="paddock-injection-date">Datum</label>
+          <input id="paddock-injection-date" type="date" required>
+        </div>
+        <div class="modal-field">
+          <label id="paddock-injection-product-label" for="paddock-injection-product">Product</label>
+          <input id="paddock-injection-product" required>
+        </div>
+        <div class="modal-field">
+          <label id="paddock-injection-repeat-label" for="paddock-injection-repeat-date">Herhalen tegen</label>
+          <input id="paddock-injection-repeat-date" type="date" required>
+        </div>
+        <div class="modal-field modal-checkbox-field">
+          <label for="paddock-injection-no-repeat">
+            <input id="paddock-injection-no-repeat" type="checkbox">
+            <span id="paddock-injection-no-repeat-label">Niet herhalen</span>
+          </label>
+        </div>
+        <button type="submit" id="paddock-injection-submit">Opslaan</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="paddock-shearing-modal" class="modal hidden" aria-hidden="true">
+    <div id="paddock-shearing-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="paddock-shearing-modal-close" class="modal-close">✕</button>
+      <h2 id="paddock-shearing-modal-title">Scheren registreren</h2>
+      <div class="modal-field">
+        <label id="paddock-shearing-paddock-label">Weide</label>
+        <div id="paddock-shearing-paddock-name">-</div>
+      </div>
+      <form id="paddock-shearing-form" class="group-form">
+        <div class="modal-field">
+          <label id="paddock-shearing-sheep-list-label">Schapen</label>
+          <div id="paddock-shearing-sheep-list" class="modal-sheep-grid"></div>
+        </div>
+        <div class="modal-field">
+          <label id="paddock-shearing-date-label" for="paddock-shearing-date">Datum</label>
+          <input id="paddock-shearing-date" type="date" required>
+        </div>
+        <button type="submit" id="paddock-shearing-submit">Bevestigen</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="sheep-injection-modal" class="modal hidden" aria-hidden="true">
+    <div id="sheep-injection-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="sheep-injection-modal-close" class="modal-close">✕</button>
+      <h2 id="sheep-injection-modal-title">Injectie registreren (schaap)</h2>
+      <div class="modal-field">
+        <label id="sheep-injection-sheep-label">Schaap</label>
+        <div id="sheep-injection-sheep-name">-</div>
+      </div>
+      <form id="sheep-injection-form" class="group-form">
+        <div class="modal-field">
+          <label id="sheep-injection-date-label" for="sheep-injection-date">Datum</label>
+          <input id="sheep-injection-date" type="date" required>
+        </div>
+        <div class="modal-field">
+          <label id="sheep-injection-product-label" for="sheep-injection-product">Product</label>
+          <input id="sheep-injection-product" required>
+        </div>
+        <div class="modal-field">
+          <label id="sheep-injection-repeat-label" for="sheep-injection-repeat-date">Herhalen tegen</label>
+          <input id="sheep-injection-repeat-date" type="date" required>
+        </div>
+        <div class="modal-field modal-checkbox-field">
+          <label for="sheep-injection-no-repeat">
+            <input id="sheep-injection-no-repeat" type="checkbox">
+            <span id="sheep-injection-no-repeat-label">Niet herhalen</span>
+          </label>
+        </div>
+        <button type="submit" id="sheep-injection-submit">Opslaan</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="sheep-shearing-modal" class="modal hidden" aria-hidden="true">
+    <div id="sheep-shearing-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="sheep-shearing-modal-close" class="modal-close">✕</button>
+      <h2 id="sheep-shearing-modal-title">Scheren registreren (schaap)</h2>
+      <div class="modal-field">
+        <label id="sheep-shearing-sheep-label">Schaap</label>
+        <div id="sheep-shearing-sheep-name">-</div>
+      </div>
+      <form id="sheep-shearing-form" class="group-form">
+        <div class="modal-field">
+          <label id="sheep-shearing-date-label" for="sheep-shearing-date">Datum</label>
+          <input id="sheep-shearing-date" type="date" required>
+        </div>
+        <button type="submit" id="sheep-shearing-submit">Bevestigen</button>
+      </form>
+    </div>
+  </div>
+
   <div id="sheep-modal" class="modal hidden" aria-hidden="true">
     <div id="sheep-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">

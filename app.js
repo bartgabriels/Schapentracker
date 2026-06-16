@@ -14,6 +14,10 @@ const PAYPAL_BILLING_CONFIG = {
 }
 let paypalSdkPromise = null
 let pendingDeleteConfirm = null
+let pendingInjectionPaddockId = null
+let pendingShearingPaddockId = null
+let pendingInjectionSheepId = null
+let pendingShearingSheepId = null
 
 const translations = {
   nl: {
@@ -61,6 +65,24 @@ const translations = {
     'sheep.edit.earmarkLabel': 'Oorkenmerk',
     'sheep.edit.earmarkPlaceholder': 'Oorkenmerk toevoegen',
     'sheep.edit.submit': 'Opslaan',
+    'injection.title': 'Injectie registreren',
+    'injection.paddockLabel': 'Weide',
+    'injection.dateLabel': 'Datum',
+    'injection.productLabel': 'Product',
+    'injection.productPlaceholder': 'Productnaam',
+    'injection.repeatLabel': 'Herhalen tegen',
+    'injection.noRepeatLabel': 'Niet herhalen',
+    'injection.sheepListLabel': 'Schapen',
+    'injection.submit': 'Opslaan',
+    'injection.sheepTitle': 'Injectie registreren',
+    'injection.sheepLabel': 'Schaap',
+    'shearing.title': 'Scheren registreren',
+    'shearing.paddockLabel': 'Weide',
+    'shearing.dateLabel': 'Datum',
+    'shearing.sheepListLabel': 'Schapen',
+    'shearing.submit': 'Bevestigen',
+    'shearing.sheepTitle': 'Scheren registreren',
+    'shearing.sheepLabel': 'Schaap',
     'sheep.location.unknownPaddock': 'Onbekend veld',
     'sheep.location.unknownZone': 'Onbekende zone',
     'sheep.location.none': 'Geen zone',
@@ -78,9 +100,19 @@ const translations = {
     'history.details.earmarkAdded': 'oorkenmerk toegevoegd: {earmark}',
     'entity.sheep': 'schaap',
     'errors.earmark.duplicate': 'Dit oorkenmerk is al toegewezen aan een ander schaap.',
+    'history.injection.applied': 'Injectie geregistreerd in {paddock}: {product} ({date}, herhalen tegen {repeatDate}) voor {count} schapen',
+    'history.injection.appliedNoRepeat': 'Injectie geregistreerd in {paddock}: {product} ({date}, niet herhalen) voor {count} schapen',
+    'history.shearing.applied': 'Scheren geregistreerd in {paddock} op {date} voor {count} schapen',
+    'history.injection.sheep': 'Injectie geregistreerd voor {sheep}: {product} ({date}, herhalen tegen {repeatDate})',
+    'history.injection.sheepNoRepeat': 'Injectie geregistreerd voor {sheep}: {product} ({date}, niet herhalen)',
+    'history.shearing.sheep': 'Scheren geregistreerd voor {sheep} op {date}',
     'labels.age': 'Leeftijd: {age}',
     'labels.ageYearsMonths': '{years} jr {months} mnd',
     'labels.birthDate': 'Geboortedatum: {date}',
+    'labels.lastShearing': 'Laatste scheerbeurt: {value}',
+    'labels.lastInjection': 'Laatste injectie: {value}',
+    'labels.nextInjection': 'Eerstvolgende injectie: {value}',
+    'labels.notAvailable': 'niet geregistreerd',
     'labels.lastUpdated': 'Laatst gewijzigd: {date} ({days} dagen geleden)',
     'actions.move': 'Verplaats',
     'aria.editSheepName': 'Naam wijzigen voor {tag}',
@@ -95,6 +127,10 @@ const translations = {
     'aria.addZone': 'Zone toevoegen',
     'aria.editZone': 'Zone bewerken',
     'aria.deleteZone': 'Zone verwijderen',
+    'aria.registerInjection': 'Injectie registreren voor {paddock}',
+    'aria.registerShearing': 'Scheren registreren voor {paddock}',
+    'aria.registerSheepInjection': 'Injectie registreren voor {tag}',
+    'aria.registerSheepShearing': 'Scheren registreren voor {tag}',
     'aria.moveSheep': 'Verplaats {tag}',
     'aria.weatherForecast': 'Weervoorspelling',
     'paddock.add.title': 'Weide toevoegen',
@@ -247,6 +283,24 @@ const translations = {
     'sheep.edit.earmarkLabel': 'Earmark',
     'sheep.edit.earmarkPlaceholder': 'Add earmark',
     'sheep.edit.submit': 'Save',
+    'injection.title': 'Register injection',
+    'injection.paddockLabel': 'Paddock',
+    'injection.dateLabel': 'Date',
+    'injection.productLabel': 'Product',
+    'injection.productPlaceholder': 'Product name',
+    'injection.repeatLabel': 'Repeat by',
+    'injection.noRepeatLabel': 'Do not repeat',
+    'injection.sheepListLabel': 'Sheep',
+    'injection.submit': 'Save',
+    'injection.sheepTitle': 'Register injection',
+    'injection.sheepLabel': 'Sheep',
+    'shearing.title': 'Register shearing',
+    'shearing.paddockLabel': 'Paddock',
+    'shearing.dateLabel': 'Date',
+    'shearing.sheepListLabel': 'Sheep',
+    'shearing.submit': 'Confirm',
+    'shearing.sheepTitle': 'Register shearing',
+    'shearing.sheepLabel': 'Sheep',
     'sheep.location.unknownPaddock': 'Unknown paddock',
     'sheep.location.unknownZone': 'Unknown zone',
     'sheep.location.none': 'No zone',
@@ -264,9 +318,19 @@ const translations = {
     'history.details.earmarkAdded': 'earmark added: {earmark}',
     'entity.sheep': 'sheep',
     'errors.earmark.duplicate': 'This earmark is already assigned to another sheep.',
+    'history.injection.applied': 'Injection registered in {paddock}: {product} ({date}, repeat by {repeatDate}) for {count} sheep',
+    'history.injection.appliedNoRepeat': 'Injection registered in {paddock}: {product} ({date}, do not repeat) for {count} sheep',
+    'history.shearing.applied': 'Shearing registered in {paddock} on {date} for {count} sheep',
+    'history.injection.sheep': 'Injection registered for {sheep}: {product} ({date}, repeat by {repeatDate})',
+    'history.injection.sheepNoRepeat': 'Injection registered for {sheep}: {product} ({date}, do not repeat)',
+    'history.shearing.sheep': 'Shearing registered for {sheep} on {date}',
     'labels.age': 'Age: {age}',
     'labels.ageYearsMonths': '{years} y {months} m',
     'labels.birthDate': 'Birth date: {date}',
+    'labels.lastShearing': 'Last shearing: {value}',
+    'labels.lastInjection': 'Last injection: {value}',
+    'labels.nextInjection': 'Next injection: {value}',
+    'labels.notAvailable': 'not recorded',
     'labels.lastUpdated': 'Last updated: {date} ({days} days ago)',
     'actions.move': 'Move',
     'aria.editSheepName': 'Edit name for {tag}',
@@ -281,6 +345,10 @@ const translations = {
     'aria.addZone': 'Add zone',
     'aria.editZone': 'Edit zone',
     'aria.deleteZone': 'Delete zone',
+    'aria.registerInjection': 'Register injection for {paddock}',
+    'aria.registerShearing': 'Register shearing for {paddock}',
+    'aria.registerSheepInjection': 'Register injection for {tag}',
+    'aria.registerSheepShearing': 'Register shearing for {tag}',
     'aria.moveSheep': 'Move {tag}',
     'aria.weatherForecast': 'Weather forecast',
     'paddock.add.title': 'Add paddock',
@@ -436,6 +504,24 @@ const translationsFr = {
   'sheep.edit.earmarkLabel': 'Marque auriculaire',
   'sheep.edit.earmarkPlaceholder': 'Ajouter une marque auriculaire',
   'sheep.edit.submit': 'Enregistrer',
+  'injection.title': 'Enregistrer une injection',
+  'injection.paddockLabel': 'Pâturage',
+  'injection.dateLabel': 'Date',
+  'injection.productLabel': 'Produit',
+  'injection.productPlaceholder': 'Nom du produit',
+  'injection.repeatLabel': 'Répéter avant',
+  'injection.noRepeatLabel': 'Ne pas répéter',
+  'injection.sheepListLabel': 'Moutons',
+  'injection.submit': 'Enregistrer',
+  'injection.sheepTitle': 'Enregistrer une injection',
+  'injection.sheepLabel': 'Mouton',
+  'shearing.title': 'Enregistrer la tonte',
+  'shearing.paddockLabel': 'Pâturage',
+  'shearing.dateLabel': 'Date',
+  'shearing.sheepListLabel': 'Moutons',
+  'shearing.submit': 'Confirmer',
+  'shearing.sheepTitle': 'Enregistrer la tonte',
+  'shearing.sheepLabel': 'Mouton',
   'sheep.location.unknownPaddock': 'Pâturage inconnu',
   'sheep.location.unknownZone': 'Zone inconnue',
   'sheep.location.none': 'Aucune zone',
@@ -453,9 +539,19 @@ const translationsFr = {
   'history.details.earmarkAdded': 'marque auriculaire ajoutée : {earmark}',
   'entity.sheep': 'mouton',
   'errors.earmark.duplicate': 'Cette marque auriculaire est déjà attribuée à un autre mouton.',
+  'history.injection.applied': 'Injection enregistrée dans {paddock} : {product} ({date}, répéter avant {repeatDate}) pour {count} moutons',
+  'history.injection.appliedNoRepeat': 'Injection enregistrée dans {paddock} : {product} ({date}, ne pas répéter) pour {count} moutons',
+  'history.shearing.applied': 'Tonte enregistrée dans {paddock} le {date} pour {count} moutons',
+  'history.injection.sheep': 'Injection enregistrée pour {sheep} : {product} ({date}, répéter avant {repeatDate})',
+  'history.injection.sheepNoRepeat': 'Injection enregistrée pour {sheep} : {product} ({date}, ne pas répéter)',
+  'history.shearing.sheep': 'Tonte enregistrée pour {sheep} le {date}',
   'labels.age': 'Âge : {age}',
   'labels.ageYearsMonths': '{years} a {months} m',
   'labels.birthDate': 'Date de naissance : {date}',
+  'labels.lastShearing': 'Dernière tonte : {value}',
+  'labels.lastInjection': 'Dernière injection : {value}',
+  'labels.nextInjection': 'Prochaine injection : {value}',
+  'labels.notAvailable': 'non enregistre',
   'labels.lastUpdated': 'Dernière mise à jour : {date} (il y a {days} jours)',
   'actions.move': 'Déplacer',
   'aria.editSheepName': 'Modifier le nom de {tag}',
@@ -470,6 +566,10 @@ const translationsFr = {
   'aria.addZone': 'Ajouter une zone',
   'aria.editZone': 'Modifier la zone',
   'aria.deleteZone': 'Supprimer la zone',
+  'aria.registerInjection': 'Enregistrer une injection pour {paddock}',
+  'aria.registerShearing': 'Enregistrer la tonte pour {paddock}',
+  'aria.registerSheepInjection': 'Enregistrer une injection pour {tag}',
+  'aria.registerSheepShearing': 'Enregistrer la tonte pour {tag}',
   'aria.moveSheep': 'Déplacer {tag}',
   'aria.weatherForecast': 'Prévisions météo',
   'paddock.add.title': 'Ajouter un pâturage',
@@ -847,6 +947,36 @@ function applyStaticTranslations(){
   setPlaceholder('paddock-edit-notes', t('paddock.notes.placeholder'))
   setIconButton('paddock-edit-submit', t('ui.save'))
 
+  setText('paddock-injection-modal-title', t('injection.title'))
+  setText('paddock-injection-paddock-label', t('injection.paddockLabel'))
+  setText('paddock-injection-date-label', t('injection.dateLabel'))
+  setText('paddock-injection-product-label', t('injection.productLabel'))
+  setPlaceholder('paddock-injection-product', t('injection.productPlaceholder'))
+  setText('paddock-injection-repeat-label', t('injection.repeatLabel'))
+  setText('paddock-injection-no-repeat-label', t('injection.noRepeatLabel'))
+  setText('paddock-injection-sheep-list-label', t('injection.sheepListLabel'))
+  setIconButton('paddock-injection-submit', t('injection.submit'))
+
+  setText('paddock-shearing-modal-title', t('shearing.title'))
+  setText('paddock-shearing-paddock-label', t('shearing.paddockLabel'))
+  setText('paddock-shearing-sheep-list-label', t('shearing.sheepListLabel'))
+  setText('paddock-shearing-date-label', t('shearing.dateLabel'))
+  setIconButton('paddock-shearing-submit', t('shearing.submit'))
+
+  setText('sheep-injection-modal-title', t('injection.sheepTitle'))
+  setText('sheep-injection-sheep-label', t('injection.sheepLabel'))
+  setText('sheep-injection-date-label', t('injection.dateLabel'))
+  setText('sheep-injection-product-label', t('injection.productLabel'))
+  setPlaceholder('sheep-injection-product', t('injection.productPlaceholder'))
+  setText('sheep-injection-repeat-label', t('injection.repeatLabel'))
+  setText('sheep-injection-no-repeat-label', t('injection.noRepeatLabel'))
+  setIconButton('sheep-injection-submit', t('injection.submit'))
+
+  setText('sheep-shearing-modal-title', t('shearing.sheepTitle'))
+  setText('sheep-shearing-sheep-label', t('shearing.sheepLabel'))
+  setText('sheep-shearing-date-label', t('shearing.dateLabel'))
+  setIconButton('sheep-shearing-submit', t('shearing.submit'))
+
   // Zone modals
   setText('zone-modal-title', t('zone.add.title'))
   setPlaceholder('zone-modal-name', t('zone.namePlaceholder'))
@@ -1095,6 +1225,16 @@ function load(){
       tag: s.tag,
       earmark: typeof s.earmark === 'string' && s.earmark.trim() ? s.earmark.trim() : null,
       birthDate: typeof s.birthDate === 'string' && s.birthDate.trim() ? s.birthDate.trim() : null,
+      injections: Array.isArray(s.injections) ? s.injections.map(i => ({
+        id: i.id || uid(),
+        date: typeof i.date === 'string' ? i.date : '',
+        product: typeof i.product === 'string' ? i.product : '',
+        repeatDate: typeof i.repeatDate === 'string' ? i.repeatDate : ''
+      })) : [],
+      shearings: Array.isArray(s.shearings) ? s.shearings.map(sh => ({
+        id: sh.id || uid(),
+        date: typeof sh.date === 'string' ? sh.date : ''
+      })) : [],
       gender: s.gender === 'male' || s.gender === 'female' ? s.gender : null,
       motherId: s.motherId ?? null,
       fatherId: s.fatherId ?? null,
@@ -1148,6 +1288,45 @@ function formatAge(dateString){
   }
 
   return t('labels.ageYearsMonths', { years, months })
+}
+
+function todayIso(){
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function oneYearFromTodayIso(){
+  const date = new Date()
+  date.setFullYear(date.getFullYear() + 1)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function latestShearingRecord(sheep){
+  if(!Array.isArray(sheep.shearings)) return null
+  const valid = sheep.shearings.filter(sh => typeof sh.date === 'string' && sh.date)
+  if(!valid.length) return null
+  return valid.reduce((latest, item) => (item.date > latest.date ? item : latest))
+}
+
+function latestInjectionRecord(sheep){
+  if(!Array.isArray(sheep.injections)) return null
+  const valid = sheep.injections.filter(i => typeof i.date === 'string' && i.date)
+  if(!valid.length) return null
+  return valid.reduce((latest, item) => (item.date > latest.date ? item : latest))
+}
+
+function nextInjectionRecord(sheep){
+  if(!Array.isArray(sheep.injections)) return null
+  const today = todayIso()
+  const valid = sheep.injections.filter(i => typeof i.repeatDate === 'string' && i.repeatDate && i.repeatDate >= today)
+  if(!valid.length) return null
+  return valid.reduce((next, item) => (item.repeatDate < next.repeatDate ? item : next))
 }
 
 function formatDate(timestamp){
@@ -1253,6 +1432,16 @@ function importDataFile(file){
         tag: s.tag,
         earmark: typeof s.earmark === 'string' && s.earmark.trim() ? s.earmark.trim() : null,
         birthDate: typeof s.birthDate === 'string' && s.birthDate.trim() ? s.birthDate.trim() : null,
+        injections: Array.isArray(s.injections) ? s.injections.map(i => ({
+          id: i.id || uid(),
+          date: typeof i.date === 'string' ? i.date : '',
+          product: typeof i.product === 'string' ? i.product : '',
+          repeatDate: typeof i.repeatDate === 'string' ? i.repeatDate : ''
+        })) : [],
+        shearings: Array.isArray(s.shearings) ? s.shearings.map(sh => ({
+          id: sh.id || uid(),
+          date: typeof sh.date === 'string' ? sh.date : ''
+        })) : [],
         gender: s.gender === 'male' || s.gender === 'female' ? s.gender : null,
         motherId: s.motherId ?? null,
         fatherId: s.fatherId ?? null,
@@ -1310,26 +1499,44 @@ function render(){
     <button type="button" class="add-paddock-block" aria-label="${t('aria.addPaddock')}">+</button>
   `
 
-  sheepList.innerHTML = state.sheep.map(s => `
+  sheepList.innerHTML = state.sheep.map(s => {
+    const lastShearing = latestShearingRecord(s)
+    const lastInjection = latestInjectionRecord(s)
+    const nextInjection = nextInjectionRecord(s)
+    const lastShearingValue = lastShearing
+      ? formatBirthDate(lastShearing.date)
+      : t('labels.notAvailable')
+    const lastInjectionValue = lastInjection
+      ? `${formatBirthDate(lastInjection.date)} (${lastInjection.product || t('unknown')})`
+      : t('labels.notAvailable')
+    const nextInjectionValue = nextInjection
+      ? `${formatBirthDate(nextInjection.repeatDate)} ♻ (${nextInjection.product || t('unknown')})`
+      : t('labels.notAvailable')
+
+    return `
       <div class="sheep-card">
         <div class="sheep-card-body">
           <div class="sheep-name-row">
             <button type="button" class="sheep-tag-edit-button" data-id="${s.id}" aria-label="${t('aria.editSheepName', { tag: s.tag })}">✎</button>
-            <span class="sheep-name-label">${s.tag}${genderIcon(s.gender)}</span>
+            <span class="sheep-name-label">${s.tag}${s.earmark ? ` <span class="sheep-name-earmark">- ${s.earmark}</span>` : ''}${genderIcon(s.gender)}</span>
           </div>
-          ${s.earmark ? `<small class="sheep-earmark">🏷 ${s.earmark}</small>` : `<small class="sheep-earmark sheep-earmark--empty">&nbsp;</small>`}
           ${s.birthDate
             ? `<small>${t('labels.age', { age: formatAge(s.birthDate) })}</small>`
             : `<input type="date" class="sheep-birthdate-input" data-id="${s.id}" aria-label="${t('aria.setSheepBirthDate', { tag: s.tag })}">`}
           <small>${paddockName(s.paddockId)}${s.zoneId ? ' / ' + zoneName(s.paddockId, s.zoneId) : ''}</small>
-          <small>${t('labels.lastUpdated', { date: formatDate(s.lastUpdated), days: daysSince(s.lastUpdated) })}</small>
+          <small>✂️ ${lastShearingValue}</small>
+          <small>💉 ${lastInjectionValue}</small>
+          <small>💉 ${nextInjectionValue}</small>
         </div>
         <div class="sheep-actions">
+          <button type="button" class="sheep-injection-button" data-id="${s.id}" aria-label="${t('aria.registerSheepInjection', { tag: s.tag })}" title="${t('aria.registerSheepInjection', { tag: s.tag })}">💉</button>
+          <button type="button" class="sheep-shearing-button" data-id="${s.id}" aria-label="${t('aria.registerSheepShearing', { tag: s.tag })}" title="${t('aria.registerSheepShearing', { tag: s.tag })}">✂️</button>
           <button type="button" class="move-button" data-id="${s.id}" aria-label="${t('actions.move')}" title="${t('actions.move')}">${doubleArrowIcon()}</button>
           <button type="button" class="sheep-delete-button" data-id="${s.id}" aria-label="${t('aria.deleteSheep')}">${recycleBinIcon()}</button>
         </div>
       </div>
-    `).join('') + `
+    `
+  }).join('') + `
       <button type="button" class="sheep-card add-sheep-card" id="add-sheep-block" aria-label="${t('aria.addSheep')}">
         <span class="add-zone-icon">+</span>
       </button>
@@ -1398,6 +1605,12 @@ function renderPaddock(p){
   const paddockSheepCount = state.sheep.filter(s => s.paddockId === p.id && p.zones.some(z => z.id === s.zoneId)).length
   const areaLabel = `${new Intl.NumberFormat(localeTag(), { maximumFractionDigits: 2 }).format(paddockTotalArea)} m2`
   const sheepLabel = `${paddockSheepCount} ${paddockSheepCount === 1 ? t('paddock.sheep.singular') : t('paddock.sheep.plural')}`
+  const injectionButtonHtml = paddockSheepCount > 0
+    ? `<button type="button" class="paddock-injection-button" data-paddock-id="${p.id}" aria-label="${t('aria.registerInjection', { paddock: p.name })}" title="${t('aria.registerInjection', { paddock: p.name })}">💉</button>`
+    : ''
+  const shearingButtonHtml = paddockSheepCount > 0
+    ? `<button type="button" class="paddock-shearing-button" data-paddock-id="${p.id}" aria-label="${t('aria.registerShearing', { paddock: p.name })}" title="${t('aria.registerShearing', { paddock: p.name })}">✂️</button>`
+    : ''
   const canDeletePaddock = !isStalPaddock(p)
   // Build today's temp badge from weather cache
   const _postcodeKey = paddockPostcode.toUpperCase()
@@ -1426,6 +1639,8 @@ function renderPaddock(p){
         <button type="button" class="paddock-edit-button" data-paddock-id="${p.id}" aria-label="${t('aria.editPaddock')}">✎</button>
         <button type="button" class="paddock-collapse-button" data-paddock-id="${p.id}" aria-label="${isExpanded ? t('aria.collapsePaddock') : t('aria.expandPaddock')}">${isExpanded ? '▾' : '▸'}</button>
         <strong>${p.name}</strong>
+        ${injectionButtonHtml}
+        ${shearingButtonHtml}
         ${paddockPostcode ? `<span class="badge paddock-postcode">${paddockFlagHtml}${paddockPostcode}</span>` : ''}
         <span class="badge">${areaLabel}</span>
         <span class="badge">${sheepLabel}</span>
@@ -2001,6 +2216,125 @@ function closeEditPaddockModal(){
   closeModal('paddock-edit-modal')
 }
 
+function renderPaddockSheepSelection(containerId, inputName, paddockId){
+  const container = document.getElementById(containerId)
+  if(!container) return
+
+  const sheepInPaddock = state.sheep
+    .filter(s => s.paddockId === paddockId)
+    .sort((a, b) => a.tag.localeCompare(b.tag, localeTag()))
+
+  if(!sheepInPaddock.length){
+    container.innerHTML = `<div class="empty">${t('sheep.empty')}</div>`
+    return
+  }
+
+  container.innerHTML = sheepInPaddock.map(sheep => `
+    <label class="modal-sheep-option" for="${inputName}-${sheep.id}">
+      <input id="${inputName}-${sheep.id}" type="checkbox" name="${inputName}" value="${sheep.id}" checked>
+      <span>${sheep.tag}</span>
+    </label>
+  `).join('')
+}
+
+function openPaddockInjectionModal(paddockId){
+  const paddock = getPaddock(paddockId)
+  if(!paddock) return
+  pendingInjectionPaddockId = paddockId
+
+  const paddockNameEl = document.getElementById('paddock-injection-paddock-name')
+  const dateInput = document.getElementById('paddock-injection-date')
+  const productInput = document.getElementById('paddock-injection-product')
+  const repeatDateInput = document.getElementById('paddock-injection-repeat-date')
+  const noRepeatInput = document.getElementById('paddock-injection-no-repeat')
+
+  if(paddockNameEl) paddockNameEl.textContent = paddock.name
+  if(dateInput) dateInput.value = todayIso()
+  if(productInput) productInput.value = ''
+  if(repeatDateInput) repeatDateInput.value = oneYearFromTodayIso()
+  if(noRepeatInput) noRepeatInput.checked = false
+  if(repeatDateInput){
+    repeatDateInput.disabled = false
+    repeatDateInput.required = true
+  }
+  renderPaddockSheepSelection('paddock-injection-sheep-list', 'paddock-injection-sheep', paddockId)
+
+  openModal('paddock-injection-modal')
+}
+
+function closePaddockInjectionModal(){
+  pendingInjectionPaddockId = null
+  closeModal('paddock-injection-modal')
+}
+
+function openPaddockShearingModal(paddockId){
+  const paddock = getPaddock(paddockId)
+  if(!paddock) return
+  pendingShearingPaddockId = paddockId
+
+  const paddockNameEl = document.getElementById('paddock-shearing-paddock-name')
+  const dateInput = document.getElementById('paddock-shearing-date')
+
+  if(paddockNameEl) paddockNameEl.textContent = paddock.name
+  if(dateInput) dateInput.value = todayIso()
+  renderPaddockSheepSelection('paddock-shearing-sheep-list', 'paddock-shearing-sheep', paddockId)
+
+  openModal('paddock-shearing-modal')
+}
+
+function closePaddockShearingModal(){
+  pendingShearingPaddockId = null
+  closeModal('paddock-shearing-modal')
+}
+
+function openSheepInjectionModal(sheepId){
+  const sheep = state.sheep.find(s => s.id === sheepId)
+  if(!sheep) return
+  pendingInjectionSheepId = sheepId
+
+  const sheepNameEl = document.getElementById('sheep-injection-sheep-name')
+  const dateInput = document.getElementById('sheep-injection-date')
+  const productInput = document.getElementById('sheep-injection-product')
+  const repeatDateInput = document.getElementById('sheep-injection-repeat-date')
+  const noRepeatInput = document.getElementById('sheep-injection-no-repeat')
+
+  if(sheepNameEl) sheepNameEl.textContent = sheep.tag
+  if(dateInput) dateInput.value = todayIso()
+  if(productInput) productInput.value = ''
+  if(repeatDateInput) repeatDateInput.value = oneYearFromTodayIso()
+  if(noRepeatInput) noRepeatInput.checked = false
+  if(repeatDateInput){
+    repeatDateInput.disabled = false
+    repeatDateInput.required = true
+  }
+
+  openModal('sheep-injection-modal')
+}
+
+function closeSheepInjectionModal(){
+  pendingInjectionSheepId = null
+  closeModal('sheep-injection-modal')
+}
+
+function openSheepShearingModal(sheepId){
+  const sheep = state.sheep.find(s => s.id === sheepId)
+  if(!sheep) return
+  pendingShearingSheepId = sheepId
+
+  const sheepNameEl = document.getElementById('sheep-shearing-sheep-name')
+  const dateInput = document.getElementById('sheep-shearing-date')
+
+  if(sheepNameEl) sheepNameEl.textContent = sheep.tag
+  if(dateInput) dateInput.value = todayIso()
+
+  openModal('sheep-shearing-modal')
+}
+
+function closeSheepShearingModal(){
+  pendingShearingSheepId = null
+  closeModal('sheep-shearing-modal')
+}
+
 function openEditZoneModal(paddockId, zoneId){
   const paddock = getPaddock(paddockId)
   const zone = getZone(paddockId, zoneId)
@@ -2092,6 +2426,32 @@ document.getElementById('delete-confirm-backdrop')?.addEventListener('click', cl
 document.getElementById('paddock-edit-modal-close')?.addEventListener('click', closeEditPaddockModal)
 document.getElementById('paddock-edit-modal-backdrop')?.addEventListener('click', closeEditPaddockModal)
 
+document.getElementById('paddock-injection-modal-close')?.addEventListener('click', closePaddockInjectionModal)
+document.getElementById('paddock-injection-modal-backdrop')?.addEventListener('click', closePaddockInjectionModal)
+document.getElementById('paddock-injection-no-repeat')?.addEventListener('change', e => {
+  const repeatDateInput = document.getElementById('paddock-injection-repeat-date')
+  if(!repeatDateInput) return
+  const noRepeat = !!e.target.checked
+  repeatDateInput.disabled = noRepeat
+  repeatDateInput.required = !noRepeat
+})
+
+document.getElementById('paddock-shearing-modal-close')?.addEventListener('click', closePaddockShearingModal)
+document.getElementById('paddock-shearing-modal-backdrop')?.addEventListener('click', closePaddockShearingModal)
+
+document.getElementById('sheep-injection-modal-close')?.addEventListener('click', closeSheepInjectionModal)
+document.getElementById('sheep-injection-modal-backdrop')?.addEventListener('click', closeSheepInjectionModal)
+document.getElementById('sheep-injection-no-repeat')?.addEventListener('change', e => {
+  const repeatDateInput = document.getElementById('sheep-injection-repeat-date')
+  if(!repeatDateInput) return
+  const noRepeat = !!e.target.checked
+  repeatDateInput.disabled = noRepeat
+  repeatDateInput.required = !noRepeat
+})
+
+document.getElementById('sheep-shearing-modal-close')?.addEventListener('click', closeSheepShearingModal)
+document.getElementById('sheep-shearing-modal-backdrop')?.addEventListener('click', closeSheepShearingModal)
+
 document.getElementById('sheep-modal-close')?.addEventListener('click', () => closeModal('sheep-modal'))
 document.getElementById('sheep-modal-backdrop')?.addEventListener('click', () => closeModal('sheep-modal'))
 
@@ -2173,6 +2533,155 @@ document.getElementById('paddock-edit-form')?.addEventListener('submit', e => {
   save(); render(); closeEditPaddockModal()
 })
 
+document.getElementById('paddock-injection-form')?.addEventListener('submit', e => {
+  e.preventDefault()
+  if(!pendingInjectionPaddockId) return
+
+  const paddock = getPaddock(pendingInjectionPaddockId)
+  if(!paddock) return
+
+  const dateInput = document.getElementById('paddock-injection-date')
+  const productInput = document.getElementById('paddock-injection-product')
+  const repeatDateInput = document.getElementById('paddock-injection-repeat-date')
+  const noRepeatInput = document.getElementById('paddock-injection-no-repeat')
+
+  const date = dateInput ? dateInput.value.trim() : ''
+  const product = productInput ? productInput.value.trim() : ''
+  const noRepeat = noRepeatInput ? noRepeatInput.checked : false
+  const repeatDate = repeatDateInput ? repeatDateInput.value.trim() : ''
+  if(!date || !product || (!noRepeat && !repeatDate)) return
+
+  const selectedSheepIds = Array.from(document.querySelectorAll('#paddock-injection-sheep-list input[name="paddock-injection-sheep"]:checked')).map(input => input.value)
+  const sheepInPaddock = state.sheep.filter(s => s.paddockId === pendingInjectionPaddockId && selectedSheepIds.includes(s.id))
+  if(!sheepInPaddock.length) return
+  const injection = { id: uid(), date, product, repeatDate: noRepeat ? '' : repeatDate }
+
+  sheepInPaddock.forEach(sheep => {
+    if(!Array.isArray(sheep.injections)) sheep.injections = []
+    sheep.injections.push({ ...injection, id: uid() })
+    sheep.lastUpdated = Date.now()
+  })
+
+  if(noRepeat){
+    addHistory('injectie', t('history.injection.appliedNoRepeat', {
+      paddock: paddock.name,
+      product,
+      date: formatBirthDate(date),
+      count: sheepInPaddock.length
+    }))
+  } else {
+    addHistory('injectie', t('history.injection.applied', {
+      paddock: paddock.name,
+      product,
+      date: formatBirthDate(date),
+      repeatDate: formatBirthDate(repeatDate),
+      count: sheepInPaddock.length
+    }))
+  }
+
+  save(); render(); closePaddockInjectionModal()
+})
+
+document.getElementById('paddock-shearing-form')?.addEventListener('submit', e => {
+  e.preventDefault()
+  if(!pendingShearingPaddockId) return
+
+  const paddock = getPaddock(pendingShearingPaddockId)
+  if(!paddock) return
+
+  const dateInput = document.getElementById('paddock-shearing-date')
+  const shearingDate = dateInput ? dateInput.value.trim() : ''
+  if(!shearingDate) return
+
+  const selectedSheepIds = Array.from(document.querySelectorAll('#paddock-shearing-sheep-list input[name="paddock-shearing-sheep"]:checked')).map(input => input.value)
+  const sheepInPaddock = state.sheep.filter(s => s.paddockId === pendingShearingPaddockId && selectedSheepIds.includes(s.id))
+  if(!sheepInPaddock.length){
+    return
+  }
+
+  sheepInPaddock.forEach(sheep => {
+    if(!Array.isArray(sheep.shearings)) sheep.shearings = []
+    sheep.shearings.push({ id: uid(), date: shearingDate })
+    sheep.lastUpdated = Date.now()
+  })
+
+  addHistory('scheren', t('history.shearing.applied', {
+    paddock: paddock.name,
+    date: formatBirthDate(shearingDate),
+    count: sheepInPaddock.length
+  }))
+
+  save(); render(); closePaddockShearingModal()
+})
+
+document.getElementById('sheep-injection-form')?.addEventListener('submit', e => {
+  e.preventDefault()
+  if(!pendingInjectionSheepId) return
+
+  const sheep = state.sheep.find(s => s.id === pendingInjectionSheepId)
+  if(!sheep) return
+
+  const dateInput = document.getElementById('sheep-injection-date')
+  const productInput = document.getElementById('sheep-injection-product')
+  const repeatDateInput = document.getElementById('sheep-injection-repeat-date')
+  const noRepeatInput = document.getElementById('sheep-injection-no-repeat')
+
+  const date = dateInput ? dateInput.value.trim() : ''
+  const product = productInput ? productInput.value.trim() : ''
+  const noRepeat = noRepeatInput ? noRepeatInput.checked : false
+  const repeatDate = repeatDateInput ? repeatDateInput.value.trim() : ''
+  if(!date || !product || (!noRepeat && !repeatDate)) return
+
+  if(!Array.isArray(sheep.injections)) sheep.injections = []
+  sheep.injections.push({
+    id: uid(),
+    date,
+    product,
+    repeatDate: noRepeat ? '' : repeatDate
+  })
+  sheep.lastUpdated = Date.now()
+
+  if(noRepeat){
+    addHistory('injectie', t('history.injection.sheepNoRepeat', {
+      sheep: sheep.tag,
+      product,
+      date: formatBirthDate(date)
+    }))
+  } else {
+    addHistory('injectie', t('history.injection.sheep', {
+      sheep: sheep.tag,
+      product,
+      date: formatBirthDate(date),
+      repeatDate: formatBirthDate(repeatDate)
+    }))
+  }
+
+  save(); render(); closeSheepInjectionModal()
+})
+
+document.getElementById('sheep-shearing-form')?.addEventListener('submit', e => {
+  e.preventDefault()
+  if(!pendingShearingSheepId) return
+
+  const sheep = state.sheep.find(s => s.id === pendingShearingSheepId)
+  if(!sheep) return
+
+  const dateInput = document.getElementById('sheep-shearing-date')
+  const shearingDate = dateInput ? dateInput.value.trim() : ''
+  if(!shearingDate) return
+
+  if(!Array.isArray(sheep.shearings)) sheep.shearings = []
+  sheep.shearings.push({ id: uid(), date: shearingDate })
+  sheep.lastUpdated = Date.now()
+
+  addHistory('scheren', t('history.shearing.sheep', {
+    sheep: sheep.tag,
+    date: formatBirthDate(shearingDate)
+  }))
+
+  save(); render(); closeSheepShearingModal()
+})
+
 document.getElementById('zone-edit-form')?.addEventListener('submit', e => {
   e.preventDefault()
   if(!activeEditZoneRef) return
@@ -2234,7 +2743,7 @@ document.getElementById('sheep-modal-form')?.addEventListener('submit', e => {
   }
   if(motherId && !state.sheep.some(s => s.id === motherId && s.gender === 'female')) return
   if(fatherId && !state.sheep.some(s => s.id === fatherId && s.gender === 'male')) return
-  state.sheep.push({id:uid(), tag, earmark: earmark || null, birthDate: birthDate || null, gender, motherId, fatherId, paddockId, zoneId: zoneId || null, lastUpdated: Date.now()})
+  state.sheep.push({id:uid(), tag, earmark: earmark || null, birthDate: birthDate || null, injections: [], shearings: [], gender, motherId, fatherId, paddockId, zoneId: zoneId || null, lastUpdated: Date.now()})
   addHistory(t('entity.sheep'), t('history.sheep.added', { tag, location: `${paddockName(paddockId)}${zoneId ? ' / ' + zoneName(paddockId, zoneId) : ''}` }))
   document.getElementById('sheep-modal-tag').value = ''
   if(earmarkInput){
@@ -2471,6 +2980,22 @@ document.getElementById('sheep-list')?.addEventListener('click', e => {
     return
   }
 
+  const injectionButton = e.target.closest('.sheep-injection-button')
+  if(injectionButton){
+    const sheepId = injectionButton.dataset.id
+    if(!sheepId) return
+    openSheepInjectionModal(sheepId)
+    return
+  }
+
+  const shearingButton = e.target.closest('.sheep-shearing-button')
+  if(shearingButton){
+    const sheepId = shearingButton.dataset.id
+    if(!sheepId) return
+    openSheepShearingModal(sheepId)
+    return
+  }
+
   const deleteButton = e.target.closest('.sheep-delete-button')
   if(deleteButton){
     const sheepId = deleteButton.dataset.id
@@ -2545,6 +3070,22 @@ document.getElementById('paddock-list').addEventListener('click', e => {
     const paddockId = editPaddockButton.dataset.paddockId
     if(!paddockId) return
     openEditPaddockModal(paddockId)
+    return
+  }
+
+  const paddockInjectionButton = e.target.closest('.paddock-injection-button')
+  if(paddockInjectionButton){
+    const paddockId = paddockInjectionButton.dataset.paddockId
+    if(!paddockId) return
+    openPaddockInjectionModal(paddockId)
+    return
+  }
+
+  const paddockShearingButton = e.target.closest('.paddock-shearing-button')
+  if(paddockShearingButton){
+    const paddockId = paddockShearingButton.dataset.paddockId
+    if(!paddockId) return
+    openPaddockShearingModal(paddockId)
     return
   }
 
