@@ -18,6 +18,7 @@ let pendingInjectionPaddockId = null
 let pendingShearingPaddockId = null
 let pendingInjectionSheepId = null
 let pendingShearingSheepId = null
+let hasTriggeredExitDownload = false
 
 const translations = {
   nl: {
@@ -1424,6 +1425,17 @@ function exportData(){
   URL.revokeObjectURL(url)
 }
 
+function handleExitDownload(){
+  if(hasTriggeredExitDownload) return
+  hasTriggeredExitDownload = true
+  try {
+    exportData()
+  } catch (error) {
+    // Ignore unload-time errors; some browsers block downloads without a user gesture.
+    console.warn('Exit download skipped:', error)
+  }
+}
+
 function importDataFile(file){
   const reader = new FileReader()
   reader.onload = () => {
@@ -2402,6 +2414,9 @@ function closeModal(id){
 }
 
 document.getElementById('download-data-btn')?.addEventListener('click', exportData)
+
+window.addEventListener('pagehide', handleExitDownload)
+window.addEventListener('beforeunload', handleExitDownload)
 
 document.getElementById('upload-data-btn')?.addEventListener('click', () => {
   document.getElementById('upload-data-input')?.click()

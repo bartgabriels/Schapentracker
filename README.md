@@ -107,6 +107,8 @@ De hoofdinterface gebruikt 3 tabs om drukte te verminderen:
 - Gegevens exporteren naar JSON.
 - Gegevens importeren vanuit JSON.
 - Alle gegevens wissen met bevestiging.
+- Bij het sluiten van tabblad of browservenster probeert de app automatisch een JSON-configuratie te downloaden (best effort auto-save).
+- Opmerking: sommige browsers blokkeren downloads tijdens sluiten als er geen recente gebruikersactie was.
 
 ## Gebruik
 
@@ -117,6 +119,7 @@ De hoofdinterface gebruikt 3 tabs om drukte te verminderen:
 5. Voeg weides, zones en schapen toe.
 6. Gebruik de modals om te verplaatsen, bewerken of verwijderen.
 7. Data wordt automatisch opgeslagen in de browser.
+8. Bij sluiten van tab/venster probeert de app automatisch een back-upbestand te downloaden.
 
 ## Bestandsstructuur
 
@@ -226,6 +229,8 @@ The main interface uses 3 tabs to reduce visual clutter:
 - Export data to JSON.
 - Import data from JSON.
 - Clear all data with confirmation.
+- When closing the tab or browser window, the app attempts to automatically download a JSON config backup (best-effort auto-save).
+- Note: some browsers block downloads during close/unload when there was no recent user interaction.
 
 ## Usage
 
@@ -236,6 +241,7 @@ The main interface uses 3 tabs to reduce visual clutter:
 5. Add paddocks, zones, and sheep.
 6. Use modals to move, edit, or delete.
 7. Data is automatically saved in your browser.
+8. On tab/window close, the app tries to download an automatic backup file.
 
 ## File Structure
 
@@ -330,6 +336,8 @@ L'interface principale utilise 3 onglets pour reduire l'encombrement visuel :
 - Export des donnees en JSON.
 - Import des donnees depuis JSON.
 - Effacement de toutes les donnees avec confirmation.
+- Lors de la fermeture de l'onglet ou de la fenetre du navigateur, l'application tente de telecharger automatiquement une sauvegarde JSON (auto-save best effort).
+- Remarque : certains navigateurs bloquent les telechargements a la fermeture s'il n'y a pas eu d'interaction utilisateur recente.
 
 ## Utilisation
 
@@ -340,6 +348,7 @@ L'interface principale utilise 3 onglets pour reduire l'encombrement visuel :
 5. Ajoutez des paturages, des zones et des moutons.
 6. Utilisez les fenetres modales pour deplacer, modifier ou supprimer.
 7. Les donnees sont enregistrees automatiquement dans le navigateur.
+8. A la fermeture onglet/fenetre, l'application tente de telecharger un fichier de sauvegarde automatique.
 
 ## Structure des fichiers
 
@@ -365,4 +374,4 @@ Le dossier [server](server) est present dans le depot, mais le frontend a la rac
 
 ---
 
-**Last updated**: June 2026 | **Version**: 2.3 (NL/EN/FR + portrait cards + weather badge + earmarks)
+**Last updated**: June 2026 | **Version**: 2.4 (NL/EN/FR + autosave on close + portrait cards + weather badge + earmarks)
