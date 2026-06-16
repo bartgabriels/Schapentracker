@@ -9,8 +9,12 @@
 <body>
   <main class="wrap">
     <div class="top-bar">
-      <h1>Schapentracker</h1>
+      <h1 id="app-title">Schapentracker</h1>
       <div class="action-row">
+        <select id="language-select" aria-label="Taal">
+          <option value="nl">Nederlands</option>
+          <option value="en">English</option>
+        </select>
         <button id="download-data-btn" type="button" class="section-button">Opslaan</button>
         <button id="upload-data-btn" type="button" class="section-button">Upload</button>
         <button id="clear-data-btn" type="button" class="section-button">Wissen</button>
@@ -20,21 +24,21 @@
 
     <section>
       <div class="section-header">
-        <h2>Weides</h2>
+        <h2 id="section-paddocks-title">Weides</h2>
       </div>
       <div id="paddock-list"></div>
     </section>
     
     <section>
       <div class="section-header">
-        <h2>Schapen</h2>
+        <h2 id="section-sheep-title">Schapen</h2>
       </div>
       <div id="sheep-list" class="sheep-grid"></div>
     </section>
 
     <section>
       <div class="section-header">
-        <h2>Historiek</h2>
+        <h2 id="section-history-title">Historiek</h2>
       </div>
       <div id="history-list" class="history-list"></div>
     </section>
@@ -45,11 +49,11 @@
     <div id="paddock-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="paddock-modal-close" class="modal-close">×</button>
-      <h2>Weide toevoegen</h2>
+      <h2 id="paddock-modal-title">Weide toevoegen</h2>
       <form id="paddock-modal-form" class="group-form">
         <input id="paddock-modal-name" placeholder="Naam weide" required>
         <input id="paddock-modal-postcode" placeholder="Postcode (optioneel)">
-        <button type="submit">Toevoegen</button>
+        <button type="submit" id="paddock-modal-submit">Toevoegen</button>
       </form>
     </div>
   </div>
@@ -58,11 +62,11 @@
     <div id="paddock-edit-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="paddock-edit-modal-close" class="modal-close">×</button>
-      <h2>Weide bewerken</h2>
+      <h2 id="paddock-edit-modal-title">Weide bewerken</h2>
       <form id="paddock-edit-form" class="group-form">
         <input id="paddock-edit-name" placeholder="Naam weide" required>
         <input id="paddock-edit-postcode" placeholder="Postcode (optioneel)">
-        <button type="submit">Opslaan</button>
+        <button type="submit" id="paddock-edit-submit">Opslaan</button>
       </form>
     </div>
   </div>
@@ -71,42 +75,42 @@
     <div id="sheep-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="sheep-modal-close" class="modal-close">×</button>
-      <h2>Schaap toevoegen</h2>
+      <h2 id="sheep-modal-title">Schaap toevoegen</h2>
       <form id="sheep-modal-form" class="group-form">
         <input id="sheep-modal-tag" placeholder="Tag" required>
         <input id="sheep-modal-earmark" placeholder="Oorkenmerk (optioneel)">
         <div class="modal-field">
-          <label>Geslacht</label>
+          <label id="sheep-modal-gender-label">Geslacht</label>
           <div class="gender-radio-group">
             <label class="gender-option" for="sheep-gender-female">
               <input id="sheep-gender-female" type="radio" name="sheep-modal-gender" value="female" required>
               <span class="gender-symbol female" aria-hidden="true">♀</span>
-              <span>Ooi</span>
+              <span id="sheep-modal-gender-female-label">Ooi</span>
             </label>
             <label class="gender-option" for="sheep-gender-male">
               <input id="sheep-gender-male" type="radio" name="sheep-modal-gender" value="male" required>
               <span class="gender-symbol male" aria-hidden="true">♂</span>
-              <span>Ram</span>
+              <span id="sheep-modal-gender-male-label">Ram</span>
             </label>
           </div>
         </div>
         <div class="modal-field">
-          <label>Stamboom</label>
+          <label id="sheep-modal-pedigree-label">Stamboom</label>
         </div>
         <select id="sheep-mother-modal">
-          <option value="">Moederdier (optioneel, enkel ooien)</option>
+          <option value="">Moederdier (optioneel)</option>
         </select>
         <select id="sheep-father-modal">
-          <option value="">Vaderdier (optioneel, enkel rammen)</option>
+          <option value="">Vaderdier (optioneel)</option>
         </select>
         <div class="modal-field">
-          <label>Locatie</label>
+          <label id="sheep-modal-location-label">Locatie</label>
         </div>
         <select id="sheep-paddock-modal"></select>
         <select id="sheep-zone-modal" disabled>
           <option value="">Kies eerst een weide</option>
         </select>
-        <button type="submit">Toevoegen</button>
+        <button id="sheep-modal-submit" type="submit">Toevoegen</button>
       </form>
     </div>
   </div>
@@ -115,27 +119,27 @@
     <div id="sheep-tag-edit-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="sheep-tag-edit-modal-close" class="modal-close">×</button>
-      <h2>Schaap bewerken</h2>
+      <h2 id="sheep-edit-modal-title">Schaap bewerken</h2>
       <form id="sheep-tag-edit-form" class="group-form">
         <input id="sheep-tag-edit-input" placeholder="Nieuwe naam" required>
         <div class="modal-field">
-          <label>Oorkenmerk</label>
+          <label id="sheep-edit-earmark-label">Oorkenmerk</label>
           <div id="sheep-edit-earmark-text" hidden></div>
           <input id="sheep-edit-earmark-input" placeholder="Oorkenmerk toevoegen" hidden>
         </div>
         <div class="modal-field">
-          <label>Geslacht</label>
+          <label id="sheep-edit-gender-label">Geslacht</label>
           <div id="sheep-edit-gender-display">-</div>
         </div>
         <div class="modal-field">
-          <label>Stamboom</label>
+          <label id="sheep-edit-pedigree-label">Stamboom</label>
           <div id="sheep-edit-pedigree-display">"-" x "-"</div>
         </div>
         <div class="modal-field">
-          <label>Locatie</label>
+          <label id="sheep-edit-location-label">Locatie</label>
           <div id="sheep-edit-location-display">Veld / Zone</div>
         </div>
-        <button type="submit">Opslaan</button>
+        <button id="sheep-edit-modal-submit" type="submit">Opslaan</button>
       </form>
     </div>
   </div>
@@ -144,7 +148,7 @@
     <div id="zone-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="zone-modal-close" class="modal-close">×</button>
-      <h2>Zone toevoegen</h2>
+      <h2 id="zone-modal-title">Zone toevoegen</h2>
       <div class="modal-field">
         <label>Weide</label>
         <div id="zone-modal-paddock-name"></div>
@@ -153,7 +157,7 @@
         <input id="zone-modal-name" placeholder="Zone naam" required>
         <input id="zone-modal-area" type="number" min="0" step="0.01" placeholder="Oppervlakte (m2)">
         <input id="zone-modal-perimeter" type="number" min="0" step="0.01" placeholder="Omtrek (m)">
-        <button type="submit">Toevoegen</button>
+        <button type="submit" id="zone-modal-submit">Toevoegen</button>
       </form>
     </div>
   </div>
@@ -162,7 +166,7 @@
     <div id="zone-edit-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="zone-edit-modal-close" class="modal-close">×</button>
-      <h2>Zone bewerken</h2>
+      <h2 id="zone-edit-modal-title">Zone bewerken</h2>
       <div class="modal-field">
         <label>Weide</label>
         <div id="zone-edit-modal-paddock-name"></div>
@@ -177,7 +181,7 @@
           <label for="zone-edit-perimeter">Omtrek (m)</label>
           <input id="zone-edit-perimeter" type="number" min="0" step="0.01" placeholder="Omtrek">
         </div>
-        <button type="submit">Opslaan</button>
+        <button type="submit" id="zone-edit-submit">Opslaan</button>
       </form>
     </div>
   </div>
@@ -186,7 +190,7 @@
     <div id="move-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="move-modal-close" class="modal-close">×</button>
-      <h2>Verplaats schaap</h2>
+      <h2 id="move-modal-title">Verplaats schaap</h2>
       <div class="modal-field">
         <label>Schaap</label>
         <div id="move-modal-sheep-name"></div>
@@ -205,7 +209,7 @@
     <div id="zone-bulk-move-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="zone-bulk-move-modal-close" class="modal-close">×</button>
-      <h2>Verplaats alle dieren</h2>
+      <h2 id="zone-bulk-move-modal-title">Verplaats alle dieren</h2>
       <div class="modal-field">
         <label>Bronzone</label>
         <div id="zone-bulk-move-source-name"></div>
@@ -228,7 +232,7 @@
     <div id="zone-delete-move-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="zone-delete-move-modal-close" class="modal-close">×</button>
-      <h2>Zone verwijderen en schapen verplaatsen</h2>
+      <h2 id="zone-delete-move-modal-title">Zone verwijderen en schapen verplaatsen</h2>
       <div class="modal-field">
         <label>Te verwijderen zone</label>
         <div id="zone-delete-source-name"></div>
@@ -251,7 +255,7 @@
     <div id="paddock-delete-move-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
       <button type="button" id="paddock-delete-move-modal-close" class="modal-close">×</button>
-      <h2>Weide verwijderen en schapen verplaatsen</h2>
+      <h2 id="paddock-delete-move-modal-title">Weide verwijderen en schapen verplaatsen</h2>
       <div class="modal-field">
         <label>Te verwijderen weide</label>
         <div id="paddock-delete-source-name"></div>

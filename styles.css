@@ -119,6 +119,16 @@ button.section-button{
   min-width:fit-content;
 }
 
+#language-select{
+  width:auto;
+  min-width:140px;
+  background:#effbf2;
+  color:#1f4332;
+  border:1px solid #cde6d3;
+  border-radius:8px;
+  padding:6px 10px;
+}
+
 button.section-button:hover{
   background:#e3f6e5;
 }

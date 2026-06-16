@@ -1,10 +1,442 @@
 const KEY = 'schapentracker:data'
+const LANG_KEY = 'schapentracker:lang'
 const state = { paddocks: [], sheep: [], history: [] }
 let expandedPaddockId = null
 const expandedWeatherPaddocks = new Set()
 const weatherCache = {}
 const weatherLoading = new Set()
 const WEATHER_TTL_MS = 60 * 60 * 1000
+
+const translations = {
+  nl: {
+    'app.title': 'Schapentracker',
+    'ui.save': 'Opslaan',
+    'ui.upload': 'Upload',
+    'ui.clear': 'Wissen',
+    'ui.language': 'Taal',
+    'section.paddocks': 'Weides',
+    'section.sheep': 'Schapen',
+    'section.history': 'Historiek',
+    'sheep.add.title': 'Schaap toevoegen',
+    'sheep.add.tagPlaceholder': 'Tag',
+    'sheep.add.earmarkPlaceholder': 'Oorkenmerk (optioneel)',
+    'sheep.add.genderLabel': 'Geslacht',
+    'sheep.gender.female': 'Ooi',
+    'sheep.gender.male': 'Ram',
+    'sheep.add.pedigreeLabel': 'Stamboom',
+    'sheep.add.locationLabel': 'Locatie',
+    'sheep.add.submit': 'Toevoegen',
+    'sheep.edit.title': 'Schaap bewerken',
+    'sheep.edit.tagPlaceholder': 'Nieuwe naam',
+    'sheep.edit.earmarkLabel': 'Oorkenmerk',
+    'sheep.edit.earmarkPlaceholder': 'Oorkenmerk toevoegen',
+    'sheep.edit.genderLabel': 'Geslacht',
+    'sheep.edit.pedigreeLabel': 'Stamboom',
+    'sheep.edit.locationLabel': 'Locatie',
+    'sheep.edit.submit': 'Opslaan',
+    'sheep.location.unknownPaddock': 'Onbekend veld',
+    'sheep.location.unknownZone': 'Onbekende zone',
+    'sheep.location.none': 'Geen zone',
+    'sheep.empty': 'Geen schapen',
+    'select.paddock.first': 'Kies eerst een weide',
+    'select.paddock.choose': 'Kies weide',
+    'select.zone.choose': 'Kies zone',
+    'select.zone.noneAvailable': 'Geen zones beschikbaar',
+    'select.parent.mother': 'Moederdier (optioneel, enkel ooien)',
+    'select.parent.father': 'Vaderdier (optioneel, enkel rammen)',
+    'history.sheep.added': '{tag} toegevoegd in {location}',
+    'history.sheep.updated': 'Schaap bijgewerkt: {details}',
+    'history.sheep.deleted': '{tag} verwijderd uit {location}',
+    'history.details.name': 'naam {from} -> {to}',
+    'history.details.earmarkAdded': 'oorkenmerk toegevoegd: {earmark}',
+    'entity.sheep': 'schaap',
+    'errors.earmark.duplicate': 'Dit oorkenmerk is al toegewezen aan een ander schaap.',
+    'labels.lastUpdated': 'Laatst gewijzigd: {date} ({days} dagen geleden)',
+    'actions.move': 'Verplaats',
+    'aria.editSheepName': 'Naam wijzigen voor {tag}',
+    'aria.deleteSheep': 'Schaap verwijderen',
+    'aria.addSheep': 'Schaap toevoegen',
+    'aria.addPaddock': 'Weide toevoegen',
+    'aria.editPaddock': 'Weide bewerken',
+    'aria.deletePaddock': 'Weide verwijderen',
+    'aria.addZone': 'Zone toevoegen',
+    'aria.editZone': 'Zone bewerken',
+    'aria.deleteZone': 'Zone verwijderen',
+    'aria.moveSheep': 'Verplaats {tag}',
+    'aria.weatherForecast': 'Weervoorspelling',
+    'paddock.add.title': 'Weide toevoegen',
+    'paddock.add.nameLabel': 'Naam weide',
+    'paddock.add.postcodeLabel': 'Postcode (optioneel)',
+    'paddock.add.submit': 'Toevoegen',
+    'paddock.edit.title': 'Weide bewerken',
+    'paddock.edit.nameLabel': 'Naam weide',
+    'paddock.edit.postcodeLabel': 'Postcode (optioneel)',
+    'paddock.edit.submit': 'Opslaan',
+    'paddock.empty': 'Geen weides',
+    'paddock.sheep.singular': 'schaap',
+    'paddock.sheep.plural': 'schapen',
+    'paddock.zones.badge': '{count} zone(s)',
+    'zone.add.title': 'Zone toevoegen',
+    'zone.add.paddockLabel': 'Weide',
+    'zone.add.nameLabel': 'Zone naam',
+    'zone.add.areaLabel': 'Oppervlakte (m2)',
+    'zone.add.areaPlaceholder': 'Oppervlakte (m2)',
+    'zone.add.perimeterLabel': 'Omtrek (m)',
+    'zone.add.perimeterPlaceholder': 'Omtrek (m)',
+    'zone.add.submit': 'Toevoegen',
+    'zone.edit.title': 'Zone bewerken',
+    'zone.edit.paddockLabel': 'Weide',
+    'zone.edit.nameLabel': 'Zone naam',
+    'zone.edit.areaLabel': 'Oppervlakte (m2)',
+    'zone.edit.areaPlaceholder': 'Oppervlakte',
+    'zone.edit.perimeterLabel': 'Omtrek (m)',
+    'zone.edit.perimeterPlaceholder': 'Omtrek',
+    'zone.edit.submit': 'Opslaan',
+    'zone.status.occupied': 'Bezet',
+    'zone.status.empty': 'Leeg sinds {days} dagen',
+    'zone.sheep.empty': 'Geen schaap',
+    'zone.bulkMove': 'Verplaats alle dieren',
+    'move.title': 'Verplaats schaap',
+    'move.paddockLabel': 'Weide',
+    'move.zoneLabel': 'Zone',
+    'move.submit': 'Verplaats',
+    'move.bulkTitle': 'Verplaats alle dieren',
+    'move.bulkSourceLabel': 'Bronzone',
+    'move.bulkCountLabel': 'Aantal schapen',
+    'move.bulkTargetPaddockLabel': 'Doelweide',
+    'move.bulkTargetZoneLabel': 'Doelzone',
+    'move.bulkSubmit': 'Verplaats alle dieren',
+    'move.deleteZoneTitle': 'Zone verwijderen en schapen verplaatsen',
+    'move.deleteZoneSourceLabel': 'Te verwijderen zone',
+    'move.deleteZoneTargetLabel': 'Doelzone',
+    'move.deleteZoneSubmit': 'Verplaats en verwijder',
+    'move.deletePaddockTitle': 'Weide verwijderen en schapen verplaatsen',
+    'move.deletePaddockSourceLabel': 'Te verwijderen weide',
+    'move.deletePaddockTargetLabel': 'Doelzone',
+    'move.deletePaddockSubmit': 'Verplaats en verwijder',
+    'weather.sunny': 'Zonnig',
+    'weather.partlyCloudy': 'Halfbewolkt',
+    'weather.cloudy': 'Bewolkt',
+    'weather.fog': 'Mist',
+    'weather.rain': 'Regen',
+    'weather.snow': 'Sneeuw',
+    'weather.thunderstorm': 'Onweer',
+    'weather.variable': 'Wisselend',
+    'weather.loading': '3-daagse forecast laden...',
+    'weather.noPostcode': 'Geen postcode voor forecast',
+    'weather.noForecast': 'Geen forecast beschikbaar voor postcode {postcode}',
+    'weather.rainPercentage': '{rain}% regen',
+    'history.empty': 'Nog geen wijzigingen geregistreerd.',
+    'history.paddock.added': 'Weide {name} toegevoegd',
+    'history.paddock.updated': 'Weide bijgewerkt: {details}',
+    'history.paddock.deleted': 'Weide {name} verwijderd',
+    'history.paddockMove.auto': 'Weide {name} verwijderd en schapen automatisch verplaatst naar {target}: {sheep}',
+    'history.paddockMove.manual': 'Weide {name} verwijderd en schapen verplaatst naar {target}: {sheep}',
+    'history.zone.added': 'Zone {name} toegevoegd in weide {paddock}',
+    'history.zone.updated': 'Zone bijgewerkt: {details}',
+    'history.zone.deleted': 'Zone {paddock} / {name} verwijderd',
+    'history.zoneMove.auto': 'Zone {paddock} / {name} verwijderd en schapen automatisch verplaatst naar {target}: {sheep}',
+    'history.zoneMove.manual': 'Zone {paddock} / {name} verwijderd en schapen verplaatst naar {target}: {sheep}',
+    'history.sheep.moved': '{sheep} verplaatst van {from} naar {to}',
+    'history.import.duplicates': '{count} duplicaat oorkenmerk(en) verwijderd bij import',
+    'history.import.success': 'Gegevens geïmporteerd uit bestand',
+    'history.clear': 'Alle gegevens gewist',
+    'history.details.name': 'naam {from} -> {name}',
+    'history.details.postcode': 'postcode {from} -> {postcode}',
+    'history.details.area': 'oppervlakte {from} -> {area}',
+    'history.details.perimeter': 'omtrek {from} -> {perimeter}',
+    'alert.earmarkDuplicate': 'Dit oorkenmerk is al toegewezen aan een ander schaap.',
+    'alert.stalPaddockDelete': 'De weide Stal kan niet worden verwijderd.',
+    'alert.stalZoneDelete': 'De Stal-zone kan niet worden verwijderd.',
+    'alert.zoneMinimum': 'Een weide moet minstens 1 zone behouden.',
+    'alert.noTargetZoneInPaddock': 'Geen doelzone beschikbaar binnen deze weide.',
+    'alert.noTargetZone': 'Geen doelzone beschikbaar. Voeg eerst een extra zone of weide met zone toe.',
+    'alert.noSheepInZone': 'Geen schapen in deze zone om te verplaatsen.',
+    'alert.noTargetPaddock': 'Deze weide bevat schapen. Er moet eerst een andere weide met minstens 1 zone zijn om de schapen te verplaatsen.',
+    'alert.postcodeNotFound': 'Postcode niet gevonden',
+    'alert.postcodeFormatUnknown': 'Onbekend postcodeformaat',
+    'alert.forecastDataMissing': 'Geen forecast data',
+    'alert.importError': 'Kon bestand niet laden: {error}',
+    'alert.importSuccess': 'Gegevens succesvol geladen.',
+    'confirm.clearAll': 'Weet je zeker dat je alle gegevens wilt wissen? Dit kan niet ongedaan worden gemaakt.',
+    'unknown': 'Onbekend',
+    'fieldZone': 'Veld / Zone',
+    'ui.add': 'Toevoegen',
+    'paddock.add.namePlaceholder': 'Naam weide',
+    'paddock.add.postcodePlaceholder': 'Postcode (optioneel)',
+    'paddock.edit.namePlaceholder': 'Naam weide',
+    'paddock.edit.postcodePlaceholder': 'Postcode (optioneel)',
+    'zone.add.namePlaceholder': 'Zone naam',
+    'zone.edit.namePlaceholder': 'Zone naam'
+  },
+  en: {
+    'app.title': 'Sheep Tracker',
+    'ui.save': 'Save',
+    'ui.upload': 'Upload',
+    'ui.clear': 'Clear',
+    'ui.language': 'Language',
+    'section.paddocks': 'Paddocks',
+    'section.sheep': 'Sheep',
+    'section.history': 'History',
+    'sheep.add.title': 'Add sheep',
+    'sheep.add.tagPlaceholder': 'Tag',
+    'sheep.add.earmarkPlaceholder': 'Earmark (optional)',
+    'sheep.add.genderLabel': 'Sex',
+    'sheep.gender.female': 'Ewe',
+    'sheep.gender.male': 'Ram',
+    'sheep.add.pedigreeLabel': 'Pedigree',
+    'sheep.add.locationLabel': 'Location',
+    'sheep.add.submit': 'Add',
+    'sheep.edit.title': 'Edit sheep',
+    'sheep.edit.tagPlaceholder': 'New name',
+    'sheep.edit.earmarkLabel': 'Earmark',
+    'sheep.edit.earmarkPlaceholder': 'Add earmark',
+    'sheep.edit.genderLabel': 'Sex',
+    'sheep.edit.pedigreeLabel': 'Pedigree',
+    'sheep.edit.locationLabel': 'Location',
+    'sheep.edit.submit': 'Save',
+    'sheep.location.unknownPaddock': 'Unknown paddock',
+    'sheep.location.unknownZone': 'Unknown zone',
+    'sheep.location.none': 'No zone',
+    'sheep.empty': 'No sheep',
+    'select.paddock.first': 'Choose a paddock first',
+    'select.paddock.choose': 'Choose paddock',
+    'select.zone.choose': 'Choose zone',
+    'select.zone.noneAvailable': 'No zones available',
+    'select.parent.mother': 'Mother (optional, ewes only)',
+    'select.parent.father': 'Father (optional, rams only)',
+    'history.sheep.added': '{tag} added in {location}',
+    'history.sheep.updated': 'Sheep updated: {details}',
+    'history.sheep.deleted': '{tag} removed from {location}',
+    'history.details.name': 'name {from} -> {to}',
+    'history.details.earmarkAdded': 'earmark added: {earmark}',
+    'entity.sheep': 'sheep',
+    'errors.earmark.duplicate': 'This earmark is already assigned to another sheep.',
+    'labels.lastUpdated': 'Last updated: {date} ({days} days ago)',
+    'actions.move': 'Move',
+    'aria.editSheepName': 'Edit name for {tag}',
+    'aria.deleteSheep': 'Delete sheep',
+    'aria.addSheep': 'Add sheep',
+    'aria.addPaddock': 'Add paddock',
+    'aria.editPaddock': 'Edit paddock',
+    'aria.deletePaddock': 'Delete paddock',
+    'aria.addZone': 'Add zone',
+    'aria.editZone': 'Edit zone',
+    'aria.deleteZone': 'Delete zone',
+    'aria.moveSheep': 'Move {tag}',
+    'aria.weatherForecast': 'Weather forecast',
+    'paddock.add.title': 'Add paddock',
+    'paddock.add.nameLabel': 'Paddock name',
+    'paddock.add.postcodeLabel': 'Postcode (optional)',
+    'paddock.add.submit': 'Add',
+    'paddock.edit.title': 'Edit paddock',
+    'paddock.edit.nameLabel': 'Paddock name',
+    'paddock.edit.postcodeLabel': 'Postcode (optional)',
+    'paddock.edit.submit': 'Save',
+    'paddock.empty': 'No paddocks',
+    'paddock.sheep.singular': 'sheep',
+    'paddock.sheep.plural': 'sheep',
+    'paddock.zones.badge': '{count} zone(s)',
+    'zone.add.title': 'Add zone',
+    'zone.add.paddockLabel': 'Paddock',
+    'zone.add.nameLabel': 'Zone name',
+    'zone.add.areaLabel': 'Area (m2)',
+    'zone.add.areaPlaceholder': 'Area (m2)',
+    'zone.add.perimeterLabel': 'Perimeter (m)',
+    'zone.add.perimeterPlaceholder': 'Perimeter (m)',
+    'zone.add.submit': 'Add',
+    'zone.edit.title': 'Edit zone',
+    'zone.edit.paddockLabel': 'Paddock',
+    'zone.edit.nameLabel': 'Zone name',
+    'zone.edit.areaLabel': 'Area (m2)',
+    'zone.edit.areaPlaceholder': 'Area',
+    'zone.edit.perimeterLabel': 'Perimeter (m)',
+    'zone.edit.perimeterPlaceholder': 'Perimeter',
+    'zone.edit.submit': 'Save',
+    'zone.status.occupied': 'Occupied',
+    'zone.status.empty': 'Empty for {days} days',
+    'zone.sheep.empty': 'No sheep',
+    'zone.bulkMove': 'Move all animals',
+    'move.title': 'Move sheep',
+    'move.paddockLabel': 'Paddock',
+    'move.zoneLabel': 'Zone',
+    'move.submit': 'Move',
+    'move.bulkTitle': 'Move all animals',
+    'move.bulkSourceLabel': 'Source zone',
+    'move.bulkCountLabel': 'Number of sheep',
+    'move.bulkTargetPaddockLabel': 'Target paddock',
+    'move.bulkTargetZoneLabel': 'Target zone',
+    'move.bulkSubmit': 'Move all animals',
+    'move.deleteZoneTitle': 'Delete zone and move sheep',
+    'move.deleteZoneSourceLabel': 'Zone to delete',
+    'move.deleteZoneTargetLabel': 'Target zone',
+    'move.deleteZoneSubmit': 'Move and delete',
+    'move.deletePaddockTitle': 'Delete paddock and move sheep',
+    'move.deletePaddockSourceLabel': 'Paddock to delete',
+    'move.deletePaddockTargetLabel': 'Target zone',
+    'move.deletePaddockSubmit': 'Move and delete',
+    'weather.sunny': 'Sunny',
+    'weather.partlyCloudy': 'Partly cloudy',
+    'weather.cloudy': 'Cloudy',
+    'weather.fog': 'Fog',
+    'weather.rain': 'Rain',
+    'weather.snow': 'Snow',
+    'weather.thunderstorm': 'Thunderstorm',
+    'weather.variable': 'Variable',
+    'weather.loading': '3-day forecast loading...',
+    'weather.noPostcode': 'No postcode for forecast',
+    'weather.noForecast': 'No forecast available for postcode {postcode}',
+    'weather.rainPercentage': '{rain}% rain',
+    'history.empty': 'No changes recorded yet.',
+    'history.paddock.added': 'Paddock {name} added',
+    'history.paddock.updated': 'Paddock updated: {details}',
+    'history.paddock.deleted': 'Paddock {name} deleted',
+    'history.paddockMove.auto': 'Paddock {name} deleted and sheep auto-moved to {target}: {sheep}',
+    'history.paddockMove.manual': 'Paddock {name} deleted and sheep moved to {target}: {sheep}',
+    'history.zone.added': 'Zone {name} added in paddock {paddock}',
+    'history.zone.updated': 'Zone updated: {details}',
+    'history.zone.deleted': 'Zone {paddock} / {name} deleted',
+    'history.zoneMove.auto': 'Zone {paddock} / {name} deleted and sheep auto-moved to {target}: {sheep}',
+    'history.zoneMove.manual': 'Zone {paddock} / {name} deleted and sheep moved to {target}: {sheep}',
+    'history.sheep.moved': '{sheep} moved from {from} to {to}',
+    'history.import.duplicates': '{count} duplicate earmark(s) removed during import',
+    'history.import.success': 'Data imported from file',
+    'history.clear': 'All data deleted',
+    'history.details.name': 'name {from} -> {name}',
+    'history.details.postcode': 'postcode {from} -> {postcode}',
+    'history.details.area': 'area {from} -> {area}',
+    'history.details.perimeter': 'perimeter {from} -> {perimeter}',
+    'alert.earmarkDuplicate': 'This earmark is already assigned to another sheep.',
+    'alert.stalPaddockDelete': 'The Stal paddock cannot be deleted.',
+    'alert.stalZoneDelete': 'The Stal zone cannot be deleted.',
+    'alert.zoneMinimum': 'A paddock must keep at least 1 zone.',
+    'alert.noTargetZoneInPaddock': 'No target zone available within this paddock.',
+    'alert.noTargetZone': 'No target zone available. First add an extra zone or paddock with zone.',
+    'alert.noSheepInZone': 'No sheep in this zone to move.',
+    'alert.noTargetPaddock': 'This paddock contains sheep. There must first be another paddock with at least 1 zone to move the sheep.',
+    'alert.postcodeNotFound': 'Postcode not found',
+    'alert.postcodeFormatUnknown': 'Unknown postcode format',
+    'alert.forecastDataMissing': 'No forecast data',
+    'alert.importError': 'Could not load file: {error}',
+    'alert.importSuccess': 'Data successfully loaded.',
+    'confirm.clearAll': 'Are you sure you want to delete all data? This cannot be undone.',
+    'unknown': 'Unknown',
+    'fieldZone': 'Field / Zone',
+    'ui.add': 'Add',
+    'paddock.add.namePlaceholder': 'Paddock name',
+    'paddock.add.postcodePlaceholder': 'Postcode (optional)',
+    'paddock.edit.namePlaceholder': 'Paddock name',
+    'paddock.edit.postcodePlaceholder': 'Postcode (optional)',
+    'zone.add.namePlaceholder': 'Zone name',
+    'zone.edit.namePlaceholder': 'Zone name'
+  }
+}
+
+let currentLang = localStorage.getItem(LANG_KEY) || 'nl'
+if(!translations[currentLang]) currentLang = 'nl'
+
+function localeTag(){
+  return currentLang === 'en' ? 'en-GB' : 'nl-NL'
+}
+
+function t(key, params = {}){
+  const base = translations[currentLang] || translations.nl
+  const fallback = translations.nl
+  const template = base[key] ?? fallback[key] ?? key
+  return template.replace(/\{(\w+)\}/g, (_, name) => {
+    const value = params[name]
+    return value === undefined || value === null ? '' : String(value)
+  })
+}
+
+function setLanguage(lang){
+  if(!translations[lang]) return
+  currentLang = lang
+  localStorage.setItem(LANG_KEY, lang)
+  applyStaticTranslations()
+  render()
+}
+
+function applyStaticTranslations(){
+  document.documentElement.lang = currentLang
+  const setText = (id, value) => {
+    const el = document.getElementById(id)
+    if(el) el.textContent = value
+  }
+  const setPlaceholder = (id, value) => {
+    const el = document.getElementById(id)
+    if(el) el.setAttribute('placeholder', value)
+  }
+
+  setText('app-title', t('app.title'))
+  setText('download-data-btn', t('ui.save'))
+  setText('upload-data-btn', t('ui.upload'))
+  setText('clear-data-btn', t('ui.clear'))
+  setText('section-paddocks-title', t('section.paddocks'))
+  setText('section-sheep-title', t('section.sheep'))
+  setText('section-history-title', t('section.history'))
+
+  setText('sheep-modal-title', t('sheep.add.title'))
+  setPlaceholder('sheep-modal-tag', t('sheep.add.tagPlaceholder'))
+  setPlaceholder('sheep-modal-earmark', t('sheep.add.earmarkPlaceholder'))
+  setText('sheep-modal-gender-label', t('sheep.add.genderLabel'))
+  setText('sheep-modal-gender-female-label', t('sheep.gender.female'))
+  setText('sheep-modal-gender-male-label', t('sheep.gender.male'))
+  setText('sheep-modal-pedigree-label', t('sheep.add.pedigreeLabel'))
+  setText('sheep-modal-location-label', t('sheep.add.locationLabel'))
+  setText('sheep-modal-submit', t('sheep.add.submit'))
+
+  setText('sheep-edit-modal-title', t('sheep.edit.title'))
+  setPlaceholder('sheep-tag-edit-input', t('sheep.edit.tagPlaceholder'))
+  setText('sheep-edit-earmark-label', t('sheep.edit.earmarkLabel'))
+  setPlaceholder('sheep-edit-earmark-input', t('sheep.edit.earmarkPlaceholder'))
+  setText('sheep-edit-gender-label', t('sheep.edit.genderLabel'))
+  setText('sheep-edit-pedigree-label', t('sheep.edit.pedigreeLabel'))
+  setText('sheep-edit-location-label', t('sheep.edit.locationLabel'))
+  setText('sheep-edit-modal-submit', t('sheep.edit.submit'))
+
+  // Paddock modals
+  setText('paddock-modal-title', t('paddock.add.title'))
+  setPlaceholder('paddock-modal-name', t('paddock.add.namePlaceholder'))
+  setPlaceholder('paddock-modal-postcode', t('paddock.add.postcodePlaceholder'))
+  setText('paddock-modal-submit', t('ui.add'))
+  
+  setText('paddock-edit-modal-title', t('paddock.edit.title'))
+  setPlaceholder('paddock-edit-name', t('paddock.edit.namePlaceholder'))
+  setPlaceholder('paddock-edit-postcode', t('paddock.edit.postcodePlaceholder'))
+  setText('paddock-edit-submit', t('ui.save'))
+
+  // Zone modals
+  setText('zone-modal-title', t('zone.add.title'))
+  setPlaceholder('zone-modal-name', t('zone.add.namePlaceholder'))
+  setPlaceholder('zone-modal-area', t('zone.add.areaPlaceholder'))
+  setPlaceholder('zone-modal-perimeter', t('zone.add.perimeterPlaceholder'))
+  setText('zone-modal-submit', t('ui.add'))
+
+  setText('zone-edit-modal-title', t('zone.edit.title'))
+  setPlaceholder('zone-edit-name', t('zone.edit.namePlaceholder'))
+  setPlaceholder('zone-edit-area', t('zone.edit.areaPlaceholder'))
+  setPlaceholder('zone-edit-perimeter', t('zone.edit.perimeterPlaceholder'))
+  setText('zone-edit-submit', t('ui.save'))
+
+  // Move modals
+  setText('move-modal-title', t('move.title'))
+  setText('zone-bulk-move-modal-title', t('move.bulkTitle'))
+  setText('zone-delete-move-modal-title', t('move.deleteZoneTitle'))
+  setText('paddock-delete-move-modal-title', t('move.deletePaddockTitle'))
+
+  const langSelect = document.getElementById('language-select')
+  if(langSelect) langSelect.value = currentLang
+}
+
+function initLanguageSelector(){
+  const langSelect = document.getElementById('language-select')
+  if(!langSelect) return
+  langSelect.value = currentLang
+  langSelect.addEventListener('change', () => {
+    setLanguage(langSelect.value)
+  })
+}
 
 function detectPostcodeCountry(postcode){
   const normalized = postcode.trim().toUpperCase().replace(/\s+/g, '')
@@ -14,18 +446,18 @@ function detectPostcodeCountry(postcode){
 }
 
 function weatherLabel(code){
-  if(code === 0) return 'Zonnig'
-  if(code >= 1 && code <= 2) return 'Halfbewolkt'
-  if(code === 3) return 'Bewolkt'
-  if(code >= 45 && code <= 48) return 'Mist'
-  if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return 'Regen'
-  if((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return 'Sneeuw'
-  if(code >= 95) return 'Onweer'
-  return 'Wisselend'
+  if(code === 0) return t('weather.sunny')
+  if(code >= 1 && code <= 2) return t('weather.partlyCloudy')
+  if(code === 3) return t('weather.cloudy')
+  if(code >= 45 && code <= 48) return t('weather.fog')
+  if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return t('weather.rain')
+  if((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return t('weather.snow')
+  if(code >= 95) return t('weather.thunderstorm')
+  return t('weather.variable')
 }
 
 function formatForecastDay(dateString){
-  return new Date(`${dateString}T12:00:00`).toLocaleDateString('nl-NL', {
+  return new Date(`${dateString}T12:00:00`).toLocaleDateString(localeTag(), {
     weekday: 'short', day: '2-digit', month: '2-digit'
   })
 }
@@ -48,12 +480,12 @@ async function resolveCoordinatesViaNominatim(postcode, country){
       return { lat, lon, country, place: place.name || place.display_name || normalizedPostcode }
     }
   }
-  throw new Error('Postcode niet gevonden')
+  throw new Error(t('alert.postcodeNotFound'))
 }
 
 async function resolveCoordinatesByPostcode(postcode){
   const country = detectPostcodeCountry(postcode)
-  if(!country) throw new Error('Onbekend postcodeformaat')
+  if(!country) throw new Error(t('alert.postcodeFormatUnknown'))
 
   const normalizedPostcode = country === 'NL'
     ? postcode.trim().toUpperCase().replace(/\s+/g, '')
@@ -94,7 +526,7 @@ async function loadWeatherForPostcode(postcode){
       rain: Math.round(Number(daily.precipitation_probability_max?.[i] ?? 0))
     }))
 
-    if(!days.length) throw new Error('Geen forecast data')
+    if(!days.length) throw new Error(t('alert.forecastDataMissing'))
 
     weatherCache[postcode] = {
       fetchedAt: Date.now(),
@@ -117,7 +549,7 @@ function renderPaddockWeather(paddock, isVisible){
   const visibilityClass = isVisible ? ' is-visible' : ''
   const rawPostcode = (paddock.postcode || '').trim()
   if(!rawPostcode){
-    return `<div class="paddock-weather paddock-weather-empty${visibilityClass}">Geen postcode voor forecast</div>`
+    return `<div class="paddock-weather paddock-weather-empty${visibilityClass}">${t('weather.noPostcode')}</div>`
   }
 
   const postcodeKey = rawPostcode.toUpperCase()
@@ -129,14 +561,14 @@ function renderPaddockWeather(paddock, isVisible){
   }
 
   if(!cached || !isFresh){
-    return `<div class="paddock-weather paddock-weather-loading${visibilityClass}">3-daagse forecast laden...</div>`
+    return `<div class="paddock-weather paddock-weather-loading${visibilityClass}">${t('weather.loading')}</div>`
   }
 
   if(cached.error){
-    return `<div class="paddock-weather paddock-weather-error${visibilityClass}">Geen forecast beschikbaar voor postcode ${postcodeKey}</div>`
+    return `<div class="paddock-weather paddock-weather-error${visibilityClass}">${t('weather.noForecast', { postcode: postcodeKey })}</div>`
   }
 
-  return `<div class="paddock-weather${visibilityClass}">${cached.days.map(day => `<div class="weather-day"><strong>${day.day}</strong><small>${day.label}</small><small>${day.max}° / ${day.min}°</small><small>${day.rain}% regen</small></div>`).join('')}</div>`
+  return `<div class="paddock-weather${visibilityClass}">${cached.days.map(day => `<div class="weather-day"><strong>${day.day}</strong><small>${day.label}</small><small>${day.max}° / ${day.min}°</small><small>${t('weather.rainPercentage', { rain: day.rain })}</small></div>`).join('')}</div>`
 }
 
 function ensureDefaultStal(){
@@ -196,11 +628,11 @@ function save(){
 }
 
 function formatDate(timestamp){
-  return new Date(timestamp).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(timestamp).toLocaleDateString(localeTag(), { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 function formatDateTime(timestamp){
-  return new Date(timestamp).toLocaleString('nl-NL', {
+  return new Date(timestamp).toLocaleString(localeTag(), {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
   })
@@ -313,13 +745,13 @@ function importDataFile(file){
       const removedEarmarks = dedupeEarmarks()
       updateZoneEmptyStates()
       if(removedEarmarks > 0){
-        addHistory('systeem', `${removedEarmarks} duplicaat oorkenmerk(en) verwijderd bij import`)
+        addHistory('systeem', t('history.import.duplicates', { count: removedEarmarks }))
       }
-      addHistory('systeem', 'Gegevens geïmporteerd uit bestand')
+      addHistory('systeem', t('history.import.success'))
       save(); render()
-      alert('Gegevens succesvol geladen.')
+      alert(t('alert.importSuccess'))
     } catch (err) {
-      alert('Kon bestand niet laden: ' + err.message)
+      alert(t('alert.importError', { error: err.message }))
     }
   }
   reader.readAsText(file)
@@ -335,24 +767,24 @@ function render(){
   const movePaddockModal = document.getElementById('move-paddock-modal')
   const moveZoneModal = document.getElementById('move-zone-modal')
 
-  paddockList.innerHTML = state.paddocks.length === 0 ? '<div class="empty">Geen weides</div>' : state.paddocks.map(p => renderPaddock(p)).join('') + `
-    <button type="button" class="add-paddock-block" aria-label="Weide toevoegen">+</button>
+  paddockList.innerHTML = state.paddocks.length === 0 ? `<div class="empty">${t('paddock.empty')}</div>` : state.paddocks.map(p => renderPaddock(p)).join('') + `
+    <button type="button" class="add-paddock-block" aria-label="${t('aria.addPaddock')}">+</button>
   `
 
   sheepList.innerHTML = state.sheep.map(s => `
       <div class="sheep-card">
         <div class="sheep-card-body">
-          <button type="button" class="sheep-tag-edit-button" data-id="${s.id}" aria-label="Naam wijzigen voor ${s.tag}">${genderIcon(s.gender)}${s.tag}</button>
+          <button type="button" class="sheep-tag-edit-button" data-id="${s.id}" aria-label="${t('aria.editSheepName', { tag: s.tag })}">${genderIcon(s.gender)}${s.tag}</button>
           <small>${paddockName(s.paddockId)}${s.zoneId ? ' / ' + zoneName(s.paddockId, s.zoneId) : ''}</small>
-          <small>Laatst gewijzigd: ${formatDate(s.lastUpdated)} (${daysSince(s.lastUpdated)} dagen geleden)</small>
+          <small>${t('labels.lastUpdated', { date: formatDate(s.lastUpdated), days: daysSince(s.lastUpdated) })}</small>
         </div>
         <div class="sheep-actions">
-          <button type="button" class="move-button" data-id="${s.id}">Verplaats</button>
-          <button type="button" class="sheep-delete-button" data-id="${s.id}" aria-label="Schaap verwijderen">−</button>
+          <button type="button" class="move-button" data-id="${s.id}">${t('actions.move')}</button>
+          <button type="button" class="sheep-delete-button" data-id="${s.id}" aria-label="${t('aria.deleteSheep')}">−</button>
         </div>
       </div>
     `).join('') + `
-      <button type="button" class="sheep-card add-sheep-card" id="add-sheep-block" aria-label="Schaap toevoegen">
+      <button type="button" class="sheep-card add-sheep-card" id="add-sheep-block" aria-label="${t('aria.addSheep')}">
         <span class="add-zone-icon">+</span>
       </button>
     `
@@ -361,7 +793,7 @@ function render(){
     historyList.classList.toggle('is-scrollable', state.history.length > 5)
     historyList.innerHTML = state.history.length
       ? state.history.map(h => `<div class="history-item"><span class="history-meta">${formatDateTime(h.ts)} - ${h.entity}</span><span class="history-message">${h.message}</span></div>`).join('')
-      : '<div class="empty">Nog geen wijzigingen geregistreerd.</div>'
+      : `<div class="empty">${t('history.empty')}</div>`
   }
 
   if(sheepPaddockModal && sheepZoneModal){
@@ -373,7 +805,7 @@ function render(){
     populatePaddockSelect(movePaddockModal)
   }
   if(moveZoneModal){
-    moveZoneModal.innerHTML = '<option value="">Kies eerst een weide</option>'
+    moveZoneModal.innerHTML = `<option value="">${t('select.paddock.first')}</option>`
     moveZoneModal.disabled = true
   }
 }
@@ -382,7 +814,7 @@ function renderPaddock(p){
   const isExpanded = expandedPaddockId === p.id
   const isWeatherExpanded = expandedWeatherPaddocks.has(p.id)
   const sheepCount = state.sheep.filter(s => s.paddockId === p.id).length
-  const sheepLabel = sheepCount === 1 ? 'schaap' : 'schapen'
+  const sheepLabel = sheepCount === 1 ? t('paddock.sheep.singular') : t('paddock.sheep.plural')
   const paddockPostcode = (p.postcode || '').trim()
   const hasZoneArea = p.zones.some(z => z.area !== null)
   const totalZoneArea = p.zones.reduce((sum, z) => sum + (Number.isFinite(Number(z.area)) ? Number(z.area) : 0), 0)
@@ -392,16 +824,16 @@ function renderPaddock(p){
   return `<div class="card" data-id="${p.id}" ${isExpanded ? 'data-expanded="true"' : ''}>
     <div class="card-header" data-paddock-id="${p.id}" style="cursor:pointer;user-select:none">
       <div class="card-header-main">
-        <button type="button" class="paddock-edit-button" data-paddock-id="${p.id}" aria-label="Weide bewerken">✎</button>
+        <button type="button" class="paddock-edit-button" data-paddock-id="${p.id}" aria-label="${t('aria.editPaddock')}">✎</button>
         <strong>${p.name}</strong>
         ${paddockPostcode ? `<span class="paddock-postcode">${paddockPostcode}</span>` : ''}
         ${paddockArea ? `<span class="paddock-metric">${paddockArea}</span>` : ''}
         <span class="paddock-sheep-count">${sheepCount} ${sheepLabel}</span>
       </div>
       <div class="card-header-actions">
-        <span class="badge">${p.zones.length} zone(s)</span>
-        <button type="button" class="weather-toggle-button" data-paddock-id="${p.id}">Weervoorspelling</button>
-        ${canDeletePaddock ? `<button type="button" class="paddock-delete-button" data-paddock-id="${p.id}" aria-label="Weide verwijderen">−</button>` : ''}
+        <span class="badge">${t('paddock.zones.badge', { count: p.zones.length })}</span>
+        <button type="button" class="weather-toggle-button" data-paddock-id="${p.id}">${t('aria.weatherForecast')}</button>
+        ${canDeletePaddock ? `<button type="button" class="paddock-delete-button" data-paddock-id="${p.id}" aria-label="${t('aria.deletePaddock')}">−</button>` : ''}
       </div>
     </div>
     ${weatherHtml}
@@ -409,19 +841,20 @@ function renderPaddock(p){
       ${p.zones.map(z => {
         const sheepInZone = state.sheep.filter(s => s.paddockId === p.id && s.zoneId === z.id)
         const sheepCount = sheepInZone.length
-        const status = z.emptySince ? `Leeg sinds ${daysSince(z.emptySince)} dagen` : `Bezet${sheepCount ? ` (${sheepCount})` : ''}`
+        const emptyDays = z.emptySince ? daysSince(z.emptySince) : 0
+        const status = z.emptySince ? t('zone.status.empty', { days: emptyDays }) : `${t('zone.status.occupied')}${sheepCount ? ` (${sheepCount})` : ''}`
         const zoneArea = z.area !== null ? `${z.area} m2` : ''
         const zonePerimeter = z.perimeter !== null ? `${z.perimeter} m` : ''
-        const bulkMoveButton = sheepCount > 1 ? `<button type="button" class="zone-bulk-move-button" data-paddock-id="${p.id}" data-zone-id="${z.id}">Verplaats alle dieren</button>` : ''
+        const bulkMoveButton = sheepCount > 1 ? `<button type="button" class="zone-bulk-move-button" data-paddock-id="${p.id}" data-zone-id="${z.id}">${t('zone.bulkMove')}</button>` : ''
         const sheepLabel = sheepCount
-          ? `<div class="zone-sheep-list${sheepCount > 6 ? ' is-scrollable' : ''}">${sheepInZone.map(s => `<button type="button" class="zone-sheep-link" data-sheep-id="${s.id}" aria-label="Verplaats ${s.tag}">${sheepIcon()}${s.tag}</button>`).join('')}</div>${bulkMoveButton}`
-          : 'Geen schaap'
+          ? `<div class="zone-sheep-list${sheepCount > 6 ? ' is-scrollable' : ''}">${sheepInZone.map(s => `<button type="button" class="zone-sheep-link" data-sheep-id="${s.id}" aria-label="${t('aria.moveSheep', { tag: s.tag })}">${sheepIcon()}${s.tag}</button>`).join('')}</div>${bulkMoveButton}`
+          : t('zone.sheep.empty')
         const stallZone = isStalZone(p, z)
         const useStallBackground = isStalPaddock(p)
         const canDeleteZone = !stallZone && p.zones.length > 1
-        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="Zone verwijderen">−</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="Zone bewerken">✎</button><strong>${z.name}</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}</div><small>${status}</small></div><div class="zone-bottom">${sheepLabel}</div></div>`
+        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">−</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name}</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}</div><small>${status}</small></div><div class="zone-bottom">${sheepLabel}</div></div>`
       }).join('')}
-      <button type="button" class="zone-item add-zone-button${isStalPaddock(p) ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" aria-label="Zone toevoegen">
+      <button type="button" class="zone-item add-zone-button${isStalPaddock(p) ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" aria-label="${t('aria.addZone')}">
         <span class="add-zone-icon">+</span>
       </button>
     </div>
@@ -430,12 +863,12 @@ function renderPaddock(p){
 
 function paddockName(id){
   const p = state.paddocks.find(x=>x.id===id)
-  return p ? p.name : 'Onbekend'
+  return p ? p.name : t('unknown')
 }
 
 function zoneName(paddockId, zoneId){
   const zone = getZone(paddockId, zoneId)
-  return zone ? zone.name : 'Onbekend'
+  return zone ? zone.name : t('unknown')
 }
 
 function getPaddock(id){ return state.paddocks.find(x => x.id === id) }
@@ -465,14 +898,14 @@ function setSheepModalDefaultSelection(){
   const stalPaddock = state.paddocks.find(p => isStalPaddock(p))
   const selectedPaddock = stalPaddock || state.paddocks[0]
   if(!selectedPaddock){
-    sheepZoneModal.innerHTML = '<option value="">Kies eerst een weide</option>'
+    sheepZoneModal.innerHTML = `<option value="">${t('select.paddock.first')}</option>`
     sheepZoneModal.disabled = true
     return
   }
 
   sheepPaddockModal.value = selectedPaddock.id
   if(selectedPaddock.zones.length){
-    sheepZoneModal.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + selectedPaddock.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
+    sheepZoneModal.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + selectedPaddock.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
     sheepZoneModal.disabled = false
 
     const stalZone = selectedPaddock.zones.find(z => typeof z.name === 'string' && z.name.toLowerCase() === 'stal')
@@ -484,7 +917,7 @@ function setSheepModalDefaultSelection(){
       sheepZoneModal.value = ''
     }
   } else {
-    sheepZoneModal.innerHTML = '<option value="">Geen zones beschikbaar</option>'
+    sheepZoneModal.innerHTML = `<option value="">${t('select.zone.noneAvailable')}</option>`
     sheepZoneModal.disabled = true
   }
 }
@@ -502,16 +935,16 @@ function populateParentSheepSelects(){
     .join('')
 
   if(motherSelect){
-    motherSelect.innerHTML = `<option value="">Moederdier</option>${femaleOptions}`
+    motherSelect.innerHTML = `<option value="">${t('select.parent.mother')}</option>${femaleOptions}`
   }
   if(fatherSelect){
-    fatherSelect.innerHTML = `<option value="">Vaderdier</option>${maleOptions}`
+    fatherSelect.innerHTML = `<option value="">${t('select.parent.father')}</option>${maleOptions}`
   }
 }
 
 function populatePaddockSelect(select){
   if(!select) return
-  select.innerHTML = `<option value="" selected disabled hidden>Kies weide</option>` + state.paddocks.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
+  select.innerHTML = `<option value="" selected disabled hidden>${t('select.paddock.choose')}</option>` + state.paddocks.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
 }
 
 function zoneSheepNames(paddockId, zoneId){
@@ -569,7 +1002,7 @@ function populateZoneDeleteMoveTargets(selectedPaddockId){
 
   const zones = availableTargetZones(sourcePaddock.id, sourcePaddock.id, pendingZoneDeletion.sourceZoneId)
   if(zones.length){
-    zoneSelect.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
+    zoneSelect.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
     zoneSelect.disabled = false
     if(zones.length === 1){
       zoneSelect.value = zones[0].id
@@ -579,7 +1012,7 @@ function populateZoneDeleteMoveTargets(selectedPaddockId){
       if(submitBtn) submitBtn.disabled = true
     }
   } else {
-    zoneSelect.innerHTML = '<option value="">Geen zones beschikbaar</option>'
+    zoneSelect.innerHTML = `<option value="">${t('select.zone.noneAvailable')}</option>`
     zoneSelect.disabled = true
     if(submitBtn) submitBtn.disabled = true
   }
@@ -591,18 +1024,18 @@ function openZoneDeleteMoveModal(sourcePaddockId, sourceZoneId, sheepCount){
   if(!sourcePaddock || !sourceZone) return
 
   if(isStalZone(sourcePaddock, sourceZone)){
-    alert('De Stal-zone kan niet worden verwijderd.')
+    alert(t('alert.stalZoneDelete'))
     return
   }
 
   if(sourcePaddock.zones.length <= 1){
-    alert('Een weide moet minstens 1 zone behouden.')
+    alert(t('alert.zoneMinimum'))
     return
   }
 
   const hasTarget = availableTargetZones(sourcePaddockId, sourcePaddockId, sourceZoneId).length > 0
   if(!hasTarget){
-    alert('Geen doelzone beschikbaar binnen deze weide.')
+    alert(t('alert.noTargetZoneInPaddock'))
     return
   }
 
@@ -620,7 +1053,7 @@ function openZoneDeleteMoveModal(sourcePaddockId, sourceZoneId, sheepCount){
       }
     })
     sourcePaddock.zones = sourcePaddock.zones.filter(z => z.id !== sourceZoneId)
-    addHistory('zone', `Zone ${sourcePaddock.name} / ${sourceZone.name} verwijderd en schapen automatisch verplaatst naar ${paddockName(target.paddockId)} / ${zoneName(target.paddockId, target.zoneId)}: ${movedNames}`)
+    addHistory('zone', t('history.zoneMove.auto', { paddock: sourcePaddock.name, name: sourceZone.name, target: `${paddockName(target.paddockId)} / ${zoneName(target.paddockId, target.zoneId)}`, sheep: movedNames }))
     save(); render()
     return
   }
@@ -631,7 +1064,7 @@ function openZoneDeleteMoveModal(sourcePaddockId, sourceZoneId, sheepCount){
     sourceLabel.textContent = `${sourcePaddock.name} / ${sourceZone.name}`
   }
   if(sheepLabel){
-    sheepLabel.textContent = `${sheepCount} schaap${sheepCount === 1 ? '' : 'en'}`
+    sheepLabel.textContent = `${sheepCount} ${sheepCount === 1 ? t('entity.sheep') : t('entity.sheep')}`
   }
 
   pendingZoneDeletion = { sourcePaddockId, sourceZoneId }
@@ -667,9 +1100,9 @@ function populateZoneBulkMoveTargets(selectedPaddockId){
 
   const targetPaddocks = availableBulkMoveTargetPaddocks(pendingZoneBulkMove.sourcePaddockId, pendingZoneBulkMove.sourceZoneId)
   if(!targetPaddocks.length){
-    paddockSelect.innerHTML = '<option value="">Geen doelweides beschikbaar</option>'
+    paddockSelect.innerHTML = `<option value="">${t('alert.noTargetPaddock')}</option>`
     paddockSelect.disabled = true
-    zoneSelect.innerHTML = '<option value="">Geen doelzones beschikbaar</option>'
+    zoneSelect.innerHTML = `<option value="">${t('select.zone.noneAvailable')}</option>`
     zoneSelect.disabled = true
     if(submitBtn) submitBtn.disabled = true
     return
@@ -677,11 +1110,11 @@ function populateZoneBulkMoveTargets(selectedPaddockId){
 
   const effectivePaddockId = selectedPaddockId || targetPaddocks[0].id
   paddockSelect.disabled = false
-  paddockSelect.innerHTML = `<option value="" disabled hidden>Kies weide</option>` + targetPaddocks.map(p => `<option value="${p.id}"${p.id === effectivePaddockId ? ' selected' : ''}>${p.name}</option>`).join('')
+  paddockSelect.innerHTML = `<option value="" disabled hidden>${t('select.paddock.choose')}</option>` + targetPaddocks.map(p => `<option value="${p.id}"${p.id === effectivePaddockId ? ' selected' : ''}>${p.name}</option>`).join('')
 
   const zones = availableBulkMoveTargetZones(effectivePaddockId, pendingZoneBulkMove.sourcePaddockId, pendingZoneBulkMove.sourceZoneId)
   if(zones.length){
-    zoneSelect.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
+    zoneSelect.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
     zoneSelect.disabled = false
     if(zones.length === 1){
       zoneSelect.value = zones[0].id
@@ -691,7 +1124,7 @@ function populateZoneBulkMoveTargets(selectedPaddockId){
       if(submitBtn) submitBtn.disabled = true
     }
   } else {
-    zoneSelect.innerHTML = '<option value="">Geen zones beschikbaar</option>'
+    zoneSelect.innerHTML = `<option value="">${t('select.zone.noneAvailable')}</option>`
     zoneSelect.disabled = true
     if(submitBtn) submitBtn.disabled = true
   }
@@ -704,13 +1137,13 @@ function openZoneBulkMoveModal(sourcePaddockId, sourceZoneId){
 
   const sheepInZone = state.sheep.filter(s => s.paddockId === sourcePaddockId && s.zoneId === sourceZoneId)
   if(!sheepInZone.length){
-    alert('Geen schapen in deze zone om te verplaatsen.')
+    alert(t('alert.noSheepInZone'))
     return
   }
 
   const targetPaddocks = availableBulkMoveTargetPaddocks(sourcePaddockId, sourceZoneId)
   if(!targetPaddocks.length){
-    alert('Geen doelzone beschikbaar. Voeg eerst een extra zone of weide met zone toe.')
+    alert(t('alert.noTargetZone'))
     return
   }
 
@@ -722,7 +1155,7 @@ function openZoneBulkMoveModal(sourcePaddockId, sourceZoneId){
     sourceLabel.textContent = `${sourcePaddock.name} / ${sourceZone.name}`
   }
   if(sheepLabel){
-    sheepLabel.textContent = `${sheepInZone.length} schaap${sheepInZone.length === 1 ? '' : 'en'}`
+    sheepLabel.textContent = `${sheepInZone.length} ${sheepInZone.length === 1 ? t('entity.sheep') : t('entity.sheep')}`
   }
 
   populateZoneBulkMoveTargets(targetPaddocks[0].id)
@@ -741,13 +1174,13 @@ function populatePaddockDeleteMoveTargets(selectedPaddockId){
   if(!paddockSelect || !zoneSelect || !pendingPaddockDeletion) return
 
   const targetPaddocks = availableTargetPaddocksForDelete(pendingPaddockDeletion.sourcePaddockId)
-  paddockSelect.innerHTML = `<option value="" selected disabled hidden>Kies weide</option>` + targetPaddocks.map(p => `<option value="${p.id}"${p.id === selectedPaddockId ? ' selected' : ''}>${p.name}</option>`).join('')
+  paddockSelect.innerHTML = `<option value="" selected disabled hidden>${t('select.paddock.choose')}</option>` + targetPaddocks.map(p => `<option value="${p.id}"${p.id === selectedPaddockId ? ' selected' : ''}>${p.name}</option>`).join('')
 
   const targetPaddockId = selectedPaddockId || paddockSelect.value
   const targetPaddock = getPaddock(targetPaddockId)
   const zones = targetPaddock ? targetPaddock.zones : []
   if(zones.length){
-    zoneSelect.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
+    zoneSelect.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
     zoneSelect.disabled = false
     if(zones.length === 1){
       zoneSelect.value = zones[0].id
@@ -757,7 +1190,7 @@ function populatePaddockDeleteMoveTargets(selectedPaddockId){
       if(submitBtn) submitBtn.disabled = true
     }
   } else {
-    zoneSelect.innerHTML = '<option value="">Geen zones beschikbaar</option>'
+    zoneSelect.innerHTML = `<option value="">${t('select.zone.noneAvailable')}</option>`
     zoneSelect.disabled = true
     if(submitBtn) submitBtn.disabled = true
   }
@@ -769,7 +1202,7 @@ function openPaddockDeleteMoveModal(sourcePaddockId, sheepCount){
 
   const targetPaddocks = availableTargetPaddocksForDelete(sourcePaddockId)
   if(!targetPaddocks.length){
-    alert('Deze weide bevat schapen. Er moet eerst een andere weide met minstens 1 zone zijn om de schapen te verplaatsen.')
+    alert(t('alert.noTargetPaddock'))
     return
   }
 
@@ -787,7 +1220,7 @@ function openPaddockDeleteMoveModal(sourcePaddockId, sheepCount){
     })
     state.paddocks = state.paddocks.filter(p => p.id !== sourcePaddockId)
     if(expandedPaddockId === sourcePaddockId) expandedPaddockId = null
-    addHistory('weide', `Weide ${sourcePaddock.name} verwijderd en schapen automatisch verplaatst naar ${paddockName(target.paddockId)} / ${zoneName(target.paddockId, target.zoneId)}: ${movedNames}`)
+    addHistory('weide', t('history.paddockMove.auto', { name: sourcePaddock.name, target: `${paddockName(target.paddockId)} / ${zoneName(target.paddockId, target.zoneId)}`, sheep: movedNames }))
     save(); render()
     return
   }
@@ -800,7 +1233,7 @@ function openPaddockDeleteMoveModal(sourcePaddockId, sheepCount){
     sourceLabel.textContent = sourcePaddock.name
   }
   if(sheepLabel){
-    sheepLabel.textContent = `${sheepCount} schaap${sheepCount === 1 ? '' : 'en'}`
+    sheepLabel.textContent = `${sheepCount} ${sheepCount === 1 ? t('entity.sheep') : t('entity.sheep')}`
   }
 
   populatePaddockDeleteMoveTargets(targetPaddocks[0].id)
@@ -818,11 +1251,11 @@ function populateMoveModalPaddocks(selectedPaddockId){
   const submitBtn = document.getElementById('move-modal-submit')
   if(!movePaddockModal || !moveZoneModal) return
 
-  movePaddockModal.innerHTML = `<option value="" selected disabled hidden>Kies weide</option>` + state.paddocks.map(p => `<option value="${p.id}"${p.id === selectedPaddockId ? ' selected' : ''}>${p.name}</option>`).join('')
+  movePaddockModal.innerHTML = `<option value="" selected disabled hidden>${t('select.paddock.choose')}</option>` + state.paddocks.map(p => `<option value="${p.id}"${p.id === selectedPaddockId ? ' selected' : ''}>${p.name}</option>`).join('')
 
   const selected = getPaddock(selectedPaddockId)
   if(selected && selected.zones.length){
-    moveZoneModal.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + selected.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
+    moveZoneModal.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + selected.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
     moveZoneModal.disabled = false
     if(selected.zones.length === 1){
       moveZoneModal.value = selected.zones[0].id
@@ -832,7 +1265,7 @@ function populateMoveModalPaddocks(selectedPaddockId){
       if(submitBtn) submitBtn.disabled = true
     }
   } else {
-    moveZoneModal.innerHTML = selected ? '<option value="">Geen zones beschikbaar</option>' : '<option value="">Kies eerst een weide</option>'
+    moveZoneModal.innerHTML = selected ? `<option value="">${t('select.zone.noneAvailable')}</option>` : `<option value="">${t('select.paddock.first')}</option>`
     moveZoneModal.disabled = !selected || selected.zones.length === 0
     if(submitBtn) submitBtn.disabled = true
   }
@@ -889,9 +1322,9 @@ function openEditSheepTagModal(sheepId){
   const genderDisplay = document.getElementById('sheep-edit-gender-display')
   if(genderDisplay){
     if(sheep.gender === 'female'){
-      genderDisplay.innerHTML = '<span class="gender-symbol female" aria-hidden="true">♀</span> Ooi'
+      genderDisplay.innerHTML = `<span class="gender-symbol female" aria-hidden="true">♀</span> ${t('sheep.gender.female')}`
     } else if(sheep.gender === 'male'){
-      genderDisplay.innerHTML = '<span class="gender-symbol male" aria-hidden="true">♂</span> Ram'
+      genderDisplay.innerHTML = `<span class="gender-symbol male" aria-hidden="true">♂</span> ${t('sheep.gender.male')}`
     } else {
       genderDisplay.textContent = '-'
     }
@@ -910,8 +1343,8 @@ function openEditSheepTagModal(sheepId){
   const paddock = getPaddock(sheep.paddockId)
   const zone = sheep.zoneId ? getZone(sheep.paddockId, sheep.zoneId) : null
   if(locationDisplay){
-    const paddockLabel = paddock ? paddock.name : 'Onbekend veld'
-    const zoneLabel = sheep.zoneId ? (zone ? zone.name : 'Onbekende zone') : 'Geen zone'
+    const paddockLabel = paddock ? paddock.name : t('sheep.location.unknownPaddock')
+    const zoneLabel = sheep.zoneId ? (zone ? zone.name : t('sheep.location.unknownZone')) : t('sheep.location.none')
     locationDisplay.textContent = `${paddockLabel} / ${zoneLabel}`
   }
 
@@ -1008,14 +1441,14 @@ document.getElementById('upload-data-btn')?.addEventListener('click', () => {
 })
 
 document.getElementById('clear-data-btn')?.addEventListener('click', () => {
-  if(!confirm('Weet je zeker dat je alle gegevens wilt wissen? Dit kan niet ongedaan worden gemaakt.')) return
+  if(!confirm(t('confirm.clearAll'))) return
   state.paddocks = []
   state.sheep = []
   state.history = []
   expandedPaddockId = null
   expandedWeatherPaddocks.clear()
   ensureDefaultStal()
-  addHistory('systeem', 'Alle gegevens gewist')
+  addHistory('systeem', t('history.clear'))
   localStorage.removeItem(KEY)
   save()
   render()
@@ -1069,7 +1502,7 @@ document.getElementById('move-modal-form')?.addEventListener('submit', e => {
   sheep.paddockId = paddockId
   sheep.zoneId = zoneId || null
   sheep.lastUpdated = Date.now()
-  addHistory('schaap', `${sheep.tag} verplaatst van ${fromLabel} naar ${toLabel}`)
+  addHistory('schaap', t('history.sheep.moved', { sheep: sheep.tag, from: fromLabel, to: toLabel }))
   save(); render(); closeModal('move-modal')
 })
 
@@ -1079,7 +1512,7 @@ document.getElementById('paddock-modal-form')?.addEventListener('submit', e => {
   const postcode = document.getElementById('paddock-modal-postcode').value.trim()
   if(!name) return
   state.paddocks.push({id:uid(), name, postcode, zones: []})
-  addHistory('weide', `Weide ${name} toegevoegd`)
+  addHistory('weide', t('history.paddock.added', { name }))
   document.getElementById('paddock-modal-name').value = ''
   document.getElementById('paddock-modal-postcode').value = ''
   save(); render(); closeModal('paddock-modal')
@@ -1106,7 +1539,10 @@ document.getElementById('paddock-edit-form')?.addEventListener('submit', e => {
   paddock.postcode = nextPostcode
 
   if(beforeName !== paddock.name || beforePostcode !== paddock.postcode){
-    addHistory('weide', `Weide bijgewerkt: ${beforeName} -> ${paddock.name}${beforePostcode !== paddock.postcode ? `, postcode ${beforePostcode || '-'} -> ${paddock.postcode || '-'}` : ''}`)
+    const details = []
+    if(beforeName !== paddock.name) details.push(t('history.details.name', { from: beforeName, name: paddock.name }))
+    if(beforePostcode !== paddock.postcode) details.push(t('history.details.postcode', { from: beforePostcode || '-', postcode: paddock.postcode || '-' }))
+    addHistory('weide', t('history.paddock.updated', { details: details.join(', ') }))
   }
 
   save(); render(); closeEditPaddockModal()
@@ -1138,7 +1574,11 @@ document.getElementById('zone-edit-form')?.addEventListener('submit', e => {
   zone.perimeter = nextPerimeter
 
   if(beforeName !== zone.name || beforeArea !== zone.area || beforePerimeter !== zone.perimeter){
-    addHistory('zone', `Zone bijgewerkt: ${paddock.name} / ${beforeName} -> ${zone.name}${beforeArea !== zone.area ? `, oppervlakte ${beforeArea ?? '-'} -> ${zone.area ?? '-'}` : ''}${beforePerimeter !== zone.perimeter ? `, omtrek ${beforePerimeter ?? '-'} -> ${zone.perimeter ?? '-'}` : ''}`)
+    const details = []
+    if(beforeName !== zone.name) details.push(t('history.details.name', { from: beforeName, name: zone.name }))
+    if(beforeArea !== zone.area) details.push(t('history.details.area', { from: beforeArea ?? '-', area: zone.area ?? '-' }))
+    if(beforePerimeter !== zone.perimeter) details.push(t('history.details.perimeter', { from: beforePerimeter ?? '-', perimeter: zone.perimeter ?? '-' }))
+    addHistory('zone', t('history.zone.updated', { details: details.join(', ') }))
   }
 
   save(); render(); closeEditZoneModal()
@@ -1157,13 +1597,13 @@ document.getElementById('sheep-modal-form')?.addEventListener('submit', e => {
   const zoneId = document.getElementById('sheep-zone-modal').value
   if(!tag || !paddockId || !gender) return
   if(isEarmarkInUse(earmark)){
-    alert('Dit oorkenmerk is al toegewezen aan een ander schaap.')
+    alert(t('errors.earmark.duplicate'))
     return
   }
   if(motherId && !state.sheep.some(s => s.id === motherId && s.gender === 'female')) return
   if(fatherId && !state.sheep.some(s => s.id === fatherId && s.gender === 'male')) return
   state.sheep.push({id:uid(), tag, earmark: earmark || null, gender, motherId, fatherId, paddockId, zoneId: zoneId || null, lastUpdated: Date.now()})
-  addHistory('schaap', `${tag} toegevoegd in ${paddockName(paddockId)}${zoneId ? ' / ' + zoneName(paddockId, zoneId) : ''}`)
+  addHistory(t('entity.sheep'), t('history.sheep.added', { tag, location: `${paddockName(paddockId)}${zoneId ? ' / ' + zoneName(paddockId, zoneId) : ''}` }))
   document.getElementById('sheep-modal-tag').value = ''
   if(earmarkInput){
     earmarkInput.value = ''
@@ -1194,7 +1634,7 @@ document.getElementById('sheep-tag-edit-form')?.addEventListener('submit', e => 
   const previousEarmark = sheep.earmark ?? null
   sheep.tag = nextTag
   if(!previousEarmark && nextEarmark && isEarmarkInUse(nextEarmark, sheep.id)){
-    alert('Dit oorkenmerk is al toegewezen aan een ander schaap.')
+    alert(t('errors.earmark.duplicate'))
     return
   }
   if(!previousEarmark && nextEarmark){
@@ -1202,10 +1642,10 @@ document.getElementById('sheep-tag-edit-form')?.addEventListener('submit', e => 
   }
   sheep.lastUpdated = Date.now()
   if(previousTag !== nextTag || (!previousEarmark && nextEarmark)){
-    const namePart = previousTag !== nextTag ? `naam ${previousTag} -> ${nextTag}` : null
-    const earmarkPart = (!previousEarmark && nextEarmark) ? `oorkenmerk toegevoegd: ${nextEarmark}` : null
+    const namePart = previousTag !== nextTag ? t('history.details.name', { from: previousTag, to: nextTag }) : null
+    const earmarkPart = (!previousEarmark && nextEarmark) ? t('history.details.earmarkAdded', { earmark: nextEarmark }) : null
     const details = [namePart, earmarkPart].filter(Boolean).join(', ')
-    addHistory('schaap', `Schaap bijgewerkt: ${details}`)
+    addHistory(t('entity.sheep'), t('history.sheep.updated', { details }))
   }
   save(); render(); closeEditSheepTagModal()
 })
@@ -1216,13 +1656,13 @@ if(sheepPaddockModal){
     const sheepZoneModal = document.getElementById('sheep-zone-modal')
     const selectedPaddock = getPaddock(sheepPaddockModal.value)
     if(selectedPaddock && selectedPaddock.zones.length){
-      sheepZoneModal.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + selectedPaddock.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
+      sheepZoneModal.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + selectedPaddock.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
       sheepZoneModal.disabled = false
       if(selectedPaddock.zones.length === 1){
         sheepZoneModal.value = selectedPaddock.zones[0].id
       }
     } else {
-      sheepZoneModal.innerHTML = selectedPaddock ? '<option value="">Geen zones beschikbaar</option>' : '<option value="">Kies eerst een weide</option>'
+      sheepZoneModal.innerHTML = selectedPaddock ? `<option value="">${t('select.zone.noneAvailable')}</option>` : `<option value="">${t('select.paddock.first')}</option>`
       sheepZoneModal.disabled = !selectedPaddock || selectedPaddock.zones.length === 0
     }
   })
@@ -1319,7 +1759,7 @@ document.getElementById('zone-delete-move-form')?.addEventListener('submit', e =
   })
 
   sourcePaddock.zones = sourcePaddock.zones.filter(z => z.id !== pendingZoneDeletion.sourceZoneId)
-  addHistory('zone', `Zone ${sourcePaddock.name} / ${sourceZone ? sourceZone.name : 'Onbekend'} verwijderd en schapen verplaatst naar ${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}: ${movedNames}`)
+  addHistory('zone', t('history.zoneMove.manual', { paddock: sourcePaddock.name, name: sourceZone ? sourceZone.name : t('unknown'), target: `${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}`, sheep: movedNames }))
   save(); render(); closeZoneDeleteMoveModal()
 })
 
@@ -1344,7 +1784,7 @@ document.getElementById('paddock-delete-move-form')?.addEventListener('submit', 
 
   state.paddocks = state.paddocks.filter(p => p.id !== pendingPaddockDeletion.sourcePaddockId)
   if(expandedPaddockId === pendingPaddockDeletion.sourcePaddockId) expandedPaddockId = null
-  addHistory('weide', `Weide ${sourcePaddock ? sourcePaddock.name : 'Onbekend'} verwijderd en schapen verplaatst naar ${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}: ${movedNames}`)
+  addHistory('weide', t('history.paddockMove.manual', { name: sourcePaddock ? sourcePaddock.name : t('unknown'), target: `${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}`, sheep: movedNames }))
   save(); render(); closePaddockDeleteMoveModal()
 })
 
@@ -1369,7 +1809,7 @@ document.getElementById('zone-bulk-move-form')?.addEventListener('submit', e => 
     }
   })
 
-  addHistory('schaap', `${movedNames} verplaatst van ${sourcePaddock ? sourcePaddock.name : 'Onbekend'} / ${sourceZone ? sourceZone.name : 'Onbekend'} naar ${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}`)
+  addHistory('schaap', t('history.sheep.moved', { sheep: movedNames, from: `${sourcePaddock ? sourcePaddock.name : t('unknown')} / ${sourceZone ? sourceZone.name : t('unknown')}`, to: `${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}` }))
   save(); render(); closeZoneBulkMoveModal()
 })
 
@@ -1405,7 +1845,7 @@ document.getElementById('sheep-list')?.addEventListener('click', e => {
       }
     })
     if(sheep){
-      addHistory('schaap', `${sheep.tag} verwijderd uit ${paddockName(sheep.paddockId)}${sheep.zoneId ? ' / ' + zoneName(sheep.paddockId, sheep.zoneId) : ''}`)
+      addHistory(t('entity.sheep'), t('history.sheep.deleted', { tag: sheep.tag, location: `${paddockName(sheep.paddockId)}${sheep.zoneId ? ' / ' + zoneName(sheep.paddockId, sheep.zoneId) : ''}` }))
     }
     save(); render()
     return
@@ -1477,7 +1917,7 @@ document.getElementById('paddock-list').addEventListener('click', e => {
     if(!paddockId) return
     const paddock = getPaddock(paddockId)
     if(isStalPaddock(paddock)){
-      alert('De weide Stal kan niet worden verwijderd.')
+      alert(t('alert.stalPaddockDelete'))
       return
     }
     const sheepInPaddock = state.sheep.filter(s => s.paddockId === paddockId)
@@ -1488,7 +1928,7 @@ document.getElementById('paddock-list').addEventListener('click', e => {
     state.paddocks = state.paddocks.filter(p => p.id !== paddockId)
     if(expandedPaddockId === paddockId) expandedPaddockId = null
     expandedWeatherPaddocks.delete(paddockId)
-    addHistory('weide', `Weide ${paddock.name} verwijderd`)
+    addHistory('weide', t('history.paddock.deleted', { name: paddock.name }))
     save(); render()
     return
   }
@@ -1504,12 +1944,12 @@ document.getElementById('paddock-list').addEventListener('click', e => {
     if(!zone) return
 
     if(isStalZone(paddock, zone)){
-      alert('De Stal-zone kan niet worden verwijderd.')
+      alert(t('alert.stalZoneDelete'))
       return
     }
 
     if(paddock.zones.length <= 1){
-      alert('Een weide moet minstens 1 zone behouden.')
+      alert(t('alert.zoneMinimum'))
       return
     }
 
@@ -1520,7 +1960,7 @@ document.getElementById('paddock-list').addEventListener('click', e => {
     }
 
     paddock.zones = paddock.zones.filter(z => z.id !== zoneId)
-    addHistory('zone', `Zone ${paddock.name} / ${zone.name} verwijderd`)
+    addHistory('zone', t('history.zone.deleted', { paddock: paddock.name, name: zone.name }))
     save(); render()
     return
   }
@@ -1563,8 +2003,10 @@ document.getElementById('zone-modal-form')?.addEventListener('submit', e => {
   const paddock = getPaddock(paddockId)
   if(!paddock) return
   paddock.zones.push({id:uid(),name:zoneName,area,perimeter,emptySince: Date.now()})
-  addHistory('zone', `Zone ${zoneName} toegevoegd in weide ${paddock.name}`)
+  addHistory('zone', t('history.zone.added', { name: zoneName, paddock: paddock.name }))
   save(); render(); closeModal('zone-modal')
 })
 
+initLanguageSelector()
+applyStaticTranslations()
 load(); render()
