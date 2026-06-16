@@ -41,22 +41,26 @@ De hoofdinterface gebruikt 3 tabs om drukte te verminderen:
 ### Weides
 - Weides toevoegen, bewerken en verwijderen.
 - Beschermde standaardweide Stal die niet verwijderd kan worden.
-- Postcode per weide (optioneel).
+- Postcode en landesvlag per weide (optioneel).
 - Oppervlakte op weideniveau wordt automatisch berekend als som van alle zone-oppervlaktes.
-- Weides staan standaard open en kunnen handmatig in/uitgeklapt worden.
+- Weides staan standaard ingeklapt en kunnen handmatig in/uitgeklapt worden.
+- De weide-header toont: naam, postcode + vlag, oppervlakte, schapenteller en een temperatuurbadge (min/max vandaag).
 
 ### Zones
-- Meerdere zones per weide.
+- Meerdere zones per weide, getoond als 4:3 portretkaarten in een raster.
 - Zones toevoegen, bewerken en verwijderen.
 - Per zone kan je Oppervlakte (m2) en Omtrek (m) bijhouden.
 - Een weide moet altijd minstens 1 zone behouden.
 - Beschermde Stal-zone binnen de Stal-weide.
-- **Schapen per zone**: Schapen worden in een compacte, scrollbare lijst weergegeven om overlapping van teksten te voorkomen.
+- **Schapen per zone**: Schapen worden in een compacte, scrollbare lijst weergegeven.
+- **Bulkverplaatsing**: bij meer dan 1 schaap per zone verschijnt een verplaats-alle-dieren-knop.
 
 ### Schapen
 - Schapen toevoegen, hernoemen, verplaatsen en verwijderen.
+- Schapen worden als 4:3 portretkaarten weergegeven in een raster.
 - Schapen kunnen aan een specifieke weide en zone gekoppeld worden.
 - **Geslacht bijhouden**: Ooi (vrouw, ♀) of Ram (man, ♂) met gekleurde iconen.
+- **Oorkenmerk**: uniek oorkenmerk per schaap (optioneel), dubbele invoer wordt geweigerd.
 - **Stamboom/Genealogie**: Moeder- en vaderdieren selecteren bij toevoegen van een schaap.
   - Moederselect toont alleen ooien.
   - Vaderselect toont alleen rammen.
@@ -64,6 +68,7 @@ De hoofdinterface gebruikt 3 tabs om drukte te verminderen:
   - Ouderrelaties worden behouden en automatisch opgeschoond bij verwijderen.
 - Laatste wijzigingsdatum per schaap wordt bijgehouden.
 - Klik op een schaapnaam in een zone om meteen het verplaatsvenster te openen.
+- Verwijderen en verplaatsen via stijlvolle knoppen met bevestigingsmodal (geen browser-alert).
 
 ### Slimme verplaats- en verwijderlogica
 - Automatische zonekeuze wanneer er maar 1 geldige doelzone bestaat.
@@ -81,9 +86,10 @@ De hoofdinterface gebruikt 3 tabs om drukte te verminderen:
 
 ### Weer per weide
 - 3-daagse weersvoorspelling op basis van postcode.
-- Ondersteuning voor Belgische en Nederlandse postcodes.
-- Forecast is in- en uitklapbaar per weide.
-- Caching van weersdata voor performantie.
+- Ondersteuning voor Belgische, Nederlandse en Franse postcodes (detectie op formaat).
+- Temperatuurbadge (min/max vandaag) zichtbaar in de weide-header naast postcode/oppervlakte/schapen.
+- Klik op de badge om de volledige 3-daagse voorspelling in/uit te klappen.
+- Caching van weersdata (1 uur TTL) voor betere performantie.
 
 ### Databeheer
 - Lokale opslag via localStorage onder sleutel `flockops:data`.
@@ -143,22 +149,26 @@ The main interface uses 3 tabs to reduce visual clutter:
 ### Paddocks
 - Add, edit, and delete paddocks.
 - Protected default paddock "Stal" (Stall) which cannot be deleted.
-- Optional postcode per paddock.
+- Optional postcode and country flag per paddock.
 - Paddock area is automatically calculated as the sum of all zone areas.
-- Paddocks are expanded by default and can be collapsed/expanded manually.
+- Paddocks are collapsed by default and can be expanded/collapsed manually.
+- Paddock header shows: name, postcode + flag, area, sheep count, and a temperature badge (today's min/max).
 
 ### Zones
-- Multiple zones per paddock.
+- Multiple zones per paddock, displayed as 4:3 portrait cards in a grid.
 - Add, edit, and delete zones.
 - Track area (m2) and perimeter (m) per zone.
 - A paddock must always retain at least 1 zone.
 - Protected "Stal" zone within the Stal paddock.
-- **Sheep per zone**: Sheep are displayed in a compact, scrollable list to prevent text overlap.
+- **Sheep per zone**: Sheep are displayed in a compact, scrollable list.
+- **Bulk move**: when a zone has more than 1 sheep, a move-all-animals button appears.
 
 ### Sheep
 - Add, rename, move, and delete sheep.
+- Sheep are displayed as 4:3 portrait cards in a grid.
 - Sheep can be assigned to a specific paddock and zone.
 - **Track sex**: Ewe (female, ♀) or Ram (male, ♂) with color-coded icons.
+- **Earmark**: unique earmark per sheep (optional); duplicates are rejected.
 - **Pedigree/Genealogy**: Select parent animals when adding a sheep.
   - Mother selector shows only ewes.
   - Father selector shows only rams.
@@ -166,6 +176,7 @@ The main interface uses 3 tabs to reduce visual clutter:
   - Parent relationships are preserved and automatically cleaned up when deleting.
 - Last update timestamp is tracked per sheep.
 - Click a sheep name in a zone to immediately open the move dialog.
+- Delete and move via styled buttons with confirmation modal (no browser alert).
 
 ### Smart move and delete logic
 - Automatic zone selection when there is only 1 valid target zone.
@@ -183,9 +194,10 @@ The main interface uses 3 tabs to reduce visual clutter:
 
 ### Weather per paddock
 - 3-day weather forecast based on postcode.
-- Support for Belgian and Dutch postcodes.
-- Forecast is collapsible per paddock.
-- Weather data caching for performance.
+- Automatic country detection from postcode format (BE, NL, FR).
+- Temperature badge (today's min/max) shown inline in the paddock header next to postcode/area/sheep count.
+- Click the badge to expand/collapse the full 3-day forecast.
+- Weather data caching (1-hour TTL) for performance.
 
 ### Data Management
 - Local storage via localStorage under key `flockops:data`.
@@ -245,9 +257,10 @@ L'interface principale utilise 3 onglets pour reduire l'encombrement visuel :
 ### Paturages
 - Ajouter, modifier et supprimer des paturages.
 - Paturage par defaut protege "Stal" qui ne peut pas etre supprime.
-- Code postal optionnel par paturage.
+- Code postal et drapeau national optionnels par paturage.
 - La surface du paturage est calculee automatiquement comme somme des surfaces des zones.
-- Les paturages sont ouverts par defaut et peuvent etre replies/deplies manuellement.
+- Les paturages sont replis par defaut et peuvent etre deplies manuellement.
+- L'en-tete du paturage affiche : nom, code postal + drapeau, surface, compteur de moutons et badge de temperature (min/max du jour).
 
 ### Zones
 - Plusieurs zones par paturage.
@@ -285,9 +298,10 @@ L'interface principale utilise 3 onglets pour reduire l'encombrement visuel :
 
 ### Meteo par paturage
 - Prevision meteo sur 3 jours basee sur le code postal.
-- Prise en charge des codes postaux belges et neerlandais.
-- Les previsions sont repliables/depliables par paturage.
-- Mise en cache des donnees meteo pour de meilleures performances.
+- Detection automatique du pays selon le format du code postal (BE, NL, FR).
+- Badge de temperature (min/max du jour) visible dans l'en-tete du paturage.
+- Cliquez sur le badge pour afficher/masquer les previsions detaillees sur 3 jours.
+- Mise en cache des donnees meteo (TTL 1 heure) pour de meilleures performances.
 
 ### Gestion des donnees
 - Stockage local via localStorage avec la cle `flockops:data`.
@@ -329,4 +343,4 @@ Le dossier [server](server) est present dans le depot, mais le frontend a la rac
 
 ---
 
-**Last updated**: June 2026 | **Version**: 2.2 (NL/EN/FR + Tab Layout)
+**Last updated**: June 2026 | **Version**: 2.3 (NL/EN/FR + portrait cards + weather badge + earmarks)
