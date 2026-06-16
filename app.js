@@ -1,5 +1,3 @@
-const KEY = 'schapentracker:data'
-const state = { paddocks: [], sheep: [] }
 const expandedPaddocks = new Set()
 
 function ensureDefaultStal(){
@@ -180,10 +178,12 @@ function renderPaddock(p){
     </div>
     <div class="zone-list" ${isExpanded ? '' : 'style="display:none"'}>
       ${p.zones.map(z => {
-        const sheepNames = zoneSheepNames(p.id, z.id)
-        const sheepCount = sheepNames.length
+        const sheepInZone = state.sheep.filter(s => s.paddockId === p.id && s.zoneId === z.id)
+        const sheepCount = sheepInZone.length
         const status = z.emptySince ? `Leeg sinds ${daysSince(z.emptySince)} dagen` : `Bezet${sheepCount ? ` (${sheepCount})` : ''}`
-        const sheepLabel = sheepCount ? sheepNames.map(name => `${sheepIcon()}${name}`).join(' ') : 'Geen schaap'
+        const sheepLabel = sheepCount
+          ? sheepInZone.map(s => `<button type="button" class="zone-sheep-link" data-sheep-id="${s.id}" aria-label="Verplaats ${s.tag}">${sheepIcon()}${s.tag}</button>`).join(' ')
+          : 'Geen schaap'
         const stallZone = isStalZone(p, z)
         const useStallBackground = isStalPaddock(p)
         const canDeleteZone = !stallZone && p.zones.length > 1
@@ -194,7 +194,7 @@ function renderPaddock(p){
       </button>
     </div>
   </div>`
-}
+
 
 function paddockName(id){
   const p = state.paddocks.find(x=>x.id===id)
@@ -252,6 +252,7 @@ function availableTargetZones(targetPaddockId, sourcePaddockId = pendingZoneDele
 function populateZoneDeleteMoveTargets(selectedPaddockId){
   const paddockSelect = document.getElementById('zone-delete-target-paddock-modal')
   const zoneSelect = document.getElementById('zone-delete-target-zone-modal')
+  const submitBtn = document.getElementById('zone-delete-move-submit')
   if(!paddockSelect || !zoneSelect || !pendingZoneDeletion) return
 
   const sourcePaddock = getPaddock(pendingZoneDeletion.sourcePaddockId)
@@ -264,9 +265,17 @@ function populateZoneDeleteMoveTargets(selectedPaddockId){
   if(zones.length){
     zoneSelect.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
     zoneSelect.disabled = false
+    if(zones.length === 1){
+      zoneSelect.value = zones[0].id
+      if(submitBtn) submitBtn.disabled = false
+    } else {
+      zoneSelect.value = ''
+      if(submitBtn) submitBtn.disabled = true
+    }
   } else {
     zoneSelect.innerHTML = '<option value="">Geen zones beschikbaar</option>'
     zoneSelect.disabled = true
+    if(submitBtn) submitBtn.disabled = true
   }
 }
 
@@ -334,6 +343,7 @@ function availableTargetPaddocksForDelete(sourcePaddockId){
 function populatePaddockDeleteMoveTargets(selectedPaddockId){
   const paddockSelect = document.getElementById('paddock-delete-target-paddock-modal')
   const zoneSelect = document.getElementById('paddock-delete-target-zone-modal')
+  const submitBtn = document.getElementById('paddock-delete-move-submit')
   if(!paddockSelect || !zoneSelect || !pendingPaddockDeletion) return
 
   const targetPaddocks = availableTargetPaddocksForDelete(pendingPaddockDeletion.sourcePaddockId)
@@ -345,9 +355,17 @@ function populatePaddockDeleteMoveTargets(selectedPaddockId){
   if(zones.length){
     zoneSelect.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
     zoneSelect.disabled = false
+    if(zones.length === 1){
+      zoneSelect.value = zones[0].id
+      if(submitBtn) submitBtn.disabled = false
+    } else {
+      zoneSelect.value = ''
+      if(submitBtn) submitBtn.disabled = true
+    }
   } else {
     zoneSelect.innerHTML = '<option value="">Geen zones beschikbaar</option>'
     zoneSelect.disabled = true
+    if(submitBtn) submitBtn.disabled = true
   }
 }
 
@@ -400,6 +418,7 @@ function closePaddockDeleteMoveModal(){
 function populateMoveModalPaddocks(selectedPaddockId){
   const movePaddockModal = document.getElementById('move-paddock-modal')
   const moveZoneModal = document.getElementById('move-zone-modal')
+  const submitBtn = document.getElementById('move-modal-submit')
   if(!movePaddockModal || !moveZoneModal) return
 
   movePaddockModal.innerHTML = `<option value="" selected disabled hidden>Kies weide</option>` + state.paddocks.map(p => `<option value="${p.id}"${p.id === selectedPaddockId ? ' selected' : ''}>${p.name}</option>`).join('')
@@ -408,9 +427,17 @@ function populateMoveModalPaddocks(selectedPaddockId){
   if(selected && selected.zones.length){
     moveZoneModal.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + selected.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
     moveZoneModal.disabled = false
+    if(selected.zones.length === 1){
+      moveZoneModal.value = selected.zones[0].id
+      if(submitBtn) submitBtn.disabled = false
+    } else {
+      moveZoneModal.value = ''
+      if(submitBtn) submitBtn.disabled = true
+    }
   } else {
     moveZoneModal.innerHTML = selected ? '<option value="">Geen zones beschikbaar</option>' : '<option value="">Kies eerst een weide</option>'
     moveZoneModal.disabled = !selected || selected.zones.length === 0
+    if(submitBtn) submitBtn.disabled = true
   }
 }
 
@@ -544,15 +571,16 @@ if(sheepPaddockModal){
 const movePaddockModal = document.getElementById('move-paddock-modal')
 if(movePaddockModal){
   movePaddockModal.addEventListener('change', () => {
-    const selected = getPaddock(movePaddockModal.value)
-    const moveZoneModal = document.getElementById('move-zone-modal')
-    if(!moveZoneModal) return
-    if(selected && selected.zones.length){
-      moveZoneModal.innerHTML = `<option value="" selected disabled hidden>Kies zone</option>` + selected.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
-      moveZoneModal.disabled = false
-    } else {
-      moveZoneModal.innerHTML = selected ? '<option value="">Geen zones beschikbaar</option>' : '<option value="">Kies eerst een weide</option>'
-      moveZoneModal.disabled = !selected || selected.zones.length === 0
+    populateMoveModalPaddocks(movePaddockModal.value)
+  })
+}
+
+const moveZoneModal = document.getElementById('move-zone-modal')
+if(moveZoneModal){
+  moveZoneModal.addEventListener('change', () => {
+    const submitBtn = document.getElementById('move-modal-submit')
+    if(submitBtn){
+      submitBtn.disabled = !moveZoneModal.value
     }
   })
 }
@@ -564,10 +592,30 @@ if(zoneDeleteTargetPaddockModal){
   })
 }
 
+const zoneDeleteTargetZoneModal = document.getElementById('zone-delete-target-zone-modal')
+if(zoneDeleteTargetZoneModal){
+  zoneDeleteTargetZoneModal.addEventListener('change', () => {
+    const submitBtn = document.getElementById('zone-delete-move-submit')
+    if(submitBtn){
+      submitBtn.disabled = !zoneDeleteTargetZoneModal.value
+    }
+  })
+}
+
 const paddockDeleteTargetPaddockModal = document.getElementById('paddock-delete-target-paddock-modal')
 if(paddockDeleteTargetPaddockModal){
   paddockDeleteTargetPaddockModal.addEventListener('change', () => {
     populatePaddockDeleteMoveTargets(paddockDeleteTargetPaddockModal.value)
+  })
+}
+
+const paddockDeleteTargetZoneModal = document.getElementById('paddock-delete-target-zone-modal')
+if(paddockDeleteTargetZoneModal){
+  paddockDeleteTargetZoneModal.addEventListener('change', () => {
+    const submitBtn = document.getElementById('paddock-delete-move-submit')
+    if(submitBtn){
+      submitBtn.disabled = !paddockDeleteTargetZoneModal.value
+    }
   })
 }
 
@@ -645,6 +693,14 @@ document.getElementById('paddock-list').addEventListener('click', e => {
   const addPaddockButton = e.target.closest('.add-paddock-block')
   if(addPaddockButton){
     openModal('paddock-modal')
+    return
+  }
+
+  const zoneSheepLink = e.target.closest('.zone-sheep-link')
+  if(zoneSheepLink){
+    const sheepId = zoneSheepLink.dataset.sheepId
+    if(!sheepId) return
+    openMoveModal(sheepId)
     return
   }
 
@@ -733,24 +789,5 @@ document.getElementById('zone-modal-form')?.addEventListener('submit', e => {
   paddock.zones.push({id:uid(),name:zoneName,emptySince: Date.now()})
   save(); render(); closeModal('zone-modal')
 })
-
-function openMoveModal(sheepId){
-  const sheep = state.sheep.find(s => s.id === sheepId)
-  if(!sheep) return
-  activeMoveSheepId = sheepId
-
-  const label = document.getElementById('move-modal-sheep-name')
-  if(label){
-    label.textContent = `${sheep.tag} — ${paddockName(sheep.paddockId)}${sheep.zoneId ? ' / ' + zoneName(sheep.paddockId, sheep.zoneId) : ''}`
-  }
-
-  populateMoveModalPaddocks(sheep.paddockId)
-  const moveZoneModal = document.getElementById('move-zone-modal')
-  if(moveZoneModal && sheep.zoneId){
-    moveZoneModal.value = sheep.zoneId
-  }
-
-  openModal('move-modal')
-}
 
 load(); render()
