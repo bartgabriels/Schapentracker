@@ -211,6 +211,13 @@ button.section-button{
   flex:0 0 auto;
 }
 
+.inline-icon{
+  width:0.95em;
+  height:0.95em;
+  display:inline-block;
+  vertical-align:-0.12em;
+}
+
 .button-icon--move{
   color:currentColor;
 }

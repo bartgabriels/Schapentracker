@@ -797,6 +797,22 @@ function recycleBinIcon(){
   return '<svg class="button-icon button-icon--delete" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3a1 1 0 0 0-1 1v1H4.75a.75.75 0 0 0 0 1.5h.84l.82 10.31A2.25 2.25 0 0 0 8.64 19.5h6.72a2.25 2.25 0 0 0 2.23-1.69l.82-10.31h.84a.75.75 0 0 0 0-1.5H16V4a1 1 0 0 0-1-1H9zm1 2h4v0.5h-4V5zm-1.83 3.5a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5a.75.75 0 0 1 .75-.75zm3.33 0a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5a.75.75 0 0 1 .75-.75zm3.33 0a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5a.75.75 0 0 1 .75-.75z"/></svg>'
 }
 
+function syringeIcon(iconClass = 'button-icon'){
+  return `<img src="spuit.png" class="${iconClass}" alt="Spuit" />`
+}
+
+function scissorsIcon(iconClass = 'button-icon'){
+  return `<img src="schaar.png" class="${iconClass}" alt="Schaar" />`
+}
+
+function calendarIcon(iconClass = 'button-icon'){
+  return `<img src="calender.png" class="${iconClass}" alt="Calender" />`
+}
+
+function repeatIcon(iconClass = 'button-icon'){
+  return `<img src="repeat.png" class="${iconClass}" alt="Repeat" />`
+}
+
 function doubleArrowIcon(){
   return '<svg class="button-icon button-icon--move" viewBox="0 0 1920 1920" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,1920) scale(0.1,-0.1)"><path fill="currentColor" d="M12770 12920 c-19 -5 -45 -20 -57 -35 l-23 -26 0 -412 0 -412 -753 0 c-898 0 -844 6 -1231 -135 -71 -26 -157 -69 -209 -104 -21 -14 -42 -26 -47 -26 -6 0 -10 -4 -10 -10 0 -5 -5 -10 -10 -10 -12 0 -113 -77 -204 -155 -53 -44 -320 -331 -522 -559 -40 -45 -81 -88 -93 -96 -12 -8 -21 -18 -21 -23 0 -5 -19 -28 -42 -51 -24 -23 -62 -64 -86 -91 -24 -28 -81 -90 -128 -140 -46 -49 -461 -506 -921 -1015 -517 -570 -872 -954 -928 -1002 -238 -206 -534 -364 -845 -452 -269 -76 -289 -78 -1025 -85 l-660 -7 -64 -28 c-122 -53 -197 -120 -251 -226 -43 -86 -60 -155 -60 -251 0 -204 108 -380 285 -464 39 -18 77 -34 85 -35 8 -1 287 -5 620 -7 838 -6 1000 7 1352 107 79 22 152 45 163 50 18 9 56 23 250 95 86 31 183 82 358 186 270 162 439 293 643 501 72 73 542 588 1045 1143 502 556 935 1032 961 1059 26 27 48 51 48 55 0 3 20 26 44 51 141 145 175 181 216 230 48 58 68 79 224 238 84 85 112 107 191 146 166 84 175 85 953 88 l672 3 0 -408 c0 -261 4 -415 10 -428 17 -30 64 -49 126 -49 47 0 66 5 98 27 23 16 43 31 46 34 6 7 230 184 480 379 95 74 243 191 329 260 86 69 167 133 181 142 14 9 37 27 52 40 14 13 37 32 49 43 36 31 322 256 447 351 102 79 112 89 112 119 0 29 -11 41 -127 132 -263 205 -418 327 -429 337 -22 22 -100 86 -131 108 -18 13 -106 81 -195 152 -535 426 -811 640 -848 658 -37 19 -64 21 -120 8z"/><path fill="currentColor" d="M5009 12135 c-3 -2 -21 -5 -40 -6 -18 -1 -65 -17 -104 -35 -260 -122 -362 -445 -225 -714 54 -106 129 -173 251 -226 l64 -28 655 -6 c622 -6 662 -7 785 -29 405 -71 777 -243 1075 -496 79 -67 116 -105 259 -259 l54 -58 66 73 c36 40 89 97 116 126 28 28 63 67 79 85 16 18 62 69 103 113 41 44 93 101 116 126 23 25 80 87 127 138 47 51 87 97 89 102 5 17 -266 284 -389 383 -148 120 -211 163 -397 275 -175 104 -272 155 -358 186 -194 72 -232 86 -250 95 -38 19 -306 91 -408 111 -104 19 -121 21 -332 39 -118 10 -1327 15 -1336 5z"/><path fill="currentColor" d="M12738 9054 c-15 -8 -32 -23 -38 -34 -6 -12 -10 -167 -10 -427 l0 -408 -672 3 c-778 3 -787 4 -953 88 -79 39 -107 61 -191 146 -156 159 -176 180 -224 238 -25 29 -72 82 -105 115 -33 34 -77 81 -98 103 -20 23 -39 42 -41 42 -2 0 -102 -108 -221 -240 -119 -132 -221 -240 -225 -240 -4 0 -11 -9 -16 -19 -5 -11 -54 -68 -108 -126 -145 -154 -140 -129 -43 -232 45 -48 148 -160 229 -248 80 -89 172 -183 204 -211 91 -77 192 -154 204 -154 5 0 10 -4 10 -10 0 -5 4 -10 10 -10 5 0 26 -12 47 -26 52 -35 138 -78 209 -104 173 -63 270 -93 369 -113 108 -22 123 -22 862 -22 l753 0 0 -413 0 -414 28 -28 c36 -35 113 -48 163 -27 35 15 275 200 857 663 89 71 177 139 195 152 31 22 109 86 131 108 11 10 166 132 429 337 116 91 127 103 127 132 0 30 -10 40 -112 119 -125 95 -411 320 -447 351 -12 11 -35 30 -49 43 -15 13 -38 31 -52 40 -14 9 -81 62 -150 118 -69 55 -154 123 -190 151 -120 92 -645 506 -650 512 -3 3 -23 18 -46 34 -33 22 -51 27 -100 27 -32 -1 -71 -7 -86 -16z"/></g></svg>'
 }
@@ -1510,7 +1526,7 @@ function render(){
       ? `${formatBirthDate(lastInjection.date)} (${lastInjection.product || t('unknown')})`
       : t('labels.notAvailable')
     const nextInjectionValue = nextInjection
-      ? `${formatBirthDate(nextInjection.repeatDate)} ♻ (${nextInjection.product || t('unknown')})`
+      ? `${formatBirthDate(nextInjection.repeatDate)} (${nextInjection.product || t('unknown')})`
       : t('labels.notAvailable')
 
     return `
@@ -1524,13 +1540,13 @@ function render(){
             ? `<small>${t('labels.age', { age: formatAge(s.birthDate) })}</small>`
             : `<input type="date" class="sheep-birthdate-input" data-id="${s.id}" aria-label="${t('aria.setSheepBirthDate', { tag: s.tag })}">`}
           <small>${paddockName(s.paddockId)}${s.zoneId ? ' / ' + zoneName(s.paddockId, s.zoneId) : ''}</small>
-          <small>✂️ ${lastShearingValue}</small>
-          <small>💉 ${lastInjectionValue}</small>
-          <small>💉 ${nextInjectionValue}</small>
+          <small>${scissorsIcon('inline-icon')} ${calendarIcon('inline-icon')} ${lastShearingValue}</small>
+          <small>${syringeIcon('inline-icon')} ${calendarIcon('inline-icon')} ${lastInjectionValue}</small>
+          <small>${syringeIcon('inline-icon')} ${repeatIcon('inline-icon')} ${nextInjectionValue}</small>
         </div>
         <div class="sheep-actions">
-          <button type="button" class="sheep-injection-button" data-id="${s.id}" aria-label="${t('aria.registerSheepInjection', { tag: s.tag })}" title="${t('aria.registerSheepInjection', { tag: s.tag })}">💉</button>
-          <button type="button" class="sheep-shearing-button" data-id="${s.id}" aria-label="${t('aria.registerSheepShearing', { tag: s.tag })}" title="${t('aria.registerSheepShearing', { tag: s.tag })}">✂️</button>
+          <button type="button" class="sheep-injection-button" data-id="${s.id}" aria-label="${t('aria.registerSheepInjection', { tag: s.tag })}" title="${t('aria.registerSheepInjection', { tag: s.tag })}">${syringeIcon()}</button>
+          <button type="button" class="sheep-shearing-button" data-id="${s.id}" aria-label="${t('aria.registerSheepShearing', { tag: s.tag })}" title="${t('aria.registerSheepShearing', { tag: s.tag })}">${scissorsIcon()}</button>
           <button type="button" class="move-button" data-id="${s.id}" aria-label="${t('actions.move')}" title="${t('actions.move')}">${doubleArrowIcon()}</button>
           <button type="button" class="sheep-delete-button" data-id="${s.id}" aria-label="${t('aria.deleteSheep')}">${recycleBinIcon()}</button>
         </div>
@@ -1606,10 +1622,10 @@ function renderPaddock(p){
   const areaLabel = `${new Intl.NumberFormat(localeTag(), { maximumFractionDigits: 2 }).format(paddockTotalArea)} m2`
   const sheepLabel = `${paddockSheepCount} ${paddockSheepCount === 1 ? t('paddock.sheep.singular') : t('paddock.sheep.plural')}`
   const injectionButtonHtml = paddockSheepCount > 0
-    ? `<button type="button" class="paddock-injection-button" data-paddock-id="${p.id}" aria-label="${t('aria.registerInjection', { paddock: p.name })}" title="${t('aria.registerInjection', { paddock: p.name })}">💉</button>`
+    ? `<button type="button" class="paddock-injection-button" data-paddock-id="${p.id}" aria-label="${t('aria.registerInjection', { paddock: p.name })}" title="${t('aria.registerInjection', { paddock: p.name })}">${syringeIcon()}</button>`
     : ''
   const shearingButtonHtml = paddockSheepCount > 0
-    ? `<button type="button" class="paddock-shearing-button" data-paddock-id="${p.id}" aria-label="${t('aria.registerShearing', { paddock: p.name })}" title="${t('aria.registerShearing', { paddock: p.name })}">✂️</button>`
+    ? `<button type="button" class="paddock-shearing-button" data-paddock-id="${p.id}" aria-label="${t('aria.registerShearing', { paddock: p.name })}" title="${t('aria.registerShearing', { paddock: p.name })}">${scissorsIcon()}</button>`
     : ''
   const canDeletePaddock = !isStalPaddock(p)
   // Build today's temp badge from weather cache
