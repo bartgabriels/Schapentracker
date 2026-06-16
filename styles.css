@@ -1,4 +1,4 @@
-:root{--bg:#fbfdfb;--card:#fff;--accent:#2d6a4f}
+:root{--bg:#fbfdfb;--card:#fff;--accent:#2d6a4f;--text-outline:0 0 1px rgba(255,255,255,0.9),0 0 2px rgba(255,255,255,0.7),-1px -1px 1px rgba(255,255,255,0.6),1px -1px 1px rgba(255,255,255,0.6),-1px 1px 1px rgba(255,255,255,0.6),1px 1px 1px rgba(255,255,255,0.6)}
 
 html{
   overflow-x:hidden;
@@ -15,6 +15,14 @@ body{
   line-height:1.4;
   background:var(--bg);
   color:#0f1720;
+  text-shadow:var(--text-outline);
+}
+
+.group-form button,
+.zone-form button,
+form button,
+.zone-bottom{
+  text-shadow:none;
 }
 
 *{
@@ -115,6 +123,7 @@ button.add-zone-button:hover {
   margin:0 0 12px;
   background:white;
   overflow:hidden;
+  min-height:80px;
   transition:background 0.2s ease;
 }
 
@@ -133,11 +142,42 @@ button.add-zone-button:hover {
   border-radius:6px;
 }
 
-.card-header > div{
+.card-header-main{
   display:flex;
   flex-direction:row;
   gap:8px;
   align-items:baseline;
+}
+
+.card-header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.paddock-sheep-count{
+  color:#64748b;
+  font-size:0.75rem;
+}
+
+.paddock-delete-button{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:none;
+  background:#eef5ef;
+  color:#1f4332;
+  font-size:1rem;
+  line-height:1;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+}
+
+.paddock-delete-button:hover{
+  background:#dceadd;
 }
 
 .card-header strong{
@@ -214,6 +254,16 @@ button.add-zone-button:hover {
   background:rgba(255,255,255,1);
 }
 
+.stall-zone-item{
+  background:#f4f8f4 url('stal.png') no-repeat bottom center;
+  background-size:cover;
+}
+
+.zone-list .add-zone-button.stall-zone-item{
+  background:#f4f8f4 url('stal.png') no-repeat bottom center;
+  background-size:cover;
+}
+
 .zone-list .add-zone-button::after{
   content:'';
   position:absolute;
@@ -240,6 +290,7 @@ button.add-zone-button:hover {
   font-size:2rem;
   line-height:1;
   font-weight:700;
+  text-shadow:var(--text-outline);
 }
 
 .zone-item strong{
@@ -406,6 +457,13 @@ form button{
   flex:1;
 }
 
+.sheep-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+
 .move-button{
   background:#effbf2;
   color:#1f4332;
@@ -420,6 +478,27 @@ form button{
 }
 
 .move-button:hover{background:#e3f6e5}
+
+.sheep-delete-button{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:none;
+  background:#eef5ef;
+  color:#1f4332;
+  font-size:1rem;
+  line-height:1;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  flex:0 0 auto;
+}
+
+.sheep-delete-button:hover{
+  background:#dceadd;
+}
 
 .sheep-icon{
   display:inline;

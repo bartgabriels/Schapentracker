@@ -97,6 +97,52 @@
     </div>
   </div>
 
+  <div id="zone-delete-move-modal" class="modal hidden" aria-hidden="true">
+    <div id="zone-delete-move-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="zone-delete-move-modal-close" class="modal-close">×</button>
+      <h2>Zone verwijderen en schapen verplaatsen</h2>
+      <div class="modal-field">
+        <label>Te verwijderen zone</label>
+        <div id="zone-delete-source-name"></div>
+      </div>
+      <div class="modal-field">
+        <label>Aantal schapen</label>
+        <div id="zone-delete-sheep-count"></div>
+      </div>
+      <form id="zone-delete-move-form" class="group-form">
+        <select id="zone-delete-target-paddock-modal"></select>
+        <select id="zone-delete-target-zone-modal" disabled>
+          <option value="">Kies eerst een weide</option>
+        </select>
+        <button type="submit">Verplaats en verwijder</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="paddock-delete-move-modal" class="modal hidden" aria-hidden="true">
+    <div id="paddock-delete-move-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="paddock-delete-move-modal-close" class="modal-close">×</button>
+      <h2>Weide verwijderen en schapen verplaatsen</h2>
+      <div class="modal-field">
+        <label>Te verwijderen weide</label>
+        <div id="paddock-delete-source-name"></div>
+      </div>
+      <div class="modal-field">
+        <label>Aantal schapen</label>
+        <div id="paddock-delete-sheep-count"></div>
+      </div>
+      <form id="paddock-delete-move-form" class="group-form">
+        <select id="paddock-delete-target-paddock-modal"></select>
+        <select id="paddock-delete-target-zone-modal" disabled>
+          <option value="">Kies eerst een weide</option>
+        </select>
+        <button type="submit">Verplaats en verwijder</button>
+      </form>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
