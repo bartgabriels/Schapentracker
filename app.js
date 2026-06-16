@@ -6,6 +6,13 @@ const expandedWeatherPaddocks = new Set()
 const weatherCache = {}
 const weatherLoading = new Set()
 const WEATHER_TTL_MS = 60 * 60 * 1000
+const PAYPAL_BILLING_CONFIG = {
+  enabled: false,
+  clientId: '',
+  planId: '',
+  currency: 'EUR'
+}
+let paypalSdkPromise = null
 
 const translations = {
   nl: {
@@ -18,9 +25,24 @@ const translations = {
     'tab.paddocksZones': 'Weides en zones',
     'tab.sheep': 'Schapen',
     'tab.history': 'Historiek',
+    'tab.billing': 'Facturatie',
     'section.paddocks': 'Weides',
     'section.sheep': 'Schapen',
     'section.history': 'Historiek',
+    'section.billing': 'Facturatie',
+    'billing.fields': 'Velden',
+    'billing.zones': 'Zones',
+    'billing.sheep': 'Schapen',
+    'billing.rateMonthly': '{price} / maand',
+    'billing.unlimited': 'Onbeperkt aantal',
+    'billing.included': 'Inbegrepen',
+    'billing.total': 'Totaal per maand',
+    'billing.paypal.title': 'PayPal abonnementen',
+    'billing.paypal.description': 'Integreer terugkerende betalingen via PayPal voor maandelijkse facturatie.',
+    'billing.paypal.unconfigured': 'Voeg eerst een PayPal client ID en plan ID toe om recurring payments te activeren.',
+    'billing.paypal.ready': 'PayPal recurring payments is klaar om gebruikt te worden.',
+    'billing.paypal.approved': 'PayPal abonnement goedgekeurd. De terugkerende betaling is gestart.',
+    'billing.paypal.error': 'PayPal kon niet geladen worden. Controleer de configuratie en probeer opnieuw.',
     'sheep.add.title': 'Schaap toevoegen',
     'sheep.add.tagPlaceholder': 'Tag',
     'sheep.add.earmarkPlaceholder': 'Oorkenmerk (optioneel)',
@@ -180,9 +202,24 @@ const translations = {
     'tab.paddocksZones': 'Paddocks and zones',
     'tab.sheep': 'Sheep',
     'tab.history': 'History',
+    'tab.billing': 'Billing',
     'section.paddocks': 'Paddocks',
     'section.sheep': 'Sheep',
     'section.history': 'History',
+    'section.billing': 'Billing',
+    'billing.fields': 'Fields',
+    'billing.zones': 'Zones',
+    'billing.sheep': 'Sheep',
+    'billing.rateMonthly': '{price} / month',
+    'billing.unlimited': 'Unlimited',
+    'billing.included': 'Included',
+    'billing.total': 'Monthly total',
+    'billing.paypal.title': 'PayPal subscriptions',
+    'billing.paypal.description': 'Integrate recurring payments with PayPal for monthly billing.',
+    'billing.paypal.unconfigured': 'Add a PayPal client ID and plan ID first to enable recurring payments.',
+    'billing.paypal.ready': 'PayPal recurring payments is ready to use.',
+    'billing.paypal.approved': 'PayPal subscription approved. The recurring payment has started.',
+    'billing.paypal.error': 'PayPal could not be loaded. Check the configuration and try again.',
     'sheep.add.title': 'Add sheep',
     'sheep.add.tagPlaceholder': 'Tag',
     'sheep.add.earmarkPlaceholder': 'Earmark (optional)',
@@ -346,6 +383,21 @@ const translationsFr = {
   'tab.paddocksZones': 'Pâturages et zones',
   'tab.sheep': 'Moutons',
   'tab.history': 'Historique',
+  'tab.billing': 'Facturation',
+  'section.billing': 'Facturation',
+  'billing.fields': 'Pâturages',
+  'billing.zones': 'Zones',
+  'billing.sheep': 'Moutons',
+  'billing.rateMonthly': '{price} / mois',
+  'billing.unlimited': 'Illimité',
+  'billing.included': 'Inclus',
+  'billing.total': 'Total mensuel',
+  'billing.paypal.title': 'Abonnements PayPal',
+  'billing.paypal.description': 'Intégrez des paiements récurrents via PayPal pour la facturation mensuelle.',
+  'billing.paypal.unconfigured': 'Ajoutez d\'abord un client ID PayPal et un plan ID pour activer les paiements récurrents.',
+  'billing.paypal.ready': 'Les paiements récurrents PayPal sont prêts à être utilisés.',
+  'billing.paypal.approved': 'Abonnement PayPal approuvé. Le paiement récurrent a démarré.',
+  'billing.paypal.error': 'PayPal n\'a pas pu être chargé. Vérifiez la configuration et réessayez.',
   'section.paddocks': 'Pâturages',
   'section.sheep': 'Moutons',
   'section.history': 'Historique',
@@ -524,6 +576,80 @@ function t(key, params = {}){
   })
 }
 
+function isPayPalBillingReady(){
+  return PAYPAL_BILLING_CONFIG.enabled && !!PAYPAL_BILLING_CONFIG.clientId && !!PAYPAL_BILLING_CONFIG.planId
+}
+
+function loadPayPalSdk(){
+  if(paypalSdkPromise) return paypalSdkPromise
+  const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(PAYPAL_BILLING_CONFIG.clientId)}&vault=true&intent=subscription&currency=${encodeURIComponent(PAYPAL_BILLING_CONFIG.currency)}`
+  paypalSdkPromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${src}"]`)
+    if(existing){
+      if(window.paypal) {
+        resolve(window.paypal)
+        return
+      }
+      existing.addEventListener('load', () => resolve(window.paypal), { once: true })
+      existing.addEventListener('error', reject, { once: true })
+      return
+    }
+    const script = document.createElement('script')
+    script.src = src
+    script.async = true
+    script.onload = () => resolve(window.paypal)
+    script.onerror = reject
+    document.head.appendChild(script)
+  })
+  return paypalSdkPromise
+}
+
+function renderPayPalBillingBlock(){
+  const statusEl = document.getElementById('billing-paypal-status')
+  const buttonEl = document.getElementById('billing-paypal-button')
+  if(!statusEl || !buttonEl) return
+
+  buttonEl.innerHTML = ''
+  if(!isPayPalBillingReady()){
+    statusEl.textContent = t('billing.paypal.unconfigured')
+    statusEl.dataset.state = 'idle'
+    return
+  }
+
+  statusEl.textContent = t('billing.paypal.ready')
+  statusEl.dataset.state = 'ready'
+
+  loadPayPalSdk()
+    .then((paypal) => {
+      if(!paypal?.Buttons) throw new Error('PayPal SDK unavailable')
+      buttonEl.innerHTML = ''
+      paypal.Buttons({
+        style: {
+          shape: 'pill',
+          layout: 'vertical',
+          label: 'subscribe'
+        },
+        createSubscription(data, actions){
+          return actions.subscription.create({
+            plan_id: PAYPAL_BILLING_CONFIG.planId
+          })
+        },
+        onApprove(){
+          statusEl.textContent = t('billing.paypal.approved')
+          statusEl.dataset.state = 'approved'
+        },
+        onError(){
+          statusEl.textContent = t('billing.paypal.error')
+          statusEl.dataset.state = 'error'
+        }
+      }).render('#billing-paypal-button')
+    })
+    .catch(() => {
+      statusEl.textContent = t('billing.paypal.error')
+      statusEl.dataset.state = 'error'
+    })
+}
+
 function setLanguage(lang){
   if(!translations[lang]) {
     console.warn(`Language ${lang} not available`)
@@ -558,9 +684,11 @@ function applyStaticTranslations(){
   setText('tab-paddocks-btn', t('tab.paddocksZones'))
   setText('tab-sheep-btn', t('tab.sheep'))
   setText('tab-history-btn', t('tab.history'))
+  setText('tab-billing-btn', t('tab.billing'))
   setText('section-paddocks-title', t('section.paddocks'))
   setText('section-sheep-title', t('section.sheep'))
   setText('section-history-title', t('section.history'))
+  setText('section-billing-title', t('section.billing'))
 
   setText('sheep-modal-title', t('sheep.add.title'))
   setPlaceholder('sheep-modal-tag', t('sheep.add.tagPlaceholder'))
@@ -645,9 +773,10 @@ function initTabs(){
   const panels = {
     paddocks: document.getElementById('tab-paddocks-panel'),
     sheep: document.getElementById('tab-sheep-panel'),
-    history: document.getElementById('tab-history-panel')
+    history: document.getElementById('tab-history-panel'),
+    billing: document.getElementById('tab-billing-panel')
   }
-  if(!tabButtons.length || !panels.paddocks || !panels.sheep || !panels.history) return
+  if(!tabButtons.length || !panels.paddocks || !panels.sheep || !panels.history || !panels.billing) return
 
   const setActiveTab = (tab) => {
     const nextTab = panels[tab] ? tab : 'paddocks'
@@ -1001,10 +1130,23 @@ function render(){
   const paddockList = document.getElementById('paddock-list')
   const sheepList = document.getElementById('sheep-list')
   const historyList = document.getElementById('history-list')
+  const billingSummary = document.getElementById('billing-summary')
   const sheepPaddockModal = document.getElementById('sheep-paddock-modal')
   const sheepZoneModal = document.getElementById('sheep-zone-modal')
   const movePaddockModal = document.getElementById('move-paddock-modal')
   const moveZoneModal = document.getElementById('move-zone-modal')
+
+  const euroLocale = currentLang === 'fr' ? 'fr-BE' : currentLang === 'en' ? 'en-IE' : 'nl-BE'
+  const formatEuro = (value) => new Intl.NumberFormat(euroLocale, { style: 'currency', currency: 'EUR', minimumFractionDigits: value % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 }).format(value)
+  const paddockCount = state.paddocks.length
+  const zoneCount = state.paddocks.reduce((sum, paddock) => sum + paddock.zones.length, 0)
+  const sheepCount = state.sheep.length
+  const billingLines = [
+    { label: t('billing.fields'), countLabel: `${t('billing.unlimited')} ${t('billing.fields').toLowerCase()}`, rate: 0, total: 0, included: true },
+    { label: t('billing.zones'), countLabel: `${zoneCount}`, rate: 0.5, total: zoneCount * 0.5, included: false },
+    { label: t('billing.sheep'), countLabel: `${sheepCount}`, rate: 0.75, total: sheepCount * 0.75, included: false }
+  ]
+  const billingTotal = billingLines.reduce((sum, line) => sum + line.total, 0)
 
   paddockList.innerHTML = state.paddocks.length === 0 ? `<div class="empty">${t('paddock.empty')}</div>` : state.paddocks.map(p => renderPaddock(p)).join('') + `
     <button type="button" class="add-paddock-block" aria-label="${t('aria.addPaddock')}">+</button>
@@ -1037,6 +1179,35 @@ function render(){
     historyList.innerHTML = state.history.length
       ? state.history.map(h => `<div class="history-item"><span class="history-meta">${formatDateTime(h.ts)} - ${h.entity}</span><span class="history-message">${h.message}</span></div>`).join('')
       : `<div class="empty">${t('history.empty')}</div>`
+  }
+
+  if(billingSummary){
+    billingSummary.innerHTML = `
+      <div class="billing-card">
+        ${billingLines.map(line => `
+          <div class="billing-row">
+            <div>
+              <strong>${line.label}</strong>
+              <small>${line.included ? `${line.countLabel} · ${t('billing.included')}` : `${line.countLabel} x ${t('billing.rateMonthly', { price: formatEuro(line.rate) })}`}</small>
+            </div>
+            <strong>${formatEuro(line.total)}</strong>
+          </div>
+        `).join('')}
+        <div class="billing-total">
+          <span>${t('billing.total')}</span>
+          <strong>${formatEuro(billingTotal)}</strong>
+        </div>
+      </div>
+      <div class="billing-card billing-card-paypal">
+        <div>
+          <h3 class="billing-card-title">${t('billing.paypal.title')}</h3>
+          <p class="billing-card-description">${t('billing.paypal.description')}</p>
+        </div>
+        <div id="billing-paypal-status" class="billing-paypal-status"></div>
+        <div id="billing-paypal-button" class="billing-paypal-button"></div>
+      </div>
+    `
+    renderPayPalBillingBlock()
   }
 
   if(sheepPaddockModal && sheepZoneModal){

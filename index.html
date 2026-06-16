@@ -54,6 +54,15 @@
         aria-controls="tab-history-panel"
         data-tab="history"
       >Historiek</button>
+      <button
+        id="tab-billing-btn"
+        class="tab-button"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="tab-billing-panel"
+        data-tab="billing"
+      >Facturatie</button>
     </div>
 
     <div id="tab-paddocks-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-paddocks-btn">
@@ -80,6 +89,15 @@
           <h2 id="section-history-title">Historiek</h2>
         </div>
         <div id="history-list" class="history-list"></div>
+      </section>
+    </div>
+
+    <div id="tab-billing-panel" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-billing-btn">
+      <section>
+        <div class="section-header">
+          <h2 id="section-billing-title">Facturatie</h2>
+        </div>
+        <div id="billing-summary" class="billing-summary"></div>
       </section>
     </div>
 
