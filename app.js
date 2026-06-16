@@ -175,7 +175,7 @@ const translations = {
     'zone.edit.namePlaceholder': 'Zone naam'
   },
   en: {
-    'app.title': 'Sheep Tracker',
+    'app.title': 'FlockOps,
     'ui.save': 'Save',
     'ui.upload': 'Upload',
     'ui.clear': 'Clear',
@@ -344,7 +344,7 @@ const translations = {
 
 const translationsFr = {
   ...translations.en,
-  'app.title': 'Suivi des moutons',
+  'app.title': 'FlockOps',
   'ui.save': 'Enregistrer',
   'ui.upload': 'Importer',
   'ui.clear': 'Effacer',
