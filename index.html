@@ -54,15 +54,6 @@
         aria-controls="tab-history-panel"
         data-tab="history"
       >Historiek</button>
-      <button
-        id="tab-billing-btn"
-        class="tab-button"
-        type="button"
-        role="tab"
-        aria-selected="false"
-        aria-controls="tab-billing-panel"
-        data-tab="billing"
-      >Facturatie</button>
     </div>
 
     <div id="tab-paddocks-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-paddocks-btn">
@@ -92,21 +83,12 @@
       </section>
     </div>
 
-    <div id="tab-billing-panel" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-billing-btn">
-      <section>
-        <div class="section-header">
-          <h2 id="section-billing-title">Facturatie</h2>
-        </div>
-        <div id="billing-summary" class="billing-summary"></div>
-      </section>
-    </div>
-
   </main>
 
   <div id="paddock-modal" class="modal hidden" aria-hidden="true">
     <div id="paddock-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="paddock-modal-close" class="modal-close">×</button>
+      <button type="button" id="paddock-modal-close" class="modal-close">✕</button>
       <h2 id="paddock-modal-title">Weide toevoegen</h2>
       <form id="paddock-modal-form" class="group-form">
         <input id="paddock-modal-name" placeholder="Naam weide" required>
@@ -115,7 +97,7 @@
           <label id="paddock-modal-notes-label" for="paddock-modal-notes">Notities</label>
           <textarea id="paddock-modal-notes" placeholder="Algemene notities (optioneel)" rows="3"></textarea>
         </div>
-        <button type="submit" id="paddock-modal-submit">Toevoegen</button>
+        <button type="submit" id="paddock-modal-submit" class="icon-button">💾</button>
       </form>
     </div>
   </div>
@@ -123,7 +105,7 @@
   <div id="paddock-edit-modal" class="modal hidden" aria-hidden="true">
     <div id="paddock-edit-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="paddock-edit-modal-close" class="modal-close">×</button>
+      <button type="button" id="paddock-edit-modal-close" class="modal-close">✕</button>
       <h2 id="paddock-edit-modal-title">Weide bewerken</h2>
       <form id="paddock-edit-form" class="group-form">
         <input id="paddock-edit-name" placeholder="Naam weide" required>
@@ -132,7 +114,7 @@
           <label id="paddock-edit-notes-label" for="paddock-edit-notes">Notities</label>
           <textarea id="paddock-edit-notes" placeholder="Algemene notities (optioneel)" rows="3"></textarea>
         </div>
-        <button type="submit" id="paddock-edit-submit">Opslaan</button>
+        <button type="submit" id="paddock-edit-submit" class="icon-button">💾</button>
       </form>
     </div>
   </div>
@@ -140,7 +122,7 @@
   <div id="sheep-modal" class="modal hidden" aria-hidden="true">
     <div id="sheep-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="sheep-modal-close" class="modal-close">×</button>
+      <button type="button" id="sheep-modal-close" class="modal-close">✕</button>
       <h2 id="sheep-modal-title">Schaap toevoegen</h2>
       <form id="sheep-modal-form" class="group-form">
         <input id="sheep-modal-tag" placeholder="Tag" required>
@@ -180,7 +162,7 @@
           <label id="sheep-modal-notes-label" for="sheep-modal-notes">Notities</label>
           <textarea id="sheep-modal-notes" placeholder="Algemene notities (optioneel)" rows="3"></textarea>
         </div>
-        <button id="sheep-modal-submit" type="submit">Toevoegen</button>
+        <button id="sheep-modal-submit" type="submit" class="icon-button"></button>
       </form>
     </div>
   </div>
@@ -188,7 +170,7 @@
   <div id="sheep-tag-edit-modal" class="modal hidden" aria-hidden="true">
     <div id="sheep-tag-edit-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="sheep-tag-edit-modal-close" class="modal-close">×</button>
+      <button type="button" id="sheep-tag-edit-modal-close" class="modal-close">✕</button>
       <h2 id="sheep-edit-modal-title">Schaap bewerken</h2>
       <form id="sheep-tag-edit-form" class="group-form">
         <input id="sheep-tag-edit-input" placeholder="Nieuwe naam" required>
@@ -213,7 +195,7 @@
           <label id="sheep-edit-notes-label" for="sheep-edit-notes">Notities</label>
           <textarea id="sheep-edit-notes" placeholder="Algemene notities (optioneel)" rows="3"></textarea>
         </div>
-        <button id="sheep-edit-modal-submit" type="submit">Opslaan</button>
+        <button id="sheep-edit-modal-submit" type="submit" class="icon-button"></button>
       </form>
     </div>
   </div>
@@ -221,7 +203,7 @@
   <div id="zone-modal" class="modal hidden" aria-hidden="true">
     <div id="zone-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="zone-modal-close" class="modal-close">×</button>
+      <button type="button" id="zone-modal-close" class="modal-close">✕</button>
       <h2 id="zone-modal-title">Zone toevoegen</h2>
       <div class="modal-field">
         <label>Weide</label>
@@ -235,7 +217,7 @@
           <label id="zone-modal-notes-label" for="zone-modal-notes">Notities</label>
           <textarea id="zone-modal-notes" placeholder="Algemene notities (optioneel)" rows="3"></textarea>
         </div>
-        <button type="submit" id="zone-modal-submit">Toevoegen</button>
+        <button type="submit" id="zone-modal-submit" class="icon-button">💾</button>
       </form>
     </div>
   </div>
@@ -243,7 +225,7 @@
   <div id="zone-edit-modal" class="modal hidden" aria-hidden="true">
     <div id="zone-edit-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="zone-edit-modal-close" class="modal-close">×</button>
+      <button type="button" id="zone-edit-modal-close" class="modal-close">✕</button>
       <h2 id="zone-edit-modal-title">Zone bewerken</h2>
       <div class="modal-field">
         <label>Weide</label>
@@ -263,7 +245,7 @@
           <label id="zone-edit-notes-label" for="zone-edit-notes">Notities</label>
           <textarea id="zone-edit-notes" placeholder="Algemene notities (optioneel)" rows="3"></textarea>
         </div>
-        <button type="submit" id="zone-edit-submit">Opslaan</button>
+        <button type="submit" id="zone-edit-submit" class="icon-button">💾</button>
       </form>
     </div>
   </div>
@@ -271,7 +253,7 @@
   <div id="move-modal" class="modal hidden" aria-hidden="true">
     <div id="move-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="move-modal-close" class="modal-close">×</button>
+      <button type="button" id="move-modal-close" class="modal-close">✕</button>
       <h2 id="move-modal-title">Verplaats schaap</h2>
       <div class="modal-field">
         <label>Schaap</label>
@@ -282,7 +264,7 @@
         <select id="move-zone-modal" disabled>
           <option value="">Kies eerst een weide</option>
         </select>
-        <button type="submit" id="move-modal-submit" disabled>Verplaats</button>
+        <button type="submit" id="move-modal-submit" class="icon-button" disabled></button>
       </form>
     </div>
   </div>
@@ -290,7 +272,7 @@
   <div id="zone-bulk-move-modal" class="modal hidden" aria-hidden="true">
     <div id="zone-bulk-move-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="zone-bulk-move-modal-close" class="modal-close">×</button>
+      <button type="button" id="zone-bulk-move-modal-close" class="modal-close">✕</button>
       <h2 id="zone-bulk-move-modal-title">Verplaats alle dieren</h2>
       <div class="modal-field">
         <label>Bronzone</label>
@@ -313,7 +295,7 @@
   <div id="zone-delete-move-modal" class="modal hidden" aria-hidden="true">
     <div id="zone-delete-move-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="zone-delete-move-modal-close" class="modal-close">×</button>
+      <button type="button" id="zone-delete-move-modal-close" class="modal-close">✕</button>
       <h2 id="zone-delete-move-modal-title">Zone verwijderen en schapen verplaatsen</h2>
       <div class="modal-field">
         <label>Te verwijderen zone</label>
@@ -336,7 +318,7 @@
   <div id="paddock-delete-move-modal" class="modal hidden" aria-hidden="true">
     <div id="paddock-delete-move-modal-backdrop" class="modal-backdrop"></div>
     <div class="modal-panel">
-      <button type="button" id="paddock-delete-move-modal-close" class="modal-close">×</button>
+      <button type="button" id="paddock-delete-move-modal-close" class="modal-close">✕</button>
       <h2 id="paddock-delete-move-modal-title">Weide verwijderen en schapen verplaatsen</h2>
       <div class="modal-field">
         <label>Te verwijderen weide</label>
@@ -353,6 +335,19 @@
         </select>
         <button type="submit" id="paddock-delete-move-submit" disabled>Verplaats en verwijder</button>
       </form>
+    </div>
+  </div>
+
+  <div id="delete-confirm-modal" class="modal hidden" aria-hidden="true">
+    <div id="delete-confirm-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel delete-confirm-panel">
+      <button type="button" id="delete-confirm-close" class="modal-close">✕</button>
+      <h2 id="delete-confirm-title">Verwijderen bevestigen</h2>
+      <p id="delete-confirm-message" class="delete-confirm-message"></p>
+      <div class="modal-actions delete-confirm-actions">
+        <button type="button" id="delete-confirm-cancel">Annuleren</button>
+        <button type="button" id="delete-confirm-submit">Verwijderen</button>
+      </div>
     </div>
   </div>
 

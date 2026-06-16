@@ -13,6 +13,7 @@ const PAYPAL_BILLING_CONFIG = {
   currency: 'EUR'
 }
 let paypalSdkPromise = null
+let pendingDeleteConfirm = null
 
 const translations = {
   nl: {
@@ -139,6 +140,10 @@ const translations = {
     'move.deletePaddockSourceLabel': 'Te verwijderen weide',
     'move.deletePaddockTargetLabel': 'Doelzone',
     'move.deletePaddockSubmit': 'Verplaats en verwijder',
+    'actions.delete': 'Verwijderen',
+    'confirm.deleteSheep': 'Weet je zeker dat je dit schaap wilt verwijderen?',
+    'confirm.deleteZone': 'Weet je zeker dat je deze zone wilt verwijderen?',
+    'confirm.deletePaddock': 'Weet je zeker dat je deze weide wilt verwijderen?',
     'weather.sunny': 'Zonnig',
     'weather.partlyCloudy': 'Halfbewolkt',
     'weather.cloudy': 'Bewolkt',
@@ -316,6 +321,10 @@ const translations = {
     'move.deletePaddockSourceLabel': 'Paddock to delete',
     'move.deletePaddockTargetLabel': 'Target zone',
     'move.deletePaddockSubmit': 'Move and delete',
+    'actions.delete': 'Delete',
+    'confirm.deleteSheep': 'Are you sure you want to delete this sheep?',
+    'confirm.deleteZone': 'Are you sure you want to delete this zone?',
+    'confirm.deletePaddock': 'Are you sure you want to delete this paddock?',
     'weather.sunny': 'Sunny',
     'weather.partlyCloudy': 'Partly cloudy',
     'weather.cloudy': 'Cloudy',
@@ -492,6 +501,10 @@ const translationsFr = {
   'move.deletePaddockSourceLabel': 'Pâturage à supprimer',
   'move.deletePaddockTargetLabel': 'Zone cible',
   'move.deletePaddockSubmit': 'Déplacer et supprimer',
+  'actions.delete': 'Supprimer',
+  'confirm.deleteSheep': 'Voulez-vous vraiment supprimer ce mouton ?',
+  'confirm.deleteZone': 'Voulez-vous vraiment supprimer cette zone ?',
+  'confirm.deletePaddock': 'Voulez-vous vraiment supprimer ce pâturage ?',
   'weather.sunny': 'Ensoleillé',
   'weather.partlyCloudy': 'Partiellement nuageux',
   'weather.cloudy': 'Nuageux',
@@ -665,11 +678,100 @@ function setLanguage(lang){
   render()
 }
 
+function recycleBinIcon(){
+  return '<svg class="button-icon button-icon--delete" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3a1 1 0 0 0-1 1v1H4.75a.75.75 0 0 0 0 1.5h.84l.82 10.31A2.25 2.25 0 0 0 8.64 19.5h6.72a2.25 2.25 0 0 0 2.23-1.69l.82-10.31h.84a.75.75 0 0 0 0-1.5H16V4a1 1 0 0 0-1-1H9zm1 2h4v0.5h-4V5zm-1.83 3.5a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5a.75.75 0 0 1 .75-.75zm3.33 0a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5a.75.75 0 0 1 .75-.75zm3.33 0a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5a.75.75 0 0 1 .75-.75z"/></svg>'
+}
+
+function doubleArrowIcon(){
+  return '<svg class="button-icon button-icon--move" viewBox="0 0 1920 1920" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><g transform="translate(0,1920) scale(0.1,-0.1)"><path fill="currentColor" d="M12770 12920 c-19 -5 -45 -20 -57 -35 l-23 -26 0 -412 0 -412 -753 0 c-898 0 -844 6 -1231 -135 -71 -26 -157 -69 -209 -104 -21 -14 -42 -26 -47 -26 -6 0 -10 -4 -10 -10 0 -5 -5 -10 -10 -10 -12 0 -113 -77 -204 -155 -53 -44 -320 -331 -522 -559 -40 -45 -81 -88 -93 -96 -12 -8 -21 -18 -21 -23 0 -5 -19 -28 -42 -51 -24 -23 -62 -64 -86 -91 -24 -28 -81 -90 -128 -140 -46 -49 -461 -506 -921 -1015 -517 -570 -872 -954 -928 -1002 -238 -206 -534 -364 -845 -452 -269 -76 -289 -78 -1025 -85 l-660 -7 -64 -28 c-122 -53 -197 -120 -251 -226 -43 -86 -60 -155 -60 -251 0 -204 108 -380 285 -464 39 -18 77 -34 85 -35 8 -1 287 -5 620 -7 838 -6 1000 7 1352 107 79 22 152 45 163 50 18 9 56 23 250 95 86 31 183 82 358 186 270 162 439 293 643 501 72 73 542 588 1045 1143 502 556 935 1032 961 1059 26 27 48 51 48 55 0 3 20 26 44 51 141 145 175 181 216 230 48 58 68 79 224 238 84 85 112 107 191 146 166 84 175 85 953 88 l672 3 0 -408 c0 -261 4 -415 10 -428 17 -30 64 -49 126 -49 47 0 66 5 98 27 23 16 43 31 46 34 6 7 230 184 480 379 95 74 243 191 329 260 86 69 167 133 181 142 14 9 37 27 52 40 14 13 37 32 49 43 36 31 322 256 447 351 102 79 112 89 112 119 0 29 -11 41 -127 132 -263 205 -418 327 -429 337 -22 22 -100 86 -131 108 -18 13 -106 81 -195 152 -535 426 -811 640 -848 658 -37 19 -64 21 -120 8z"/><path fill="currentColor" d="M5009 12135 c-3 -2 -21 -5 -40 -6 -18 -1 -65 -17 -104 -35 -260 -122 -362 -445 -225 -714 54 -106 129 -173 251 -226 l64 -28 655 -6 c622 -6 662 -7 785 -29 405 -71 777 -243 1075 -496 79 -67 116 -105 259 -259 l54 -58 66 73 c36 40 89 97 116 126 28 28 63 67 79 85 16 18 62 69 103 113 41 44 93 101 116 126 23 25 80 87 127 138 47 51 87 97 89 102 5 17 -266 284 -389 383 -148 120 -211 163 -397 275 -175 104 -272 155 -358 186 -194 72 -232 86 -250 95 -38 19 -306 91 -408 111 -104 19 -121 21 -332 39 -118 10 -1327 15 -1336 5z"/><path fill="currentColor" d="M12738 9054 c-15 -8 -32 -23 -38 -34 -6 -12 -10 -167 -10 -427 l0 -408 -672 3 c-778 3 -787 4 -953 88 -79 39 -107 61 -191 146 -156 159 -176 180 -224 238 -25 29 -72 82 -105 115 -33 34 -77 81 -98 103 -20 23 -39 42 -41 42 -2 0 -102 -108 -221 -240 -119 -132 -221 -240 -225 -240 -4 0 -11 -9 -16 -19 -5 -11 -54 -68 -108 -126 -145 -154 -140 -129 -43 -232 45 -48 148 -160 229 -248 80 -89 172 -183 204 -211 91 -77 192 -154 204 -154 5 0 10 -4 10 -10 0 -5 4 -10 10 -10 5 0 26 -12 47 -26 52 -35 138 -78 209 -104 173 -63 270 -93 369 -113 108 -22 123 -22 862 -22 l753 0 0 -413 0 -414 28 -28 c36 -35 113 -48 163 -27 35 15 275 200 857 663 89 71 177 139 195 152 31 22 109 86 131 108 11 10 166 132 429 337 116 91 127 103 127 132 0 30 -10 40 -112 119 -125 95 -411 320 -447 351 -12 11 -35 30 -49 43 -15 13 -38 31 -52 40 -14 9 -81 62 -150 118 -69 55 -154 123 -190 151 -120 92 -645 506 -650 512 -3 3 -23 18 -46 34 -33 22 -51 27 -100 27 -32 -1 -71 -7 -86 -16z"/></g></svg>'
+}
+
+function openDeleteConfirm(kind, details = {}){
+  pendingDeleteConfirm = { kind, details }
+  const titleEl = document.getElementById('delete-confirm-title')
+  const messageEl = document.getElementById('delete-confirm-message')
+  const submitEl = document.getElementById('delete-confirm-submit')
+
+  if(titleEl) titleEl.textContent = kind === 'sheep' ? t('aria.deleteSheep') : kind === 'zone' ? t('aria.deleteZone') : t('aria.deletePaddock')
+  if(messageEl) messageEl.textContent = details.message || ''
+  if(submitEl) submitEl.textContent = details.confirmLabel || t('actions.delete')
+
+  openModal('delete-confirm-modal')
+}
+
+function closeDeleteConfirmModal(){
+  pendingDeleteConfirm = null
+  closeModal('delete-confirm-modal')
+}
+
+function executeDeleteConfirmed(){
+  if(!pendingDeleteConfirm) return
+  const { kind, details } = pendingDeleteConfirm
+  closeDeleteConfirmModal()
+
+  if(kind === 'sheep'){
+    const sheepId = details.sheepId
+    if(!sheepId) return
+    const sheep = state.sheep.find(s => s.id === sheepId)
+    state.sheep = state.sheep.filter(s => s.id !== sheepId)
+    state.sheep.forEach(s => {
+      if(s.motherId === sheepId) s.motherId = null
+      if(s.fatherId === sheepId) s.fatherId = null
+    })
+    if(sheep){
+      addHistory(t('entity.sheep'), t('history.sheep.deleted', { tag: sheep.tag, location: `${paddockName(sheep.paddockId)}${sheep.zoneId ? ' / ' + zoneName(sheep.paddockId, sheep.zoneId) : ''}` }))
+    }
+    save(); render()
+    return
+  }
+
+  if(kind === 'zone'){
+    const paddockId = details.paddockId
+    const zoneId = details.zoneId
+    const paddock = getPaddock(paddockId)
+    const zone = getZone(paddockId, zoneId)
+    if(!paddock || !zone) return
+    const sheepInZone = state.sheep.filter(s => s.paddockId === paddockId && s.zoneId === zoneId)
+    if(sheepInZone.length){
+      openZoneDeleteMoveModal(paddockId, zoneId, sheepInZone.length)
+      return
+    }
+    paddock.zones = paddock.zones.filter(z => z.id !== zoneId)
+    addHistory('zone', t('history.zone.deleted', { paddock: paddock.name, name: zone.name }))
+    save(); render()
+    return
+  }
+
+  if(kind === 'paddock'){
+    const paddockId = details.paddockId
+    const paddock = getPaddock(paddockId)
+    if(!paddock) return
+    const sheepInPaddock = state.sheep.filter(s => s.paddockId === paddockId)
+    if(sheepInPaddock.length){
+      openPaddockDeleteMoveModal(paddockId, sheepInPaddock.length)
+      return
+    }
+    state.paddocks = state.paddocks.filter(p => p.id !== paddockId)
+    collapsedPaddockIds.delete(paddockId)
+    expandedWeatherPaddocks.delete(paddockId)
+    addHistory('weide', t('history.paddock.deleted', { name: paddock.name }))
+    save(); render()
+  }
+}
+
 function applyStaticTranslations(){
   document.documentElement.lang = currentLang
   const setText = (id, value) => {
     const el = document.getElementById(id)
     if(el) el.textContent = value
+  }
+  const setIconButton = (id, label) => {
+    const el = document.getElementById(id)
+    if(!el) return
+    el.classList.add('icon-button')
+    el.innerHTML = '<svg class="button-icon button-icon--save" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M5 3h10.5L19 6.5V21H5V3zm2 2v14h10V7.3L14.7 5H7zm1 1h5v3H8V6zm0 8h8v4H8v-4z"/></svg>'
+    el.setAttribute('aria-label', label)
+    el.setAttribute('title', label)
   }
   const setPlaceholder = (id, value) => {
     const el = document.getElementById(id)
@@ -677,7 +779,7 @@ function applyStaticTranslations(){
   }
 
   setText('app-title', t('app.title'))
-    setText('app-subtitle', t('app.subtitle'))
+  setText('app-subtitle', t('app.subtitle'))
   setText('download-data-btn', t('ui.save'))
   setText('upload-data-btn', t('ui.upload'))
   setText('clear-data-btn', t('ui.clear'))
@@ -700,7 +802,7 @@ function applyStaticTranslations(){
   setText('sheep-modal-location-label', t('sheep.locationLabel'))
   setText('sheep-modal-notes-label', t('sheep.notes.label'))
   setPlaceholder('sheep-modal-notes', t('sheep.notes.placeholder'))
-  setText('sheep-modal-submit', t('sheep.add.submit'))
+  setIconButton('sheep-modal-submit', t('sheep.add.submit'))
 
   setText('sheep-edit-modal-title', t('sheep.edit.title'))
   setPlaceholder('sheep-tag-edit-input', t('sheep.edit.tagPlaceholder'))
@@ -711,7 +813,7 @@ function applyStaticTranslations(){
   setText('sheep-edit-location-label', t('sheep.locationLabel'))
   setText('sheep-edit-notes-label', t('sheep.notes.label'))
   setPlaceholder('sheep-edit-notes', t('sheep.notes.placeholder'))
-  setText('sheep-edit-modal-submit', t('sheep.edit.submit'))
+  setIconButton('sheep-edit-modal-submit', t('sheep.edit.submit'))
 
   // Paddock modals
   setText('paddock-modal-title', t('paddock.add.title'))
@@ -719,14 +821,14 @@ function applyStaticTranslations(){
   setPlaceholder('paddock-modal-postcode', t('paddock.postcodePlaceholder'))
   setText('paddock-modal-notes-label', t('paddock.notes.label'))
   setPlaceholder('paddock-modal-notes', t('paddock.notes.placeholder'))
-  setText('paddock-modal-submit', t('ui.add'))
+  setIconButton('paddock-modal-submit', t('ui.add'))
   
   setText('paddock-edit-modal-title', t('paddock.edit.title'))
   setPlaceholder('paddock-edit-name', t('paddock.namePlaceholder'))
   setPlaceholder('paddock-edit-postcode', t('paddock.postcodePlaceholder'))
   setText('paddock-edit-notes-label', t('paddock.notes.label'))
   setPlaceholder('paddock-edit-notes', t('paddock.notes.placeholder'))
-  setText('paddock-edit-submit', t('ui.save'))
+  setIconButton('paddock-edit-submit', t('ui.save'))
 
   // Zone modals
   setText('zone-modal-title', t('zone.add.title'))
@@ -735,7 +837,7 @@ function applyStaticTranslations(){
   setPlaceholder('zone-modal-perimeter', t('zone.add.perimeterPlaceholder'))
   setText('zone-modal-notes-label', t('zone.notes.label'))
   setPlaceholder('zone-modal-notes', t('zone.notes.placeholder'))
-  setText('zone-modal-submit', t('ui.add'))
+  setIconButton('zone-modal-submit', t('ui.add'))
 
   setText('zone-edit-modal-title', t('zone.edit.title'))
   setPlaceholder('zone-edit-name', t('zone.namePlaceholder'))
@@ -743,13 +845,14 @@ function applyStaticTranslations(){
   setPlaceholder('zone-edit-perimeter', t('zone.edit.perimeterPlaceholder'))
   setText('zone-edit-notes-label', t('zone.notes.label'))
   setPlaceholder('zone-edit-notes', t('zone.notes.placeholder'))
-  setText('zone-edit-submit', t('ui.save'))
+  setIconButton('zone-edit-submit', t('ui.save'))
 
   // Move modals
   setText('move-modal-title', t('move.title'))
   setText('zone-bulk-move-modal-title', t('move.bulkTitle'))
   setText('zone-delete-move-modal-title', t('move.deleteZoneTitle'))
   setText('paddock-delete-move-modal-title', t('move.deletePaddockTitle'))
+  setIconButton('move-modal-submit', t('move.submit'))
 
   const langSelect = document.getElementById('language-select')
   if(langSelect) langSelect.value = currentLang
@@ -773,10 +876,9 @@ function initTabs(){
   const panels = {
     paddocks: document.getElementById('tab-paddocks-panel'),
     sheep: document.getElementById('tab-sheep-panel'),
-    history: document.getElementById('tab-history-panel'),
-    billing: document.getElementById('tab-billing-panel')
+    history: document.getElementById('tab-history-panel')
   }
-  if(!tabButtons.length || !panels.paddocks || !panels.sheep || !panels.history || !panels.billing) return
+  if(!tabButtons.length || !panels.paddocks || !panels.sheep || !panels.history) return
 
   const setActiveTab = (tab) => {
     const nextTab = panels[tab] ? tab : 'paddocks'
@@ -949,6 +1051,11 @@ function ensureDefaultStal(){
   })
 }
 
+function collapseAllPaddocks(){
+  collapsedPaddockIds.clear()
+  state.paddocks.forEach(paddock => collapsedPaddockIds.add(paddock.id))
+}
+
 function load(){
   const raw = localStorage.getItem(KEY)
   if(raw){
@@ -985,6 +1092,7 @@ function load(){
     })) : []
   }
   ensureDefaultStal()
+  collapseAllPaddocks()
   dedupeEarmarks()
   updateZoneEmptyStates()
 }
@@ -1110,6 +1218,7 @@ function importDataFile(file){
         message: h.message || ''
       })) : []
       ensureDefaultStal()
+      collapseAllPaddocks()
       const removedEarmarks = dedupeEarmarks()
       updateZoneEmptyStates()
       if(removedEarmarks > 0){
@@ -1143,8 +1252,8 @@ function render(){
   const sheepCount = state.sheep.length
   const billingLines = [
     { label: t('billing.fields'), countLabel: `${t('billing.unlimited')} ${t('billing.fields').toLowerCase()}`, rate: 0, total: 0, included: true },
-    { label: t('billing.zones'), countLabel: `${zoneCount}`, rate: 0.5, total: zoneCount * 0.5, included: false },
-    { label: t('billing.sheep'), countLabel: `${sheepCount}`, rate: 0.75, total: sheepCount * 0.75, included: false }
+    { label: t('billing.zones'), countLabel: `${zoneCount}`, rate: 0.3, total: zoneCount * 0.3, included: false },
+    { label: t('billing.sheep'), countLabel: `${sheepCount}`, rate: 0.5, total: sheepCount * 0.5, included: false }
   ]
   const billingTotal = billingLines.reduce((sum, line) => sum + line.total, 0)
 
@@ -1164,8 +1273,8 @@ function render(){
           <small>${t('labels.lastUpdated', { date: formatDate(s.lastUpdated), days: daysSince(s.lastUpdated) })}</small>
         </div>
         <div class="sheep-actions">
-          <button type="button" class="move-button" data-id="${s.id}">${t('actions.move')}</button>
-          <button type="button" class="sheep-delete-button" data-id="${s.id}" aria-label="${t('aria.deleteSheep')}">−</button>
+          <button type="button" class="move-button" data-id="${s.id}" aria-label="${t('actions.move')}" title="${t('actions.move')}">${doubleArrowIcon()}</button>
+          <button type="button" class="sheep-delete-button" data-id="${s.id}" aria-label="${t('aria.deleteSheep')}">${recycleBinIcon()}</button>
         </div>
       </div>
     `).join('') + `
@@ -1233,32 +1342,62 @@ function renderPaddock(p){
   const paddockFlagHtml = paddockFlagCode
     ? `<img class="paddock-flag" src="flags/${paddockFlagCode}.png" alt="${paddockCountry} flag">`
     : ''
+  const paddockTotalArea = p.zones.reduce((sum, zone) => sum + (Number.isFinite(zone.area) ? zone.area : 0), 0)
+  const paddockSheepCount = state.sheep.filter(s => s.paddockId === p.id && p.zones.some(z => z.id === s.zoneId)).length
+  const areaLabel = `${new Intl.NumberFormat(localeTag(), { maximumFractionDigits: 2 }).format(paddockTotalArea)} m2`
+  const sheepLabel = `${paddockSheepCount} ${paddockSheepCount === 1 ? t('paddock.sheep.singular') : t('paddock.sheep.plural')}`
   const canDeletePaddock = !isStalPaddock(p)
+  // Build today's temp badge from weather cache
+  const _postcodeKey = paddockPostcode.toUpperCase()
+  const _cached = paddockPostcode ? weatherCache[_postcodeKey] : null
+  const _isFresh = !!_cached && (Date.now() - _cached.fetchedAt) < WEATHER_TTL_MS
+  if(paddockPostcode && (!_cached || !_isFresh) && !weatherLoading.has(_postcodeKey)){
+    loadWeatherForPostcode(_postcodeKey)
+  }
+  let tempBadgeContent = ''
+  if(paddockPostcode){
+    if(_cached && _isFresh && !_cached.error && _cached.days && _cached.days[0]){
+      const _today = _cached.days[0]
+      tempBadgeContent = `${_today.min}° / ${_today.max}°`
+    } else if(weatherLoading.has(_postcodeKey)){
+      tempBadgeContent = '…°'
+    } else {
+      tempBadgeContent = '?°'
+    }
+  }
+  const tempBadgeHtml = paddockPostcode
+    ? `<button type="button" class="badge temp-badge weather-toggle-button" data-paddock-id="${p.id}" aria-label="${t('aria.weatherForecast')}" title="${t('aria.weatherForecast')}">${isWeatherExpanded ? '▾' : '▸'} 🌡 ${tempBadgeContent}</button>`
+    : ''
   return `<div class="card" data-id="${p.id}" ${isExpanded ? 'data-expanded="true"' : ''}>
     <div class="card-header" data-paddock-id="${p.id}" style="user-select:none">
       <div class="card-header-main">
         <button type="button" class="paddock-edit-button" data-paddock-id="${p.id}" aria-label="${t('aria.editPaddock')}">✎</button>
         <button type="button" class="paddock-collapse-button" data-paddock-id="${p.id}" aria-label="${isExpanded ? t('aria.collapsePaddock') : t('aria.expandPaddock')}">${isExpanded ? '▾' : '▸'}</button>
         <strong>${p.name}</strong>
+        ${paddockPostcode ? `<span class="badge paddock-postcode">${paddockFlagHtml}${paddockPostcode}</span>` : ''}
+        <span class="badge">${areaLabel}</span>
+        <span class="badge">${sheepLabel}</span>
+        ${tempBadgeHtml}
       </div>
       <div class="card-header-actions">
-        ${canDeletePaddock ? `<button type="button" class="paddock-delete-button" data-paddock-id="${p.id}" aria-label="${t('aria.deletePaddock')}">−</button>` : ''}
+        ${canDeletePaddock ? `<button type="button" class="paddock-delete-button" data-paddock-id="${p.id}" aria-label="${t('aria.deletePaddock')}">${recycleBinIcon()}</button>` : ''}
       </div>
     </div>
+    ${renderPaddockWeather(p, isWeatherExpanded)}
     <div class="zone-list" ${isExpanded ? '' : 'style="display:none"'}>
       ${p.zones.map(z => {
         const sheepInZone = state.sheep.filter(s => s.paddockId === p.id && s.zoneId === z.id)
         const sheepCount = sheepInZone.length
         const zoneArea = z.area !== null ? `${z.area} m2` : ''
         const zonePerimeter = z.perimeter !== null ? `${z.perimeter} m` : ''
-        const bulkMoveButton = sheepCount > 1 ? `<button type="button" class="zone-bulk-move-button" data-paddock-id="${p.id}" data-zone-id="${z.id}">${t('zone.bulkMove')}</button>` : ''
+        const bulkMoveButton = sheepCount > 1 ? `<button type="button" class="zone-bulk-move-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('zone.bulkMove')}" title="${t('zone.bulkMove')}">${doubleArrowIcon()}</button>` : ''
         const sheepList = sheepCount
           ? `<div class="zone-sheep-list${sheepCount > 4 ? ' is-scrollable' : ''}">${sheepInZone.map(s => `<button type="button" class="zone-sheep-link" data-sheep-id="${s.id}" aria-label="${t('aria.moveSheep', { tag: s.tag })}">${sheepIcon()}${s.tag}</button>`).join('')}</div>${bulkMoveButton}`
           : t('zone.sheep.empty')
         const stallZone = isStalZone(p, z)
         const useStallBackground = isStalPaddock(p)
         const canDeleteZone = !stallZone && p.zones.length > 1
-        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">−</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name}</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}<span class="zone-metric">${sheepCount}</span></div></div><div class="zone-bottom">${sheepList}</div></div>`
+        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">${recycleBinIcon()}</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name}</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}<span class="zone-metric">${sheepCount}</span></div></div><div class="zone-bottom">${sheepList}</div></div>`
       }).join('')}
       <button type="button" class="zone-item add-zone-button${isStalPaddock(p) ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" aria-label="${t('aria.addZone')}">
         <span class="add-zone-icon">+</span>
@@ -1858,6 +1997,7 @@ document.getElementById('clear-data-btn')?.addEventListener('click', () => {
   collapsedPaddockIds.clear()
   expandedWeatherPaddocks.clear()
   ensureDefaultStal()
+  collapseAllPaddocks()
   addHistory('systeem', t('history.clear'))
   localStorage.removeItem(KEY)
   save()
@@ -1875,6 +2015,11 @@ document.getElementById('upload-data-input')?.addEventListener('change', e => {
 
 document.getElementById('paddock-modal-close')?.addEventListener('click', () => closeModal('paddock-modal'))
 document.getElementById('paddock-modal-backdrop')?.addEventListener('click', () => closeModal('paddock-modal'))
+
+document.getElementById('delete-confirm-close')?.addEventListener('click', closeDeleteConfirmModal)
+document.getElementById('delete-confirm-cancel')?.addEventListener('click', closeDeleteConfirmModal)
+document.getElementById('delete-confirm-submit')?.addEventListener('click', executeDeleteConfirmed)
+document.getElementById('delete-confirm-backdrop')?.addEventListener('click', closeDeleteConfirmModal)
 
 document.getElementById('paddock-edit-modal-close')?.addEventListener('click', closeEditPaddockModal)
 document.getElementById('paddock-edit-modal-backdrop')?.addEventListener('click', closeEditPaddockModal)
@@ -1921,7 +2066,9 @@ document.getElementById('paddock-modal-form')?.addEventListener('submit', e => {
   const name = document.getElementById('paddock-modal-name').value.trim()
   const postcode = document.getElementById('paddock-modal-postcode').value.trim()
   if(!name) return
-  state.paddocks.push({id:uid(), name, postcode, zones: []})
+  const paddockId = uid()
+  state.paddocks.push({id:paddockId, name, postcode, zones: []})
+  collapsedPaddockIds.add(paddockId)
   addHistory('weide', t('history.paddock.added', { name }))
   document.getElementById('paddock-modal-name').value = ''
   document.getElementById('paddock-modal-postcode').value = ''
@@ -2250,19 +2397,12 @@ document.getElementById('sheep-list')?.addEventListener('click', e => {
     const sheepId = deleteButton.dataset.id
     if(!sheepId) return
     const sheep = state.sheep.find(s => s.id === sheepId)
-    state.sheep = state.sheep.filter(s => s.id !== sheepId)
-    state.sheep.forEach(s => {
-      if(s.motherId === sheepId){
-        s.motherId = null
-      }
-      if(s.fatherId === sheepId){
-        s.fatherId = null
-      }
+    if(!sheep) return
+    openDeleteConfirm('sheep', {
+      sheepId,
+      message: t('confirm.deleteSheep'),
+      confirmLabel: t('actions.delete')
     })
-    if(sheep){
-      addHistory(t('entity.sheep'), t('history.sheep.deleted', { tag: sheep.tag, location: `${paddockName(sheep.paddockId)}${sheep.zoneId ? ' / ' + zoneName(sheep.paddockId, sheep.zoneId) : ''}` }))
-    }
-    save(); render()
     return
   }
 
@@ -2335,22 +2475,17 @@ document.getElementById('paddock-list').addEventListener('click', e => {
       alert(t('alert.stalPaddockDelete'))
       return
     }
-    const sheepInPaddock = state.sheep.filter(s => s.paddockId === paddockId)
-    if(sheepInPaddock.length){
-      openPaddockDeleteMoveModal(paddockId, sheepInPaddock.length)
-      return
-    }
-    state.paddocks = state.paddocks.filter(p => p.id !== paddockId)
-    collapsedPaddockIds.delete(paddockId)
-    expandedWeatherPaddocks.delete(paddockId)
-    addHistory('weide', t('history.paddock.deleted', { name: paddock.name }))
-    save(); render()
+    openDeleteConfirm('paddock', {
+      paddockId,
+      message: t('confirm.deletePaddock'),
+      confirmLabel: t('actions.delete')
+    })
     return
   }
 
   const deleteZoneButton = e.target.closest('.zone-delete-button')
   if(deleteZoneButton){
-    const paddockId = deleteZoneButton.dataset.paddockId || deleteZoneButton.dataset.paddockId
+    const paddockId = deleteZoneButton.dataset.paddockId
     const zoneId = deleteZoneButton.dataset.zoneId
     const paddock = getPaddock(paddockId)
     if(!paddock || !zoneId) return
@@ -2368,15 +2503,12 @@ document.getElementById('paddock-list').addEventListener('click', e => {
       return
     }
 
-    const sheepInZone = state.sheep.filter(s => s.paddockId === paddockId && s.zoneId === zoneId)
-    if(sheepInZone.length){
-      openZoneDeleteMoveModal(paddockId, zoneId, sheepInZone.length)
-      return
-    }
-
-    paddock.zones = paddock.zones.filter(z => z.id !== zoneId)
-    addHistory('zone', t('history.zone.deleted', { paddock: paddock.name, name: zone.name }))
-    save(); render()
+    openDeleteConfirm('zone', {
+      paddockId,
+      zoneId,
+      message: t('confirm.deleteZone'),
+      confirmLabel: t('actions.delete')
+    })
     return
   }
 

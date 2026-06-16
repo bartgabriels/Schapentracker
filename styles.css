@@ -173,6 +173,20 @@ input[type="radio"]{
   cursor:pointer;
 }
 
+.group-form button.icon-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:44px;
+  min-height:44px;
+  padding:10px 14px;
+}
+
+.group-form button.icon-button .button-icon{
+  width:1.3em;
+  height:1.3em;
+}
+
 .group-form button:hover,
 .zone-form button:hover,
 form button:hover{
@@ -188,6 +202,17 @@ button.section-button{
   cursor:pointer;
   width:auto;
   min-width:fit-content;
+}
+
+.button-icon{
+  width:1em;
+  height:1em;
+  display:block;
+  flex:0 0 auto;
+}
+
+.button-icon--move{
+  color:currentColor;
 }
 
 #language-select{
@@ -254,6 +279,7 @@ button.add-zone-button:hover {
   margin-bottom:8px;
   padding:4px;
   border-radius:6px;
+  min-width:0;
 }
 
 .card-header-main{
@@ -261,6 +287,9 @@ button.add-zone-button:hover {
   flex-direction:row;
   gap:8px;
   align-items:baseline;
+  flex:1 1 auto;
+  min-width:0;
+  flex-wrap:wrap;
 }
 
 .card-header-actions{
@@ -295,6 +324,23 @@ button.add-zone-button:hover {
 
 .weather-toggle-button:hover{
   background:#DBE8F7;
+}
+
+.temp-badge{
+  font-size:0.75rem;
+  font-weight:600;
+  white-space:nowrap;
+  cursor:pointer;
+  border:1px solid #BFD3EA;
+  background:#E6EEF8;
+  color:#234A75;
+  padding:2px 8px;
+  border-radius:999px;
+  line-height:1.4;
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  text-shadow:none;
 }
 
 .weather-day{
@@ -387,6 +433,13 @@ button.add-zone-button:hover {
   padding:0;
 }
 
+.paddock-delete-button .button-icon,
+.zone-item .zone-delete-button .button-icon,
+.sheep-delete-button .button-icon{
+  width:0.95em;
+  height:0.95em;
+}
+
 .paddock-delete-button:hover{
   background:#D8EAE2;
 }
@@ -436,6 +489,8 @@ button.add-zone-button:hover {
 
 .card-header strong{
   margin:0;
+  min-width:0;
+  overflow-wrap:anywhere;
 }
 
 .card-header small{
@@ -482,7 +537,7 @@ button.add-zone-button:hover {
   display:flex;
   flex-direction:column;
   justify-content:space-between;
-  aspect-ratio:1/1;
+  aspect-ratio:3/4;
   padding:6px;
   min-width:0;
   overflow:hidden;
@@ -639,7 +694,7 @@ button.add-zone-button:hover {
 }
 
 .zone-sheep-list.is-scrollable{
-  max-height:5.9em;
+  max-height:8em;
   overflow-y:auto;
   padding-right:3px;
   scrollbar-width:thin;
@@ -669,7 +724,7 @@ button.add-zone-button:hover {
   border:none;
   background:none;
   color:#ffffff;
-  font:inherit;
+  font-size:0.8rem;
   font-weight:600;
   padding:0;
   margin:0;
@@ -682,22 +737,33 @@ button.add-zone-button:hover {
 
 .zone-bulk-move-button{
   margin-top:6px;
-  width:auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  line-height:1;
+  width:100%;
   max-width:none;
-  border:1px solid rgba(255,255,255,0.65);
-  background:rgba(0,0,0,0.18);
-  color:#ffffff;
+  background:#E6EEF8;
+  color:#234A75;
+  border:1px solid #BFD3EA;
   font:inherit;
-  font-size:0.75rem;
   font-weight:600;
-  padding:2px 6px;
+  min-width:24px;
+  min-height:24px;
+  padding:1px 3px;
   border-radius:999px;
   cursor:pointer;
-  text-shadow:0 1px 2px rgba(0,0,0,0.35);
+}
+
+.zone-bulk-move-button .button-icon,
+.move-button .button-icon{
+  width:2.15em;
+  height:2.15em;
 }
 
 .zone-bulk-move-button:hover{
-  background:rgba(0,0,0,0.28);
+  background:#DBE8F7;
 }
 
 .empty{color:var(--text-secondary);padding:8px}
@@ -757,8 +823,10 @@ form button{
   background:#fff url('wol.png') no-repeat center bottom;
   background-size:cover;
   padding:12px;
-  min-height:140px;
+  aspect-ratio:3/4;
+  min-height:0;
   gap:12px;
+  overflow:hidden;
 }
 
 .add-sheep-card{
@@ -823,6 +891,7 @@ form button{
   display:flex;
   align-items:center;
   gap:6px;
+  min-height:1em;
 }
 
 .sheep-name-label{
@@ -884,9 +953,8 @@ form button{
 }
 
 .sheep-actions{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px;
 }
 
@@ -895,12 +963,16 @@ form button{
   color:#234A75;
   border:1px solid #BFD3EA;
   border-radius:999px;
-  padding:4px 8px;
+  min-width:24px;
+  min-height:24px;
+  padding:1px 3px;
   cursor:pointer;
   white-space:nowrap;
-  flex:0 0 auto;
-  font-size:0.75rem;
-  max-width:112px;
+  width:100%;
+  max-width:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .move-button:hover{background:#DBE8F7}
@@ -1011,24 +1083,48 @@ form button{
 }
 
 .sheep-delete-button{
-  width:24px;
-  height:24px;
-  border-radius:50%;
-  border:none;
-  background:var(--chip-bg);
-  color:var(--chip-text);
-  font-size:1rem;
+  background:#E6EEF8;
+  color:#234A75;
+  border:1px solid #BFD3EA;
+  border-radius:999px;
+  min-width:24px;
+  min-height:24px;
+  padding:1px 3px;
   line-height:1;
   cursor:pointer;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:0;
-  flex:0 0 auto;
+  width:100%;
+  max-width:none;
 }
 
 .sheep-delete-button:hover{
-  background:#D8EAE2;
+  background:#DBE8F7;
+}
+
+.delete-confirm-panel{
+  max-width:360px;
+}
+
+.delete-confirm-message{
+  margin:0 0 16px;
+  color:var(--text-primary);
+}
+
+.delete-confirm-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.delete-confirm-actions button:last-child{
+  background:#b23b3b;
+  color:#fff;
+}
+
+.delete-confirm-actions button:last-child:hover{
+  background:#972f2f;
 }
 
 .sheep-icon{
@@ -1067,17 +1163,42 @@ form button{
   z-index:1;
   max-height:80vh;
   overflow-y:auto;
+  font-size:0.9rem;
+  line-height:1.35;
+}
+
+.modal-panel h2{
+  font-size:1.15rem;
+  line-height:1.2;
 }
 
 .modal-close{
   position:absolute;
   top:8px;
   right:8px;
+  width:30px;
+  height:30px;
   border:none;
-  background:transparent;
-  font-size:20px;
+  border-radius:999px;
+  background:#1e4a2c;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  font-weight:800;
+  line-height:1;
   cursor:pointer;
-  color:var(--text-secondary);
+  box-shadow:0 2px 8px rgba(0,0,0,0.18);
+}
+
+.modal-close:hover{
+  background:#16381f;
+}
+
+.modal-close:focus-visible{
+  outline:2px solid #d6f5df;
+  outline-offset:2px;
 }
 
 .modal-field{margin-bottom:8px}
@@ -1086,6 +1207,13 @@ form button{
   display:block;
   font-weight:700;
   margin-bottom:4px;
+  font-size:0.82rem;
+}
+
+.modal-panel input,
+.modal-panel select,
+.modal-panel textarea,
+.modal-panel button{
   font-size:0.9rem;
 }
 
