@@ -1,7 +1,7 @@
 const KEY = 'schapentracker:data'
 const LANG_KEY = 'schapentracker:lang'
 const state = { paddocks: [], sheep: [], history: [] }
-let expandedPaddockId = null
+const collapsedPaddockIds = new Set()
 const expandedWeatherPaddocks = new Set()
 const weatherCache = {}
 const weatherLoading = new Set()
@@ -14,6 +14,9 @@ const translations = {
     'ui.upload': 'Upload',
     'ui.clear': 'Wissen',
     'ui.language': 'Taal',
+    'tab.paddocksZones': 'Weides en zones',
+    'tab.sheep': 'Schapen',
+    'tab.history': 'Historiek',
     'section.paddocks': 'Weides',
     'section.sheep': 'Schapen',
     'section.history': 'Historiek',
@@ -59,6 +62,8 @@ const translations = {
     'aria.addPaddock': 'Weide toevoegen',
     'aria.editPaddock': 'Weide bewerken',
     'aria.deletePaddock': 'Weide verwijderen',
+    'aria.collapsePaddock': 'Weide inklappen',
+    'aria.expandPaddock': 'Weide uitklappen',
     'aria.addZone': 'Zone toevoegen',
     'aria.editZone': 'Zone bewerken',
     'aria.deleteZone': 'Zone verwijderen',
@@ -175,6 +180,9 @@ const translations = {
     'ui.upload': 'Upload',
     'ui.clear': 'Clear',
     'ui.language': 'Language',
+    'tab.paddocksZones': 'Paddocks and zones',
+    'tab.sheep': 'Sheep',
+    'tab.history': 'History',
     'section.paddocks': 'Paddocks',
     'section.sheep': 'Sheep',
     'section.history': 'History',
@@ -220,6 +228,8 @@ const translations = {
     'aria.addPaddock': 'Add paddock',
     'aria.editPaddock': 'Edit paddock',
     'aria.deletePaddock': 'Delete paddock',
+    'aria.collapsePaddock': 'Collapse paddock',
+    'aria.expandPaddock': 'Expand paddock',
     'aria.addZone': 'Add zone',
     'aria.editZone': 'Edit zone',
     'aria.deleteZone': 'Delete zone',
@@ -386,6 +396,9 @@ function applyStaticTranslations(){
   setText('download-data-btn', t('ui.save'))
   setText('upload-data-btn', t('ui.upload'))
   setText('clear-data-btn', t('ui.clear'))
+  setText('tab-paddocks-btn', t('tab.paddocksZones'))
+  setText('tab-sheep-btn', t('tab.sheep'))
+  setText('tab-history-btn', t('tab.history'))
   setText('section-paddocks-title', t('section.paddocks'))
   setText('section-sheep-title', t('section.sheep'))
   setText('section-history-title', t('section.history'))
@@ -454,6 +467,36 @@ function initLanguageSelector(){
     const newLang = e.target.value
     setLanguage(newLang)
   })
+}
+
+function initTabs(){
+  const tabButtons = Array.from(document.querySelectorAll('.tab-button[data-tab]'))
+  const panels = {
+    paddocks: document.getElementById('tab-paddocks-panel'),
+    sheep: document.getElementById('tab-sheep-panel'),
+    history: document.getElementById('tab-history-panel')
+  }
+  if(!tabButtons.length || !panels.paddocks || !panels.sheep || !panels.history) return
+
+  const setActiveTab = (tab) => {
+    const nextTab = panels[tab] ? tab : 'paddocks'
+
+    Object.entries(panels).forEach(([name, panel]) => {
+      panel.classList.toggle('hidden', name !== nextTab)
+    })
+
+    tabButtons.forEach(btn => {
+      const active = btn.dataset.tab === nextTab
+      btn.classList.toggle('is-active', active)
+      btn.setAttribute('aria-selected', active ? 'true' : 'false')
+    })
+  }
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => setActiveTab(btn.dataset.tab))
+  })
+
+  setActiveTab('paddocks')
 }
 
 function detectPostcodeCountry(postcode){
@@ -829,7 +872,7 @@ function render(){
 }
 
 function renderPaddock(p){
-  const isExpanded = expandedPaddockId === p.id
+  const isExpanded = !collapsedPaddockIds.has(p.id)
   const isWeatherExpanded = expandedWeatherPaddocks.has(p.id)
   const sheepCount = state.sheep.filter(s => s.paddockId === p.id).length
   const sheepLabel = sheepCount === 1 ? t('paddock.sheep.singular') : t('paddock.sheep.plural')
@@ -840,9 +883,10 @@ function renderPaddock(p){
   const weatherHtml = renderPaddockWeather(p, isWeatherExpanded)
   const canDeletePaddock = !isStalPaddock(p)
   return `<div class="card" data-id="${p.id}" ${isExpanded ? 'data-expanded="true"' : ''}>
-    <div class="card-header" data-paddock-id="${p.id}" style="cursor:pointer;user-select:none">
+    <div class="card-header" data-paddock-id="${p.id}" style="user-select:none">
       <div class="card-header-main">
         <button type="button" class="paddock-edit-button" data-paddock-id="${p.id}" aria-label="${t('aria.editPaddock')}">✎</button>
+        <button type="button" class="paddock-collapse-button" data-paddock-id="${p.id}" aria-label="${isExpanded ? t('aria.collapsePaddock') : t('aria.expandPaddock')}">${isExpanded ? '▾' : '▸'}</button>
         <strong>${p.name}</strong>
         ${paddockPostcode ? `<span class="paddock-postcode">${paddockPostcode}</span>` : ''}
         ${paddockArea ? `<span class="paddock-metric">${paddockArea}</span>` : ''}
@@ -1237,7 +1281,7 @@ function openPaddockDeleteMoveModal(sourcePaddockId, sheepCount){
       }
     })
     state.paddocks = state.paddocks.filter(p => p.id !== sourcePaddockId)
-    if(expandedPaddockId === sourcePaddockId) expandedPaddockId = null
+    collapsedPaddockIds.delete(sourcePaddockId)
     addHistory('weide', t('history.paddockMove.auto', { name: sourcePaddock.name, target: `${paddockName(target.paddockId)} / ${zoneName(target.paddockId, target.zoneId)}`, sheep: movedNames }))
     save(); render()
     return
@@ -1463,7 +1507,7 @@ document.getElementById('clear-data-btn')?.addEventListener('click', () => {
   state.paddocks = []
   state.sheep = []
   state.history = []
-  expandedPaddockId = null
+  collapsedPaddockIds.clear()
   expandedWeatherPaddocks.clear()
   ensureDefaultStal()
   addHistory('systeem', t('history.clear'))
@@ -1801,7 +1845,7 @@ document.getElementById('paddock-delete-move-form')?.addEventListener('submit', 
   })
 
   state.paddocks = state.paddocks.filter(p => p.id !== pendingPaddockDeletion.sourcePaddockId)
-  if(expandedPaddockId === pendingPaddockDeletion.sourcePaddockId) expandedPaddockId = null
+  collapsedPaddockIds.delete(pendingPaddockDeletion.sourcePaddockId)
   addHistory('weide', t('history.paddockMove.manual', { name: sourcePaddock ? sourcePaddock.name : t('unknown'), target: `${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}`, sheep: movedNames }))
   save(); render(); closePaddockDeleteMoveModal()
 })
@@ -1944,7 +1988,7 @@ document.getElementById('paddock-list').addEventListener('click', e => {
       return
     }
     state.paddocks = state.paddocks.filter(p => p.id !== paddockId)
-    if(expandedPaddockId === paddockId) expandedPaddockId = null
+    collapsedPaddockIds.delete(paddockId)
     expandedWeatherPaddocks.delete(paddockId)
     addHistory('weide', t('history.paddock.deleted', { name: paddock.name }))
     save(); render()
@@ -1997,14 +2041,14 @@ document.getElementById('paddock-list').addEventListener('click', e => {
     return
   }
 
-  const header = e.target.closest('.card-header')
-  if(!header) return
-  const paddockId = header.dataset.paddockId
+  const collapseButton = e.target.closest('.paddock-collapse-button')
+  if(!collapseButton) return
+  const paddockId = collapseButton.dataset.paddockId
   if(!paddockId) return
-  if(expandedPaddockId === paddockId){
-    expandedPaddockId = null
+  if(collapsedPaddockIds.has(paddockId)){
+    collapsedPaddockIds.delete(paddockId)
   } else {
-    expandedPaddockId = paddockId
+    collapsedPaddockIds.add(paddockId)
   }
   render()
 })
@@ -2028,6 +2072,7 @@ document.getElementById('zone-modal-form')?.addEventListener('submit', e => {
 // Ensure initialization happens after DOM is fully loaded
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', () => {
+    initTabs()
     initLanguageSelector()
     applyStaticTranslations()
     load()
@@ -2035,6 +2080,7 @@ if(document.readyState === 'loading'){
   })
 } else {
   // DOM is already loaded (e.g., when script is deferred or at end of body)
+  initTabs()
   initLanguageSelector()
   applyStaticTranslations()
   load()

@@ -22,26 +22,62 @@
       <input id="upload-data-input" type="file" accept="application/json" style="display:none">
     </div>
 
-    <section>
-      <div class="section-header">
-        <h2 id="section-paddocks-title">Weides</h2>
-      </div>
-      <div id="paddock-list"></div>
-    </section>
-    
-    <section>
-      <div class="section-header">
-        <h2 id="section-sheep-title">Schapen</h2>
-      </div>
-      <div id="sheep-list" class="sheep-grid"></div>
-    </section>
+    <div class="tabs" role="tablist" aria-label="Main sections">
+      <button
+        id="tab-paddocks-btn"
+        class="tab-button is-active"
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls="tab-paddocks-panel"
+        data-tab="paddocks"
+      >Weides en zones</button>
+      <button
+        id="tab-sheep-btn"
+        class="tab-button"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="tab-sheep-panel"
+        data-tab="sheep"
+      >Schapen</button>
+      <button
+        id="tab-history-btn"
+        class="tab-button"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="tab-history-panel"
+        data-tab="history"
+      >Historiek</button>
+    </div>
 
-    <section>
-      <div class="section-header">
-        <h2 id="section-history-title">Historiek</h2>
-      </div>
-      <div id="history-list" class="history-list"></div>
-    </section>
+    <div id="tab-paddocks-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-paddocks-btn">
+      <section>
+        <div class="section-header">
+          <h2 id="section-paddocks-title">Weides</h2>
+        </div>
+        <div id="paddock-list"></div>
+      </section>
+    </div>
+
+    <div id="tab-sheep-panel" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-sheep-btn">
+      <section>
+        <div class="section-header">
+          <h2 id="section-sheep-title">Schapen</h2>
+        </div>
+        <div id="sheep-list" class="sheep-grid"></div>
+      </section>
+    </div>
+
+    <div id="tab-history-panel" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-history-btn">
+      <section>
+        <div class="section-header">
+          <h2 id="section-history-title">Historiek</h2>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </section>
+    </div>
 
   </main>
 

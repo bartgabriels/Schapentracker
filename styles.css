@@ -1,4 +1,4 @@
-:root{--bg:#fbfdfb;--card:#fff;--accent:#2d6a4f;--text-outline:0 0 1px rgba(255,255,255,0.9),0 0 2px rgba(255,255,255,0.7),-1px -1px 1px rgba(255,255,255,0.6),1px -1px 1px rgba(255,255,255,0.6),-1px 1px 1px rgba(255,255,255,0.6),1px 1px 1px rgba(255,255,255,0.6)}
+:root{--bg:#F7FAF8;--card:#FFFFFF;--surface-muted:#EEF4F1;--surface-soft:#E8F0EC;--accent:#0B6E4F;--accent-hover:#09563E;--secondary:#2F5D8A;--info:#2F5D8A;--success:#1F7A8C;--warning:#A05A00;--error:#8B2C3F;--text-primary:#1B2421;--text-secondary:#4A5A53;--border:#C9D8D0;--border-strong:#AFC4B9;--chip-bg:#EAF4F0;--chip-text:#23483A;--metric-bg:#EDF2F7;--metric-text:#334155;--focus:#5AA9E6;--text-outline:0 0 1px rgba(255,255,255,0.85),0 0 2px rgba(255,255,255,0.65),-1px -1px 1px rgba(255,255,255,0.5),1px -1px 1px rgba(255,255,255,0.5),-1px 1px 1px rgba(255,255,255,0.5),1px 1px 1px rgba(255,255,255,0.5)}
 
 html{
   overflow-x:hidden;
@@ -14,7 +14,7 @@ body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto;
   line-height:1.4;
   background:var(--bg);
-  color:#0f1720;
+  color:var(--text-primary);
   text-shadow:var(--text-outline);
 }
 
@@ -55,6 +55,44 @@ h1{margin:0;font-size:1.5rem}
   margin-left:auto;
 }
 
+.tabs{
+  display:flex;
+  gap:8px;
+  padding:0 8px;
+  margin:8px 0 2px;
+}
+
+.tab-button{
+  width:auto;
+  max-width:none;
+  border:1px solid var(--border);
+  background:var(--surface-soft);
+  color:var(--text-primary);
+  border-radius:999px;
+  padding:8px 14px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.tab-button:hover{
+  background:#DCE9E3;
+}
+
+.tab-button.is-active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+
+.tab-button:focus-visible{
+  outline:2px solid var(--focus);
+  outline-offset:2px;
+}
+
+.tab-panel.hidden{
+  display:none;
+}
+
 @media (max-width: 700px) {
   .top-bar{
     align-items:flex-start;
@@ -63,6 +101,10 @@ h1{margin:0;font-size:1.5rem}
   .top-bar .action-row{
     width:100%;
     margin-left:0;
+  }
+
+  .tabs{
+    flex-wrap:wrap;
   }
 }
 
@@ -82,8 +124,16 @@ input,select,button,textarea{
   padding:6px 4px;
   font-family:inherit;
   font-size:inherit;
-  border:1px solid #ddd;
+  border:1px solid var(--border);
   border-radius:4px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+  outline:2px solid var(--focus);
+  outline-offset:2px;
 }
 
 input[type="radio"]{
@@ -108,10 +158,16 @@ input[type="radio"]{
   cursor:pointer;
 }
 
+.group-form button:hover,
+.zone-form button:hover,
+form button:hover{
+  background:var(--accent-hover);
+}
+
 button.section-button{
-  background:#effbf2;
-  color:#1f4332;
-  border:1px solid #cde6d3;
+  background:var(--chip-bg);
+  color:var(--chip-text);
+  border:1px solid var(--border);
   border-radius:8px;
   padding:6px 10px;
   cursor:pointer;
@@ -122,15 +178,15 @@ button.section-button{
 #language-select{
   width:auto;
   min-width:140px;
-  background:#effbf2;
-  color:#1f4332;
-  border:1px solid #cde6d3;
+  background:var(--chip-bg);
+  color:var(--chip-text);
+  border:1px solid var(--border);
   border-radius:8px;
   padding:6px 10px;
 }
 
 button.section-button:hover{
-  background:#e3f6e5;
+  background:#DCE9E3;
 }
 
 button.add-zone-button:hover {
@@ -161,18 +217,18 @@ button.add-zone-button:hover {
 }
 
 .card{
-  border:1px solid #e8eef0;
+  border:1px solid var(--border);
   border-radius:10px;
   padding:8px;
   margin:0 0 12px;
-  background:white;
+  background:var(--card);
   overflow:hidden;
   min-height:80px;
   transition:background 0.2s ease;
 }
 
 .card:hover{
-  background:#f5f5f5;
+  background:#F2F6F4;
 }
 
 .card-header{
@@ -182,7 +238,6 @@ button.add-zone-button:hover {
   gap:8px;
   margin-bottom:8px;
   padding:4px;
-  cursor:pointer;
   border-radius:6px;
 }
 
@@ -215,22 +270,22 @@ button.add-zone-button:hover {
   max-width:none;
   margin:0;
   padding:4px 8px;
-  border:1px solid #cde6d3;
+  border:1px solid #BFD3EA;
   border-radius:999px;
-  background:#effbf2;
-  color:#1f4332;
+  background:#E6EEF8;
+  color:#234A75;
   font-size:0.75rem;
   cursor:pointer;
 }
 
 .weather-toggle-button:hover{
-  background:#e3f6e5;
+  background:#DBE8F7;
 }
 
 .weather-day{
-  border:1px solid #e8eef0;
+  border:1px solid var(--border);
   border-radius:8px;
-  background:#f8fbf9;
+  background:var(--surface-muted);
   padding:4px 6px;
   display:flex;
   flex-direction:column;
@@ -244,7 +299,7 @@ button.add-zone-button:hover {
 
 .weather-day small{
   font-size:0.7rem;
-  color:#475569;
+  color:var(--text-secondary);
 }
 
 .paddock-weather-empty,
@@ -253,38 +308,38 @@ button.add-zone-button:hover {
   display:block;
   margin:2px 4px 8px;
   font-size:0.75rem;
-  color:#64748b;
+  color:var(--text-secondary);
 }
 
 .paddock-weather-error{
-  color:#9f1239;
+  color:var(--error);
 }
 
 .paddock-postcode{
-  color:#475569;
+  color:var(--chip-text);
   font-size:0.75rem;
-  background:#eef5ef;
-  border:1px solid #dbe8df;
+  background:var(--chip-bg);
+  border:1px solid var(--border);
   border-radius:999px;
   padding:1px 7px;
   white-space:nowrap;
 }
 
 .paddock-metric{
-  color:#475569;
+  color:var(--metric-text);
   font-size:0.75rem;
-  background:#f4f6f8;
-  border:1px solid #dde4ea;
+  background:var(--metric-bg);
+  border:1px solid var(--border);
   border-radius:999px;
   padding:1px 7px;
   white-space:nowrap;
 }
 
 .paddock-sheep-count{
-  color:#475569;
+  color:var(--metric-text);
   font-size:0.75rem;
-  background:#f4f6f8;
-  border:1px solid #dde4ea;
+  background:var(--metric-bg);
+  border:1px solid var(--border);
   border-radius:999px;
   padding:1px 7px;
   white-space:nowrap;
@@ -295,8 +350,8 @@ button.add-zone-button:hover {
   height:24px;
   border-radius:50%;
   border:none;
-  background:#eef5ef;
-  color:#1f4332;
+  background:var(--chip-bg);
+  color:var(--chip-text);
   font-size:1rem;
   line-height:1;
   cursor:pointer;
@@ -307,7 +362,7 @@ button.add-zone-button:hover {
 }
 
 .paddock-delete-button:hover{
-  background:#dceadd;
+  background:#D8EAE2;
 }
 
 .paddock-edit-button{
@@ -315,8 +370,8 @@ button.add-zone-button:hover {
   height:24px;
   border-radius:50%;
   border:none;
-  background:#eef5ef;
-  color:#1f4332;
+  background:var(--chip-bg);
+  color:var(--chip-text);
   font-size:0.9rem;
   line-height:1;
   cursor:pointer;
@@ -328,7 +383,29 @@ button.add-zone-button:hover {
 }
 
 .paddock-edit-button:hover{
-  background:#dceadd;
+  background:#D8EAE2;
+}
+
+.paddock-collapse-button{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:none;
+  background:var(--chip-bg);
+  color:var(--chip-text);
+  font-size:0.95rem;
+  font-weight:700;
+  line-height:1;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  flex-shrink:0;
+}
+
+.paddock-collapse-button:hover{
+  background:#D8EAE2;
 }
 
 .card-header strong{
@@ -336,13 +413,13 @@ button.add-zone-button:hover {
 }
 
 .card-header small{
-  color:#64748b;
+  color:var(--text-secondary);
   font-size:0.75rem;
 }
 
 .badge{
-  background:#e6f3e9;
-  color:#1f5b3b;
+  background:var(--chip-bg);
+  color:var(--chip-text);
   border-radius:999px;
   padding:2px 8px;
   font-size:0.8rem;
@@ -375,7 +452,7 @@ button.add-zone-button:hover {
   background:#f4f8f4 url('gras.png') no-repeat bottom center;
   background-size:cover;
   border-radius:8px;
-  border:1px solid #e5efe4;
+  border:1px solid var(--border-strong);
   display:flex;
   flex-direction:column;
   justify-content:space-between;
@@ -395,7 +472,7 @@ button.add-zone-button:hover {
   border-radius:50%;
   border:none;
   background:rgba(255,255,255,0.85);
-  color:#1f4332;
+  color:var(--chip-text);
   font-size:1.25rem;
   line-height:1;
   cursor:pointer;
@@ -412,7 +489,7 @@ button.add-zone-button:hover {
   border-radius:50%;
   border:none;
   background:rgba(255,255,255,0.85);
-  color:#1f4332;
+  color:var(--chip-text);
   font-size:1rem;
   line-height:1;
   cursor:pointer;
@@ -445,19 +522,19 @@ button.add-zone-button:hover {
   content:'';
   position:absolute;
   inset:0;
-  background:rgba(46, 125, 50, 0);
+  background:rgba(31,122,140,0);
   transition:background 0.2s ease;
   pointer-events:none;
   border-radius:8px;
 }
 
 .zone-list .add-zone-button:hover::after{
-  background:rgba(46, 125, 50, 0.2);
+  background:rgba(31,122,140,0.25);
 }
 
 .zone-list .add-zone-button{
   border-style:dashed;
-  color:#1f4332;
+  color:var(--chip-text);
   justify-content:center;
   align-items:center;
   padding:0;
@@ -498,10 +575,10 @@ button.add-zone-button:hover {
 }
 
 .zone-metric{
-  color:#244036;
+  color:var(--metric-text);
   font-size:0.68rem;
-  background:rgba(255,255,255,0.82);
-  border:1px solid rgba(219,232,223,0.95);
+  background:rgba(255,255,255,0.88);
+  border:1px solid rgba(201,216,208,0.95);
   border-radius:999px;
   padding:1px 6px;
   white-space:nowrap;
@@ -511,7 +588,7 @@ button.add-zone-button:hover {
 .zone-item small{
   display:block;
   margin:2px 0;
-  color:#475569;
+  color:var(--text-secondary);
   font-size:0.7rem;
   margin-top:auto;
 }
@@ -597,9 +674,9 @@ button.add-zone-button:hover {
   background:rgba(0,0,0,0.28);
 }
 
-.empty{color:#64748b;padding:8px}
+.empty{color:var(--text-secondary);padding:8px}
 
-.empty-zone{color:#64748b;font-size:0.9rem;padding:6px}
+.empty-zone{color:var(--text-secondary);font-size:0.9rem;padding:6px}
 
 .zone-form{
   display:flex;
@@ -649,7 +726,7 @@ form button{
   display:flex;
   flex-direction:column;
   justify-content:space-between;
-  border:1px solid #e5efe4;
+  border:1px solid var(--border-strong);
   border-radius:12px;
   background:#fff url('wol.png') no-repeat center bottom;
   background-size:cover;
@@ -662,22 +739,22 @@ form button{
   position:relative;
   align-items:center;
   justify-content:center;
-  background:#ecf8ef url('wol.png') no-repeat center bottom;
+  background:var(--chip-bg) url('wol.png') no-repeat center bottom;
   background-size:cover;
-  border:1px dashed #98d5a2;
-  color:#1f4332;
+  border:1px dashed var(--border-strong);
+  color:var(--chip-text);
   font-size:2rem;
   cursor:cell;
 }
 
 .add-paddock-block{
   width:100%;
-  border:1px solid #e8eef0;
+  border:1px solid var(--border);
   border-radius:10px;
   padding:8px;
   margin:0 0 12px;
-  background:white;
-  color:#1f4332;
+  background:var(--card);
+  color:var(--chip-text);
   font-size:2rem;
   font-weight:700;
   display:flex;
@@ -689,7 +766,7 @@ form button{
 }
 
 .add-paddock-block:hover{
-  background:#f5f5f5;
+  background:#F2F6F4;
 }
 
 .add-sheep-card::after{
@@ -734,7 +811,7 @@ form button{
 }
 
 .sheep-card-body small{
-  color:#475569;
+  color:var(--text-secondary);
   font-size:0.85rem;
 }
 
@@ -764,9 +841,9 @@ form button{
 }
 
 .move-button{
-  background:#effbf2;
-  color:#1f4332;
-  border:1px solid #cde6d3;
+  background:#E6EEF8;
+  color:#234A75;
+  border:1px solid #BFD3EA;
   border-radius:999px;
   padding:4px 8px;
   cursor:pointer;
@@ -776,7 +853,7 @@ form button{
   max-width:112px;
 }
 
-.move-button:hover{background:#e3f6e5}
+.move-button:hover{background:#DBE8F7}
 
 .history-list{
   display:flex;
@@ -793,21 +870,21 @@ form button{
 }
 
 .history-item{
-  border:1px solid #e8eef0;
+  border:1px solid var(--border);
   border-radius:8px;
-  background:#f8fbf9;
+  background:var(--surface-muted);
   padding:6px 8px;
 }
 
 .history-meta{
   display:block;
-  color:#64748b;
+  color:var(--text-secondary);
   font-size:0.75rem;
 }
 
 .history-message{
   display:block;
-  color:#0f1720;
+  color:var(--text-primary);
   font-size:0.85rem;
 }
 
@@ -816,8 +893,8 @@ form button{
   height:24px;
   border-radius:50%;
   border:none;
-  background:#eef5ef;
-  color:#1f4332;
+  background:var(--chip-bg);
+  color:var(--chip-text);
   font-size:1rem;
   line-height:1;
   cursor:pointer;
@@ -829,7 +906,7 @@ form button{
 }
 
 .sheep-delete-button:hover{
-  background:#dceadd;
+  background:#D8EAE2;
 }
 
 .sheep-icon{
@@ -854,12 +931,12 @@ form button{
 .modal-backdrop{
   position:absolute;
   inset:0;
-  background:rgba(15,23,32,0.35);
+  background:rgba(27,36,33,0.35);
 }
 
 .modal-panel{
   position:relative;
-  background:white;
+  background:var(--card);
   border-radius:12px;
   box-shadow:0 18px 48px rgba(15,23,32,0.2);
   padding:16px;
@@ -878,7 +955,7 @@ form button{
   background:transparent;
   font-size:20px;
   cursor:pointer;
-  color:#475569;
+  color:var(--text-secondary);
 }
 
 .modal-field{margin-bottom:8px}
@@ -901,9 +978,9 @@ form button{
   align-items:center;
   gap:6px;
   width:auto;
-  border:1px solid #d7e0e6;
+  border:1px solid var(--border);
   border-radius:999px;
-  background:#f8fbf9;
+  background:var(--surface-muted);
   padding:4px 10px;
   cursor:pointer;
 }
@@ -927,7 +1004,7 @@ form button{
 
 #move-modal-sheep-name{
   font-size:0.85rem;
-  color:#334155;
+  color:var(--metric-text);
 }
 
 #move-modal-form{
