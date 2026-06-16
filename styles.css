@@ -51,6 +51,20 @@ form button,
 
 h1{margin:0;font-size:1.5rem}
 
+.app-title-block{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.app-subtitle{
+  margin:0;
+  font-size:0.75rem;
+  line-height:1.2;
+  color:var(--text-secondary);
+  opacity:0.9;
+}
+
 .top-bar .action-row{
   justify-content:flex-end;
   margin-left:auto;

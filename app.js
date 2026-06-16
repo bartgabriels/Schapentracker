@@ -10,6 +10,7 @@ const WEATHER_TTL_MS = 60 * 60 * 1000
 const translations = {
   nl: {
     'app.title': 'FlockOps',
+      'app.subtitle': 'Een CALM-Hoeve Project',
     'ui.save': 'Opslaan',
     'ui.upload': 'Upload',
     'ui.clear': 'Wissen',
@@ -176,6 +177,7 @@ const translations = {
   },
   en: {
     'app.title': 'FlockOps',
+      'app.subtitle': 'A CALM-Hoeve Project',
     'ui.save': 'Save',
     'ui.upload': 'Upload',
     'ui.clear': 'Clear',
@@ -345,6 +347,7 @@ const translations = {
 const translationsFr = {
   ...translations.en,
   'app.title': 'FlockOps',
+  'app.subtitle': 'Un projet CALM-Hoeve',
   'ui.save': 'Enregistrer',
   'ui.upload': 'Importer',
   'ui.clear': 'Effacer',
@@ -563,6 +566,7 @@ function applyStaticTranslations(){
   }
 
   setText('app-title', t('app.title'))
+    setText('app-subtitle', t('app.subtitle'))
   setText('download-data-btn', t('ui.save'))
   setText('upload-data-btn', t('ui.upload'))
   setText('clear-data-btn', t('ui.clear'))
