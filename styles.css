@@ -97,6 +97,12 @@ button.add-zone-button:hover {
   margin-bottom:10px;
 }
 
+.action-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
 .section-header h2{
   margin:0;
   font-size:1.05rem;

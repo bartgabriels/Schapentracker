@@ -54,6 +54,51 @@ function updateZoneEmptyStates(){
   })
 }
 
+function exportData(){
+  const json = JSON.stringify(state, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `schapentracker-${new Date().toISOString().slice(0,10)}.json`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+function importDataFile(file){
+  const reader = new FileReader()
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result)
+      if(!parsed || typeof parsed !== 'object') throw new Error('Ongeldig bestand')
+      state.paddocks = Array.isArray(parsed.paddocks) ? parsed.paddocks.map(p => ({
+        id: p.id,
+        name: p.name,
+        zones: Array.isArray(p.zones) ? p.zones.map(z => ({
+          id: z.id,
+          name: z.name,
+          emptySince: z.emptySince ?? Date.now()
+        })) : []
+      })) : []
+      state.sheep = Array.isArray(parsed.sheep) ? parsed.sheep.map(s => ({
+        id: s.id,
+        tag: s.tag,
+        paddockId: s.paddockId,
+        zoneId: s.zoneId ?? null,
+        lastUpdated: s.lastUpdated ?? Date.now()
+      })) : []
+      updateZoneEmptyStates()
+      save(); render()
+      alert('Gegevens succesvol geladen.')
+    } catch (err) {
+      alert('Kon bestand niet laden: ' + err.message)
+    }
+  }
+  reader.readAsText(file)
+}
+
 function render(){
   updateZoneEmptyStates()
   const paddockList = document.getElementById('paddock-list')
@@ -215,12 +260,22 @@ function closeModal(id){
   modal.setAttribute('aria-hidden', 'true')
 }
 
-document.getElementById('open-paddock-modal-btn')?.addEventListener('click', () => {
-  openModal('paddock-modal')
+document.getElementById('download-data-btn')?.addEventListener('click', exportData)
+
+document.getElementById('upload-data-btn')?.addEventListener('click', () => {
+  document.getElementById('upload-data-input')?.click()
 })
 
-document.getElementById('open-sheep-modal-btn')?.addEventListener('click', () => {
-  openModal('sheep-modal')
+document.getElementById('upload-data-input')?.addEventListener('change', e => {
+  const files = e.target.files
+  if(files && files.length){
+    importDataFile(files[0])
+  }
+  e.target.value = ''
+})
+
+document.getElementById('open-paddock-modal-btn')?.addEventListener('click', () => {
+  openModal('paddock-modal')
 })
 
 document.getElementById('paddock-modal-close')?.addEventListener('click', () => closeModal('paddock-modal'))
@@ -332,7 +387,7 @@ document.getElementById('paddock-list').addEventListener('click', e => {
 
   const zoneButton = e.target.closest('.add-zone-button')
   if(zoneButton){
-    const paddockId = zoneButton.dataset.paddock-id || zoneButton.dataset.paddockId
+    const paddockId = zoneButton.dataset.paddockId
     const paddock = getPaddock(paddockId)
     if(!paddock) return
     document.getElementById('zone-modal-paddock-name').textContent = paddock.name
