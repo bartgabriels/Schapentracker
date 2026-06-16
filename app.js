@@ -24,10 +24,10 @@ const translations = {
     'sheep.add.title': 'Schaap toevoegen',
     'sheep.add.tagPlaceholder': 'Tag',
     'sheep.add.earmarkPlaceholder': 'Oorkenmerk (optioneel)',
-    'sheep.add.genderLabel': 'Geslacht',
+    'sheep.genderLabel': 'Geslacht',
     'sheep.gender.female': 'Ooi',
     'sheep.gender.male': 'Ram',
-    'sheep.add.pedigreeLabel': 'Stamboom',
+    'sheep.pedigreeLabel': 'Stamboom',
     'sheep.locationLabel': 'Locatie',
     'sheep.notes.label': 'Notities',
     'sheep.notes.placeholder': 'Algemene notities (optioneel)',
@@ -36,8 +36,6 @@ const translations = {
     'sheep.edit.tagPlaceholder': 'Nieuwe naam',
     'sheep.edit.earmarkLabel': 'Oorkenmerk',
     'sheep.edit.earmarkPlaceholder': 'Oorkenmerk toevoegen',
-    'sheep.edit.genderLabel': 'Geslacht',
-    'sheep.edit.pedigreeLabel': 'Stamboom',
     'sheep.edit.submit': 'Opslaan',
     'sheep.location.unknownPaddock': 'Onbekend veld',
     'sheep.location.unknownZone': 'Onbekende zone',
@@ -72,34 +70,29 @@ const translations = {
     'aria.moveSheep': 'Verplaats {tag}',
     'aria.weatherForecast': 'Weervoorspelling',
     'paddock.add.title': 'Weide toevoegen',
-    'paddock.add.nameLabel': 'Naam weide',
-    'paddock.add.postcodeLabel': 'Postcode (optioneel)',
+    'paddock.nameLabel': 'Naam weide',
+    'paddock.postcodeLabel': 'Postcode (optioneel)',
     'paddock.notes.label': 'Notities',
     'paddock.notes.placeholder': 'Algemene notities (optioneel)',
     'paddock.add.submit': 'Toevoegen',
     'paddock.edit.title': 'Weide bewerken',
-    'paddock.edit.nameLabel': 'Naam weide',
-    'paddock.edit.postcodeLabel': 'Postcode (optioneel)',
     'paddock.edit.submit': 'Opslaan',
     'paddock.empty': 'Geen weides',
     'paddock.sheep.singular': 'schaap',
     'paddock.sheep.plural': 'schapen',
     'paddock.zones.badge': '{count} zone(s)',
     'zone.add.title': 'Zone toevoegen',
-    'zone.add.paddockLabel': 'Weide',
-    'zone.add.nameLabel': 'Zone naam',
+    'zone.paddockLabel': 'Weide',
+    'zone.nameLabel': 'Zone naam',
     'zone.areaLabel': 'Oppervlakte (m2)',
     'zone.areaPlaceholderWithUnit': 'Oppervlakte (m2)',
-    'zone.add.perimeterLabel': 'Omtrek (m)',
+    'zone.perimeterLabel': 'Omtrek (m)',
     'zone.add.perimeterPlaceholder': 'Omtrek (m)',
     'zone.notes.label': 'Notities',
     'zone.notes.placeholder': 'Algemene notities (optioneel)',
     'zone.add.submit': 'Toevoegen',
     'zone.edit.title': 'Zone bewerken',
-    'zone.edit.paddockLabel': 'Weide',
-    'zone.edit.nameLabel': 'Zone naam',
     'zone.edit.areaPlaceholder': 'Oppervlakte',
-    'zone.edit.perimeterLabel': 'Omtrek (m)',
     'zone.edit.perimeterPlaceholder': 'Omtrek',
     'zone.edit.submit': 'Opslaan',
     'zone.status.occupied': 'Bezet',
@@ -173,12 +166,9 @@ const translations = {
     'unknown': 'Onbekend',
     'fieldZone': 'Veld / Zone',
     'ui.add': 'Toevoegen',
-    'paddock.add.namePlaceholder': 'Naam weide',
-    'paddock.add.postcodePlaceholder': 'Postcode (optioneel)',
-    'paddock.edit.namePlaceholder': 'Naam weide',
-    'paddock.edit.postcodePlaceholder': 'Postcode (optioneel)',
-    'zone.add.namePlaceholder': 'Zone naam',
-    'zone.edit.namePlaceholder': 'Zone naam'
+    'paddock.namePlaceholder': 'Naam weide',
+    'paddock.postcodePlaceholder': 'Postcode (optioneel)',
+    'zone.namePlaceholder': 'Zone naam'
   },
   en: {
     'app.title': 'FlockOps',
@@ -196,10 +186,10 @@ const translations = {
     'sheep.add.title': 'Add sheep',
     'sheep.add.tagPlaceholder': 'Tag',
     'sheep.add.earmarkPlaceholder': 'Earmark (optional)',
-    'sheep.add.genderLabel': 'Sex',
+    'sheep.genderLabel': 'Sex',
     'sheep.gender.female': 'Ewe',
     'sheep.gender.male': 'Ram',
-    'sheep.add.pedigreeLabel': 'Pedigree',
+    'sheep.pedigreeLabel': 'Pedigree',
     'sheep.locationLabel': 'Location',
     'sheep.notes.label': 'Notes',
     'sheep.notes.placeholder': 'General notes (optional)',
@@ -208,8 +198,6 @@ const translations = {
     'sheep.edit.tagPlaceholder': 'New name',
     'sheep.edit.earmarkLabel': 'Earmark',
     'sheep.edit.earmarkPlaceholder': 'Add earmark',
-    'sheep.edit.genderLabel': 'Sex',
-    'sheep.edit.pedigreeLabel': 'Pedigree',
     'sheep.edit.submit': 'Save',
     'sheep.location.unknownPaddock': 'Unknown paddock',
     'sheep.location.unknownZone': 'Unknown zone',
@@ -244,34 +232,29 @@ const translations = {
     'aria.moveSheep': 'Move {tag}',
     'aria.weatherForecast': 'Weather forecast',
     'paddock.add.title': 'Add paddock',
-    'paddock.add.nameLabel': 'Paddock name',
-    'paddock.add.postcodeLabel': 'Postcode (optional)',
+    'paddock.nameLabel': 'Paddock name',
+    'paddock.postcodeLabel': 'Postcode (optional)',
     'paddock.notes.label': 'Notes',
     'paddock.notes.placeholder': 'General notes (optional)',
     'paddock.add.submit': 'Add',
     'paddock.edit.title': 'Edit paddock',
-    'paddock.edit.nameLabel': 'Paddock name',
-    'paddock.edit.postcodeLabel': 'Postcode (optional)',
     'paddock.edit.submit': 'Save',
     'paddock.empty': 'No paddocks',
     'paddock.sheep.singular': 'sheep',
     'paddock.sheep.plural': 'sheep',
     'paddock.zones.badge': '{count} zone(s)',
     'zone.add.title': 'Add zone',
-    'zone.add.paddockLabel': 'Paddock',
-    'zone.add.nameLabel': 'Zone name',
+    'zone.paddockLabel': 'Paddock',
+    'zone.nameLabel': 'Zone name',
     'zone.areaLabel': 'Area (m2)',
     'zone.areaPlaceholderWithUnit': 'Area (m2)',
-    'zone.add.perimeterLabel': 'Perimeter (m)',
+    'zone.perimeterLabel': 'Perimeter (m)',
     'zone.add.perimeterPlaceholder': 'Perimeter (m)',
     'zone.notes.label': 'Notes',
     'zone.notes.placeholder': 'General notes (optional)',
     'zone.add.submit': 'Add',
     'zone.edit.title': 'Edit zone',
-    'zone.edit.paddockLabel': 'Paddock',
-    'zone.edit.nameLabel': 'Zone name',
     'zone.edit.areaPlaceholder': 'Area',
-    'zone.edit.perimeterLabel': 'Perimeter (m)',
     'zone.edit.perimeterPlaceholder': 'Perimeter',
     'zone.edit.submit': 'Save',
     'zone.status.occupied': 'Occupied',
@@ -345,12 +328,9 @@ const translations = {
     'unknown': 'Unknown',
     'fieldZone': 'Field / Zone',
     'ui.add': 'Add',
-    'paddock.add.namePlaceholder': 'Paddock name',
-    'paddock.add.postcodePlaceholder': 'Postcode (optional)',
-    'paddock.edit.namePlaceholder': 'Paddock name',
-    'paddock.edit.postcodePlaceholder': 'Postcode (optional)',
-    'zone.add.namePlaceholder': 'Zone name',
-    'zone.edit.namePlaceholder': 'Zone name'
+    'paddock.namePlaceholder': 'Paddock name',
+    'paddock.postcodePlaceholder': 'Postcode (optional)',
+    'zone.namePlaceholder': 'Zone name'
   }
 }
 
@@ -371,10 +351,10 @@ const translationsFr = {
   'section.history': 'Historique',
   'sheep.add.title': 'Ajouter un mouton',
   'sheep.add.earmarkPlaceholder': 'Marque auriculaire (optionnel)',
-  'sheep.add.genderLabel': 'Sexe',
+  'sheep.genderLabel': 'Sexe',
   'sheep.gender.female': 'Brebis',
   'sheep.gender.male': 'Bélier',
-  'sheep.add.pedigreeLabel': 'Pedigree',
+  'sheep.pedigreeLabel': 'Pedigree',
   'sheep.locationLabel': 'Emplacement',
   'sheep.notes.label': 'Notes',
   'sheep.notes.placeholder': 'Notes generales (optionnel)',
@@ -383,8 +363,6 @@ const translationsFr = {
   'sheep.edit.tagPlaceholder': 'Nouveau nom',
   'sheep.edit.earmarkLabel': 'Marque auriculaire',
   'sheep.edit.earmarkPlaceholder': 'Ajouter une marque auriculaire',
-  'sheep.edit.genderLabel': 'Sexe',
-  'sheep.edit.pedigreeLabel': 'Pedigree',
   'sheep.edit.submit': 'Enregistrer',
   'sheep.location.unknownPaddock': 'Pâturage inconnu',
   'sheep.location.unknownZone': 'Zone inconnue',
@@ -419,30 +397,25 @@ const translationsFr = {
   'aria.moveSheep': 'Déplacer {tag}',
   'aria.weatherForecast': 'Prévisions météo',
   'paddock.add.title': 'Ajouter un pâturage',
-  'paddock.add.nameLabel': 'Nom du pâturage',
-  'paddock.add.postcodeLabel': 'Code postal (optionnel)',
+  'paddock.nameLabel': 'Nom du pâturage',
+  'paddock.postcodeLabel': 'Code postal (optionnel)',
   'paddock.add.submit': 'Ajouter',
   'paddock.edit.title': 'Modifier le pâturage',
-  'paddock.edit.nameLabel': 'Nom du pâturage',
-  'paddock.edit.postcodeLabel': 'Code postal (optionnel)',
   'paddock.edit.submit': 'Enregistrer',
   'paddock.empty': 'Aucun pâturage',
   'paddock.sheep.singular': 'mouton',
   'paddock.sheep.plural': 'moutons',
   'paddock.zones.badge': '{count} zone(s)',
   'zone.add.title': 'Ajouter une zone',
-  'zone.add.paddockLabel': 'Pâturage',
-  'zone.add.nameLabel': 'Nom de la zone',
+  'zone.paddockLabel': 'Pâturage',
+  'zone.nameLabel': 'Nom de la zone',
   'zone.areaLabel': 'Surface (m2)',
   'zone.areaPlaceholderWithUnit': 'Surface (m2)',
-  'zone.add.perimeterLabel': 'Périmètre (m)',
+  'zone.perimeterLabel': 'Périmètre (m)',
   'zone.add.perimeterPlaceholder': 'Périmètre (m)',
   'zone.add.submit': 'Ajouter',
   'zone.edit.title': 'Modifier la zone',
-  'zone.edit.paddockLabel': 'Pâturage',
-  'zone.edit.nameLabel': 'Nom de la zone',
   'zone.edit.areaPlaceholder': 'Surface',
-  'zone.edit.perimeterLabel': 'Périmètre (m)',
   'zone.edit.perimeterPlaceholder': 'Périmètre',
   'zone.edit.submit': 'Enregistrer',
   'zone.status.occupied': 'Occupée',
@@ -514,14 +487,11 @@ const translationsFr = {
   'confirm.clearAll': 'Voulez-vous vraiment supprimer toutes les données ? Cette action est irréversible.',
   'unknown': 'Inconnu',
   'fieldZone': 'Pâturage / Zone',
-  'paddock.add.namePlaceholder': 'Nom du pâturage',
-  'paddock.add.postcodePlaceholder': 'Code postal (optionnel)',
+  'paddock.namePlaceholder': 'Nom du pâturage',
+  'paddock.postcodePlaceholder': 'Code postal (optionnel)',
   'paddock.notes.label': 'Notes',
   'paddock.notes.placeholder': 'Notes generales (optionnel)',
-  'paddock.edit.namePlaceholder': 'Nom du pâturage',
-  'paddock.edit.postcodePlaceholder': 'Code postal (optionnel)',
-  'zone.add.namePlaceholder': 'Nom de la zone',
-  'zone.edit.namePlaceholder': 'Nom de la zone',
+  'zone.namePlaceholder': 'Nom de la zone',
   'zone.notes.label': 'Notes',
   'zone.notes.placeholder': 'Notes generales (optionnel)'
 }
@@ -595,10 +565,10 @@ function applyStaticTranslations(){
   setText('sheep-modal-title', t('sheep.add.title'))
   setPlaceholder('sheep-modal-tag', t('sheep.add.tagPlaceholder'))
   setPlaceholder('sheep-modal-earmark', t('sheep.add.earmarkPlaceholder'))
-  setText('sheep-modal-gender-label', t('sheep.add.genderLabel'))
+  setText('sheep-modal-gender-label', t('sheep.genderLabel'))
   setText('sheep-modal-gender-female-label', t('sheep.gender.female'))
   setText('sheep-modal-gender-male-label', t('sheep.gender.male'))
-  setText('sheep-modal-pedigree-label', t('sheep.add.pedigreeLabel'))
+  setText('sheep-modal-pedigree-label', t('sheep.pedigreeLabel'))
   setText('sheep-modal-location-label', t('sheep.locationLabel'))
   setText('sheep-modal-notes-label', t('sheep.notes.label'))
   setPlaceholder('sheep-modal-notes', t('sheep.notes.placeholder'))
@@ -608,8 +578,8 @@ function applyStaticTranslations(){
   setPlaceholder('sheep-tag-edit-input', t('sheep.edit.tagPlaceholder'))
   setText('sheep-edit-earmark-label', t('sheep.edit.earmarkLabel'))
   setPlaceholder('sheep-edit-earmark-input', t('sheep.edit.earmarkPlaceholder'))
-  setText('sheep-edit-gender-label', t('sheep.edit.genderLabel'))
-  setText('sheep-edit-pedigree-label', t('sheep.edit.pedigreeLabel'))
+  setText('sheep-edit-gender-label', t('sheep.genderLabel'))
+  setText('sheep-edit-pedigree-label', t('sheep.pedigreeLabel'))
   setText('sheep-edit-location-label', t('sheep.locationLabel'))
   setText('sheep-edit-notes-label', t('sheep.notes.label'))
   setPlaceholder('sheep-edit-notes', t('sheep.notes.placeholder'))
@@ -617,22 +587,22 @@ function applyStaticTranslations(){
 
   // Paddock modals
   setText('paddock-modal-title', t('paddock.add.title'))
-  setPlaceholder('paddock-modal-name', t('paddock.add.namePlaceholder'))
-  setPlaceholder('paddock-modal-postcode', t('paddock.add.postcodePlaceholder'))
+  setPlaceholder('paddock-modal-name', t('paddock.namePlaceholder'))
+  setPlaceholder('paddock-modal-postcode', t('paddock.postcodePlaceholder'))
   setText('paddock-modal-notes-label', t('paddock.notes.label'))
   setPlaceholder('paddock-modal-notes', t('paddock.notes.placeholder'))
   setText('paddock-modal-submit', t('ui.add'))
   
   setText('paddock-edit-modal-title', t('paddock.edit.title'))
-  setPlaceholder('paddock-edit-name', t('paddock.edit.namePlaceholder'))
-  setPlaceholder('paddock-edit-postcode', t('paddock.edit.postcodePlaceholder'))
+  setPlaceholder('paddock-edit-name', t('paddock.namePlaceholder'))
+  setPlaceholder('paddock-edit-postcode', t('paddock.postcodePlaceholder'))
   setText('paddock-edit-notes-label', t('paddock.notes.label'))
   setPlaceholder('paddock-edit-notes', t('paddock.notes.placeholder'))
   setText('paddock-edit-submit', t('ui.save'))
 
   // Zone modals
   setText('zone-modal-title', t('zone.add.title'))
-  setPlaceholder('zone-modal-name', t('zone.add.namePlaceholder'))
+  setPlaceholder('zone-modal-name', t('zone.namePlaceholder'))
   setPlaceholder('zone-modal-area', t('zone.areaPlaceholderWithUnit'))
   setPlaceholder('zone-modal-perimeter', t('zone.add.perimeterPlaceholder'))
   setText('zone-modal-notes-label', t('zone.notes.label'))
@@ -640,7 +610,7 @@ function applyStaticTranslations(){
   setText('zone-modal-submit', t('ui.add'))
 
   setText('zone-edit-modal-title', t('zone.edit.title'))
-  setPlaceholder('zone-edit-name', t('zone.edit.namePlaceholder'))
+  setPlaceholder('zone-edit-name', t('zone.namePlaceholder'))
   setPlaceholder('zone-edit-area', t('zone.edit.areaPlaceholder'))
   setPlaceholder('zone-edit-perimeter', t('zone.edit.perimeterPlaceholder'))
   setText('zone-edit-notes-label', t('zone.notes.label'))
