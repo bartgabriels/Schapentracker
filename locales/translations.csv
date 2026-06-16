@@ -13,7 +13,7 @@
 "alert.stalPaddockDelete","De weide Stal kan niet worden verwijderd.","The Stal paddock cannot be deleted.","Le pÃ¢turage Stal ne peut pas Ãªtre supprimÃ©."
 "alert.stalZoneDelete","De Stal-zone kan niet worden verwijderd.","The Stal zone cannot be deleted.","La zone Stal ne peut pas Ãªtre supprimÃ©e."
 "alert.zoneMinimum","Een weide moet minstens 1 zone behouden.","A paddock must keep at least 1 zone.","Un pÃ¢turage doit conserver au moins 1 zone."
-"app.title","Schapentracker","Sheep Tracker","Suivi des moutons"
+"app.title","FlockOps","FlockOps","FlockOps"
 "aria.addPaddock","Weide toevoegen","Add paddock","Ajouter un pÃ¢turage"
 "aria.addSheep","Schaap toevoegen","Add sheep","Ajouter un mouton"
 "aria.addZone","Zone toevoegen","Add zone","Ajouter une zone"

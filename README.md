@@ -1,4 +1,4 @@
-# Schapentracker
+# FlockOps
 
 🇳🇱 **[Lees in het Nederlands](#nederlands)** | 🇬🇧 **[Read in English](#english)** | 🇫🇷 **[Lire en français](#francais)**
 
@@ -25,7 +25,7 @@ Use `locales/translations.csv` for translation work. This file is intended for t
 
 ## Nederlands
 
-Schapentracker is een lichte, browsergebaseerde applicatie om schapen te beheren over weides en zones. De app draait volledig in HTML, CSS en JavaScript (zonder verplichte backend) en bewaart data lokaal in je browser.
+FlockOps is een lichte, browsergebaseerde applicatie om schapen te beheren over weides en zones. De app draait volledig in HTML, CSS en JavaScript (zonder verplichte backend) en bewaart data lokaal in je browser.
 
 ### Taalinstellingen
 De app ondersteunt **volledige meertalige ondersteuning** met Nederlands, Engels en Frans. Gebruik de taalkeuzelijst bovenaan de pagina om tussen talen te schakelen. Je voorkeur wordt automatisch opgeslagen.
@@ -86,14 +86,14 @@ De hoofdinterface gebruikt 3 tabs om drukte te verminderen:
 - Caching van weersdata voor performantie.
 
 ### Databeheer
-- Lokale opslag via localStorage onder sleutel `schapentracker:data`.
+- Lokale opslag via localStorage onder sleutel `flockops:data`.
 - Gegevens exporteren naar JSON.
 - Gegevens importeren vanuit JSON.
 - Alle gegevens wissen met bevestiging.
 
 ## Gebruik
 
-1. Open https://bartgabriels.github.io/Schapentracker/ in een moderne browser.
+1. Open https://bartgabriels.github.io/FlockOps/ in een moderne browser.
 2. Kies je taal met de dropdown bovenaan (Nederlands/English/Français).
 3. Gebruik de tabs om tussen weides/zones, schapen en historiek te wisselen.
 4. Test snel met [dummy-data.json](dummy-data.json) via de importknop.
@@ -127,7 +127,7 @@ De map [server](server) is aanwezig in de repository, maar de frontend in deze r
 
 ## English
 
-Schapentracker is a lightweight, browser-based application for managing sheep across paddocks and zones. The app runs entirely in HTML, CSS, and JavaScript (no required backend) and stores data locally in your browser.
+FlockOps is a lightweight, browser-based application for managing sheep across paddocks and zones. The app runs entirely in HTML, CSS, and JavaScript (no required backend) and stores data locally in your browser.
 
 ### Language Settings
 The app supports **full multilingual support** with Dutch, English, and French. Use the language selector at the top of the page to switch between languages. Your preference is automatically saved.
@@ -188,14 +188,14 @@ The main interface uses 3 tabs to reduce visual clutter:
 - Weather data caching for performance.
 
 ### Data Management
-- Local storage via localStorage under key `schapentracker:data`.
+- Local storage via localStorage under key `flockops:data`.
 - Export data to JSON.
 - Import data from JSON.
 - Clear all data with confirmation.
 
 ## Usage
 
-1. Open https://bartgabriels.github.io/Schapentracker/ in a modern browser.
+1. Open https://bartgabriels.github.io/FlockOps/ in a modern browser.
 2. Choose your language with the dropdown at the top (Nederlands/English/Français).
 3. Use tabs to switch between paddocks/zones, sheep, and history.
 4. Quick-test import with [dummy-data.json](dummy-data.json).
@@ -229,7 +229,7 @@ The [server](server) directory is present in the repository, but the frontend in
 
 ## Francais
 
-Schapentracker est une application legere basee sur le navigateur pour gerer des moutons dans des paturages et des zones. L'application fonctionne entierement en HTML, CSS et JavaScript (sans backend obligatoire) et enregistre les donnees localement dans votre navigateur.
+FlockOps est une application legere basee sur le navigateur pour gerer des moutons dans des paturages et des zones. L'application fonctionne entierement en HTML, CSS et JavaScript (sans backend obligatoire) et enregistre les donnees localement dans votre navigateur.
 
 ### Parametres de langue
 L'application prend en charge une **localisation complete** en neerlandais, anglais et francais. Utilisez le selecteur de langue en haut de la page pour changer de langue. Votre preference est enregistree automatiquement.
@@ -290,14 +290,14 @@ L'interface principale utilise 3 onglets pour reduire l'encombrement visuel :
 - Mise en cache des donnees meteo pour de meilleures performances.
 
 ### Gestion des donnees
-- Stockage local via localStorage avec la cle `schapentracker:data`.
+- Stockage local via localStorage avec la cle `flockops:data`.
 - Export des donnees en JSON.
 - Import des donnees depuis JSON.
 - Effacement de toutes les donnees avec confirmation.
 
 ## Utilisation
 
-1. Ouvrez https://bartgabriels.github.io/Schapentracker/ dans un navigateur moderne.
+1. Ouvrez https://bartgabriels.github.io/FlockOps/ dans un navigateur moderne.
 2. Choisissez votre langue en haut de la page (Nederlands/English/Francais).
 3. Utilisez les onglets pour basculer entre paturages/zones, moutons et historique.
 4. Testez rapidement l'import avec [dummy-data.json](dummy-data.json).

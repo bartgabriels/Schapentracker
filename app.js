@@ -1,5 +1,5 @@
-const KEY = 'schapentracker:data'
-const LANG_KEY = 'schapentracker:lang'
+const KEY = 'flockops:data'
+const LANG_KEY = 'flockops:lang'
 const state = { paddocks: [], sheep: [], history: [] }
 const collapsedPaddockIds = new Set()
 const expandedWeatherPaddocks = new Set()
@@ -9,7 +9,7 @@ const WEATHER_TTL_MS = 60 * 60 * 1000
 
 const translations = {
   nl: {
-    'app.title': 'Schapentracker',
+    'app.title': 'FlockOps',
     'ui.save': 'Opslaan',
     'ui.upload': 'Upload',
     'ui.clear': 'Wissen',
@@ -931,7 +931,7 @@ function exportData(){
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = `schapentracker-${new Date().toISOString().slice(0,10)}.json`
+  link.download = `flockops-${new Date().toISOString().slice(0,10)}.json`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
