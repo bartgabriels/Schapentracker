@@ -50,7 +50,7 @@ Schapentracker is een lichte, browsergebaseerde applicatie om schapen te beheren
 
 ## Gebruik
 
-1. Open [index.html](index.html) in een moderne browser.
+1. Open https://bartgabriels.github.io/Schapentracker/ in een moderne browser.
 2. Voeg weides, zones en schapen toe.
 3. Gebruik de modals om te verplaatsen, bewerken of verwijderen.
 4. Data wordt automatisch opgeslagen in de browser.
