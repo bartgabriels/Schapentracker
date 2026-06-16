@@ -89,12 +89,18 @@
             </label>
           </div>
         </div>
+        <div class="modal-field">
+          <label>Stamboom</label>
+        </div>
         <select id="sheep-mother-modal">
           <option value="">Moederdier (optioneel, enkel ooien)</option>
         </select>
         <select id="sheep-father-modal">
           <option value="">Vaderdier (optioneel, enkel rammen)</option>
         </select>
+        <div class="modal-field">
+          <label>Locatie</label>
+        </div>
         <select id="sheep-paddock-modal"></select>
         <select id="sheep-zone-modal" disabled>
           <option value="">Kies eerst een weide</option>
@@ -126,11 +132,18 @@
             </label>
           </div>
         </div>
-        <select id="sheep-edit-mother-modal" disabled>
-          <option value="">Moederdier (optioneel, enkel ooien)</option>
+        <div class="modal-field">
+          <label>Stamboom</label>
+          <div id="sheep-edit-pedigree-display">"-" x "-"</div>
+        </div>
+        <div class="modal-field">
+          <label>Locatie</label>
+        </div>
+        <select id="sheep-edit-paddock-modal" disabled>
+          <option value="">Weide</option>
         </select>
-        <select id="sheep-edit-father-modal" disabled>
-          <option value="">Vaderdier (optioneel, enkel rammen)</option>
+        <select id="sheep-edit-zone-modal" disabled>
+          <option value="">Zone</option>
         </select>
         <button type="submit">Opslaan</button>
       </form>

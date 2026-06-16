@@ -20,6 +20,12 @@ Schapentracker is een lichte, browsergebaseerde applicatie om schapen te beheren
 ### Schapen
 - Schapen toevoegen, hernoemen, verplaatsen en verwijderen.
 - Schapen kunnen aan een specifieke weide en zone gekoppeld worden.
+- **Geslacht bijhouden**: Ooi (vrouw, ♀) of Ram (man, ♂) met gekleurde iconen.
+- **Stamboom/Genealogie**: Moeder- en vaderdieren selecteren bij toevoegen van een schaap.
+  - Moederselect toont alleen ooien.
+  - Vaderselect toont alleen rammen.
+  - Bij bewerken: stamboomweergave in format `"vadertag" x "moedertag"`.
+  - Ouderrelaties worden behouden en automatisch opgeschoond bij verwijderen.
 - Laatste wijzigingsdatum per schaap wordt bijgehouden.
 - Klik op een schaapnaam in een zone om meteen het verplaatsvenster te openen.
 
@@ -104,6 +110,9 @@ state = {
     {
       id: string,
       tag: string,
+      gender: 'female' | 'male' | null,
+      motherId: string | null,
+      fatherId: string | null,
       paddockId: string,
       zoneId: string | null,
       lastUpdated: timestamp

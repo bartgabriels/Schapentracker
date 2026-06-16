@@ -841,23 +841,31 @@ function openEditSheepTagModal(sheepId){
     radio.checked = radio.value === sheep.gender
   })
 
-  const editMotherSelect = document.getElementById('sheep-edit-mother-modal')
-  const editFatherSelect = document.getElementById('sheep-edit-father-modal')
-  const femaleOptions = state.sheep
-    .filter(s => s.gender === 'female')
-    .map(s => `<option value="${s.id}">${s.tag}</option>`)
-    .join('')
-  const maleOptions = state.sheep
-    .filter(s => s.gender === 'male')
-    .map(s => `<option value="${s.id}">${s.tag}</option>`)
-    .join('')
-  if(editMotherSelect){
-    editMotherSelect.innerHTML = `<option value="">Moederdier (optioneel, enkel ooien)</option>${femaleOptions}`
-    editMotherSelect.value = sheep.motherId || ''
+  const pedigreeDisplay = document.getElementById('sheep-edit-pedigree-display')
+  if(pedigreeDisplay){
+    const father = sheep.fatherId ? state.sheep.find(s => s.id === sheep.fatherId) : null
+    const mother = sheep.motherId ? state.sheep.find(s => s.id === sheep.motherId) : null
+    const fatherLabel = father ? father.tag : '-'
+    const motherLabel = mother ? mother.tag : '-'
+    pedigreeDisplay.textContent = `"${fatherLabel}" x "${motherLabel}"`
   }
-  if(editFatherSelect){
-    editFatherSelect.innerHTML = `<option value="">Vaderdier (optioneel, enkel rammen)</option>${maleOptions}`
-    editFatherSelect.value = sheep.fatherId || ''
+
+  const editPaddockSelect = document.getElementById('sheep-edit-paddock-modal')
+  const editZoneSelect = document.getElementById('sheep-edit-zone-modal')
+  const paddock = getPaddock(sheep.paddockId)
+  const zone = sheep.zoneId ? getZone(sheep.paddockId, sheep.zoneId) : null
+  if(editPaddockSelect){
+    editPaddockSelect.innerHTML = `<option value="${sheep.paddockId}">${paddock ? paddock.name : 'Onbekend'}</option>`
+    editPaddockSelect.value = sheep.paddockId
+  }
+  if(editZoneSelect){
+    if(sheep.zoneId){
+      editZoneSelect.innerHTML = `<option value="${sheep.zoneId}">${zone ? zone.name : 'Onbekend'}</option>`
+      editZoneSelect.value = sheep.zoneId
+    } else {
+      editZoneSelect.innerHTML = '<option value="">Geen zone</option>'
+      editZoneSelect.value = ''
+    }
   }
 
   const modal = document.getElementById('sheep-tag-edit-modal')
