@@ -5,7 +5,13 @@ const expandedWeatherPaddocks = new Set()
 const weatherCache = {}
 const weatherLoading = new Set()
 const WEATHER_TTL_MS = 60 * 60 * 1000
-const ZIP_COUNTRIES = ['BE', 'NL']
+
+function detectPostcodeCountry(postcode){
+  const normalized = postcode.trim().toUpperCase().replace(/\s+/g, '')
+  if(/^\d{4}$/.test(normalized)) return 'BE'
+  if(/^\d{4}[A-Z]{2}$/.test(normalized)) return 'NL'
+  return null
+}
 
 function weatherLabel(code){
   if(code === 0) return 'Zonnig'
@@ -30,24 +36,45 @@ async function fetchJson(url){
   return response.json()
 }
 
-async function resolveCoordinatesByPostcode(postcode){
-  for(const country of ZIP_COUNTRIES){
-    try {
-      const url = `https://api.zippopotam.us/${country}/${encodeURIComponent(postcode)}`
-      const data = await fetchJson(url)
-      if(Array.isArray(data.places) && data.places.length){
-        const place = data.places[0]
-        const lat = Number(place.latitude)
-        const lon = Number(place.longitude)
-        if(Number.isFinite(lat) && Number.isFinite(lon)){
-          return { lat, lon, country, place: place['place name'] || postcode }
-        }
-      }
-    } catch (err) {
-      // Try next country code
+async function resolveCoordinatesViaNominatim(postcode, country){
+  const normalizedPostcode = postcode.trim().toUpperCase().replace(/\s+/g, '')
+  const url = `https://nominatim.openstreetmap.org/search?countrycodes=${country.toLowerCase()}&postalcode=${encodeURIComponent(normalizedPostcode)}&format=jsonv2&limit=1`
+  const data = await fetchJson(url)
+  if(Array.isArray(data) && data.length){
+    const place = data[0]
+    const lat = Number(place.lat)
+    const lon = Number(place.lon)
+    if(Number.isFinite(lat) && Number.isFinite(lon)){
+      return { lat, lon, country, place: place.name || place.display_name || normalizedPostcode }
     }
   }
   throw new Error('Postcode niet gevonden')
+}
+
+async function resolveCoordinatesByPostcode(postcode){
+  const country = detectPostcodeCountry(postcode)
+  if(!country) throw new Error('Onbekend postcodeformaat')
+
+  const normalizedPostcode = country === 'NL'
+    ? postcode.trim().toUpperCase().replace(/\s+/g, '')
+    : postcode.trim()
+
+  try {
+    const url = `https://api.zippopotam.us/${country}/${encodeURIComponent(normalizedPostcode)}`
+    const data = await fetchJson(url)
+    if(Array.isArray(data.places) && data.places.length){
+      const place = data.places[0]
+      const lat = Number(place.latitude)
+      const lon = Number(place.longitude)
+      if(Number.isFinite(lat) && Number.isFinite(lon)){
+        return { lat, lon, country, place: place['place name'] || normalizedPostcode }
+      }
+    }
+  } catch (err) {
+    return resolveCoordinatesViaNominatim(normalizedPostcode, country)
+  }
+
+  return resolveCoordinatesViaNominatim(normalizedPostcode, country)
 }
 
 async function loadWeatherForPostcode(postcode){
