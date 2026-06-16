@@ -1126,32 +1126,17 @@ document.getElementById('sheep-tag-edit-form')?.addEventListener('submit', e => 
   if(!activeEditSheepId) return
 
   const input = document.getElementById('sheep-tag-edit-input')
-  const selectedGender = document.querySelector('input[name="sheep-edit-gender"]:checked')
   const nextTag = input ? input.value.trim() : ''
-  const nextGender = selectedGender ? selectedGender.value : null
-  if(!nextTag || !nextGender) return
+  if(!nextTag) return
 
   const sheep = state.sheep.find(s => s.id === activeEditSheepId)
   if(!sheep) return
 
   const previousTag = sheep.tag
-  const previousGender = sheep.gender
   sheep.tag = nextTag
-  sheep.gender = nextGender
-  if(previousGender !== nextGender){
-    state.sheep.forEach(s => {
-      if(nextGender === 'male' && s.motherId === sheep.id){
-        s.motherId = null
-      }
-      if(nextGender === 'female' && s.fatherId === sheep.id){
-        s.fatherId = null
-      }
-    })
-  }
   sheep.lastUpdated = Date.now()
-  const genderLabel = value => value === 'female' ? 'Ooi' : value === 'male' ? 'Ram' : '-'
-  if(previousTag !== nextTag || previousGender !== nextGender){
-    addHistory('schaap', `Schaap bijgewerkt: naam ${previousTag} -> ${nextTag}${previousGender !== nextGender ? `, geslacht ${genderLabel(previousGender)} -> ${genderLabel(nextGender)}` : ''}`)
+  if(previousTag !== nextTag){
+    addHistory('schaap', `Schaap hernoemt: ${previousTag} -> ${nextTag}`)
   }
   save(); render(); closeEditSheepTagModal()
 })
