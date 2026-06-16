@@ -1,5 +1,5 @@
 const KEY = 'schapentracker:data'
-const state = { paddocks: [], sheep: [] }
+const state = { paddocks: [], sheep: [], history: [] }
 let expandedPaddockId = null
 
 function ensureDefaultStal(){
@@ -33,6 +33,12 @@ function load(){
       zoneId: s.zoneId ?? null,
       lastUpdated: s.lastUpdated ?? Date.now()
     })) : []
+    state.history = Array.isArray(saved.history) ? saved.history.map(h => ({
+      id: h.id || uid(),
+      ts: h.ts ?? Date.now(),
+      entity: h.entity || 'systeem',
+      message: h.message || ''
+    })) : []
   }
   ensureDefaultStal()
   updateZoneEmptyStates()
@@ -45,6 +51,13 @@ function save(){
 
 function formatDate(timestamp){
   return new Date(timestamp).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function formatDateTime(timestamp){
+  return new Date(timestamp).toLocaleString('nl-NL', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
 }
 
 function daysSince(timestamp){
@@ -64,6 +77,22 @@ function updateZoneEmptyStates(){
       }
     })
   })
+}
+
+function addHistory(entity, message){
+  state.history.unshift({
+    id: uid(),
+    ts: Date.now(),
+    entity,
+    message
+  })
+  if(state.history.length > 400){
+    state.history = state.history.slice(0, 400)
+  }
+}
+
+function sheepNamesList(sheepItems){
+  return sheepItems.map(s => s.tag).join(', ')
 }
 
 function exportData(){
@@ -101,8 +130,15 @@ function importDataFile(file){
         zoneId: s.zoneId ?? null,
         lastUpdated: s.lastUpdated ?? Date.now()
       })) : []
+      state.history = Array.isArray(parsed.history) ? parsed.history.map(h => ({
+        id: h.id || uid(),
+        ts: h.ts ?? Date.now(),
+        entity: h.entity || 'systeem',
+        message: h.message || ''
+      })) : []
       ensureDefaultStal()
       updateZoneEmptyStates()
+      addHistory('systeem', 'Gegevens geïmporteerd uit bestand')
       save(); render()
       alert('Gegevens succesvol geladen.')
     } catch (err) {
@@ -116,6 +152,7 @@ function render(){
   updateZoneEmptyStates()
   const paddockList = document.getElementById('paddock-list')
   const sheepList = document.getElementById('sheep-list')
+  const historyList = document.getElementById('history-list')
   const sheepPaddockModal = document.getElementById('sheep-paddock-modal')
   const sheepZoneModal = document.getElementById('sheep-zone-modal')
   const movePaddockModal = document.getElementById('move-paddock-modal')
@@ -142,6 +179,13 @@ function render(){
         <span class="add-zone-icon">+</span>
       </button>
     `
+
+  if(historyList){
+    historyList.classList.toggle('is-scrollable', state.history.length > 5)
+    historyList.innerHTML = state.history.length
+      ? state.history.map(h => `<div class="history-item"><span class="history-meta">${formatDateTime(h.ts)} - ${h.entity}</span><span class="history-message">${h.message}</span></div>`).join('')
+      : '<div class="empty">Nog geen wijzigingen geregistreerd.</div>'
+  }
 
   if(sheepPaddockModal && sheepZoneModal){
     setSheepModalDefaultSelection()
@@ -336,6 +380,8 @@ function openZoneDeleteMoveModal(sourcePaddockId, sourceZoneId, sheepCount){
     .map(z => ({ paddockId: sourcePaddockId, zoneId: z.id }))
   if(allTargets.length === 1){
     const target = allTargets[0]
+    const sheepToMove = state.sheep.filter(s => s.paddockId === sourcePaddockId && s.zoneId === sourceZoneId)
+    const movedNames = sheepNamesList(sheepToMove)
     state.sheep.forEach(s => {
       if(s.paddockId === sourcePaddockId && s.zoneId === sourceZoneId){
         s.paddockId = target.paddockId
@@ -344,6 +390,7 @@ function openZoneDeleteMoveModal(sourcePaddockId, sourceZoneId, sheepCount){
       }
     })
     sourcePaddock.zones = sourcePaddock.zones.filter(z => z.id !== sourceZoneId)
+    addHistory('zone', `Zone ${sourcePaddock.name} / ${sourceZone.name} verwijderd en schapen automatisch verplaatst naar ${paddockName(target.paddockId)} / ${zoneName(target.paddockId, target.zoneId)}: ${movedNames}`)
     save(); render()
     return
   }
@@ -474,6 +521,8 @@ function openPaddockDeleteMoveModal(sourcePaddockId, sheepCount){
   const allTargets = targetPaddocks.flatMap(p => p.zones.map(z => ({ paddockId: p.id, zoneId: z.id })))
   if(allTargets.length === 1){
     const target = allTargets[0]
+    const sheepToMove = state.sheep.filter(s => s.paddockId === sourcePaddockId)
+    const movedNames = sheepNamesList(sheepToMove)
     state.sheep.forEach(s => {
       if(s.paddockId === sourcePaddockId){
         s.paddockId = target.paddockId
@@ -483,6 +532,7 @@ function openPaddockDeleteMoveModal(sourcePaddockId, sheepCount){
     })
     state.paddocks = state.paddocks.filter(p => p.id !== sourcePaddockId)
     if(expandedPaddockId === sourcePaddockId) expandedPaddockId = null
+    addHistory('weide', `Weide ${sourcePaddock.name} verwijderd en schapen automatisch verplaatst naar ${paddockName(target.paddockId)} / ${zoneName(target.paddockId, target.zoneId)}: ${movedNames}`)
     save(); render()
     return
   }
@@ -607,8 +657,10 @@ document.getElementById('clear-data-btn')?.addEventListener('click', () => {
   if(!confirm('Weet je zeker dat je alle gegevens wilt wissen? Dit kan niet ongedaan worden gemaakt.')) return
   state.paddocks = []
   state.sheep = []
+  state.history = []
   expandedPaddockId = null
   ensureDefaultStal()
+  addHistory('systeem', 'Alle gegevens gewist')
   localStorage.removeItem(KEY)
   save()
   render()
@@ -651,9 +703,12 @@ document.getElementById('move-modal-form')?.addEventListener('submit', e => {
   const zoneId = document.getElementById('move-zone-modal').value
   const sheep = state.sheep.find(x => x.id === activeMoveSheepId)
   if(!sheep || !paddockId) return
+  const fromLabel = `${paddockName(sheep.paddockId)}${sheep.zoneId ? ' / ' + zoneName(sheep.paddockId, sheep.zoneId) : ''}`
+  const toLabel = `${paddockName(paddockId)}${zoneId ? ' / ' + zoneName(paddockId, zoneId) : ''}`
   sheep.paddockId = paddockId
   sheep.zoneId = zoneId || null
   sheep.lastUpdated = Date.now()
+  addHistory('schaap', `${sheep.tag} verplaatst van ${fromLabel} naar ${toLabel}`)
   save(); render(); closeModal('move-modal')
 })
 
@@ -662,6 +717,7 @@ document.getElementById('paddock-modal-form')?.addEventListener('submit', e => {
   const name = document.getElementById('paddock-modal-name').value.trim()
   if(!name) return
   state.paddocks.push({id:uid(), name, zones: []})
+  addHistory('weide', `Weide ${name} toegevoegd`)
   document.getElementById('paddock-modal-name').value = ''
   save(); render(); closeModal('paddock-modal')
 })
@@ -673,6 +729,7 @@ document.getElementById('sheep-modal-form')?.addEventListener('submit', e => {
   const zoneId = document.getElementById('sheep-zone-modal').value
   if(!tag || !paddockId) return
   state.sheep.push({id:uid(), tag, paddockId, zoneId: zoneId || null, lastUpdated: Date.now()})
+  addHistory('schaap', `${tag} toegevoegd in ${paddockName(paddockId)}${zoneId ? ' / ' + zoneName(paddockId, zoneId) : ''}`)
   document.getElementById('sheep-modal-tag').value = ''
   document.getElementById('sheep-zone-modal').value = ''
   save(); render(); closeModal('sheep-modal')
@@ -689,8 +746,10 @@ document.getElementById('sheep-tag-edit-form')?.addEventListener('submit', e => 
   const sheep = state.sheep.find(s => s.id === activeEditSheepId)
   if(!sheep) return
 
+  const previousTag = sheep.tag
   sheep.tag = nextTag
   sheep.lastUpdated = Date.now()
+  addHistory('schaap', `Naam gewijzigd van ${previousTag} naar ${nextTag}`)
   save(); render(); closeEditSheepTagModal()
 })
 
@@ -790,6 +849,9 @@ document.getElementById('zone-delete-move-form')?.addEventListener('submit', e =
 
   const sourcePaddock = getPaddock(pendingZoneDeletion.sourcePaddockId)
   if(!sourcePaddock) return
+  const sourceZone = getZone(pendingZoneDeletion.sourcePaddockId, pendingZoneDeletion.sourceZoneId)
+  const sheepToMove = state.sheep.filter(s => s.paddockId === pendingZoneDeletion.sourcePaddockId && s.zoneId === pendingZoneDeletion.sourceZoneId)
+  const movedNames = sheepNamesList(sheepToMove)
 
   state.sheep.forEach(s => {
     if(s.paddockId === pendingZoneDeletion.sourcePaddockId && s.zoneId === pendingZoneDeletion.sourceZoneId){
@@ -800,6 +862,7 @@ document.getElementById('zone-delete-move-form')?.addEventListener('submit', e =
   })
 
   sourcePaddock.zones = sourcePaddock.zones.filter(z => z.id !== pendingZoneDeletion.sourceZoneId)
+  addHistory('zone', `Zone ${sourcePaddock.name} / ${sourceZone ? sourceZone.name : 'Onbekend'} verwijderd en schapen verplaatst naar ${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}: ${movedNames}`)
   save(); render(); closeZoneDeleteMoveModal()
 })
 
@@ -810,6 +873,9 @@ document.getElementById('paddock-delete-move-form')?.addEventListener('submit', 
   const targetPaddockId = document.getElementById('paddock-delete-target-paddock-modal').value
   const targetZoneId = document.getElementById('paddock-delete-target-zone-modal').value
   if(!targetPaddockId || !targetZoneId) return
+  const sourcePaddock = getPaddock(pendingPaddockDeletion.sourcePaddockId)
+  const sheepToMove = state.sheep.filter(s => s.paddockId === pendingPaddockDeletion.sourcePaddockId)
+  const movedNames = sheepNamesList(sheepToMove)
 
   state.sheep.forEach(s => {
     if(s.paddockId === pendingPaddockDeletion.sourcePaddockId){
@@ -821,6 +887,7 @@ document.getElementById('paddock-delete-move-form')?.addEventListener('submit', 
 
   state.paddocks = state.paddocks.filter(p => p.id !== pendingPaddockDeletion.sourcePaddockId)
   if(expandedPaddockId === pendingPaddockDeletion.sourcePaddockId) expandedPaddockId = null
+  addHistory('weide', `Weide ${sourcePaddock ? sourcePaddock.name : 'Onbekend'} verwijderd en schapen verplaatst naar ${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}: ${movedNames}`)
   save(); render(); closePaddockDeleteMoveModal()
 })
 
@@ -831,6 +898,10 @@ document.getElementById('zone-bulk-move-form')?.addEventListener('submit', e => 
   const targetPaddockId = document.getElementById('zone-bulk-move-target-paddock-modal').value
   const targetZoneId = document.getElementById('zone-bulk-move-target-zone-modal').value
   if(!targetPaddockId || !targetZoneId) return
+  const sourcePaddock = getPaddock(pendingZoneBulkMove.sourcePaddockId)
+  const sourceZone = getZone(pendingZoneBulkMove.sourcePaddockId, pendingZoneBulkMove.sourceZoneId)
+  const sheepToMove = state.sheep.filter(s => s.paddockId === pendingZoneBulkMove.sourcePaddockId && s.zoneId === pendingZoneBulkMove.sourceZoneId)
+  const movedNames = sheepNamesList(sheepToMove)
 
   state.sheep.forEach(s => {
     if(s.paddockId === pendingZoneBulkMove.sourcePaddockId && s.zoneId === pendingZoneBulkMove.sourceZoneId){
@@ -840,6 +911,7 @@ document.getElementById('zone-bulk-move-form')?.addEventListener('submit', e => 
     }
   })
 
+  addHistory('schaap', `${movedNames} verplaatst van ${sourcePaddock ? sourcePaddock.name : 'Onbekend'} / ${sourceZone ? sourceZone.name : 'Onbekend'} naar ${paddockName(targetPaddockId)} / ${zoneName(targetPaddockId, targetZoneId)}`)
   save(); render(); closeZoneBulkMoveModal()
 })
 
@@ -864,7 +936,11 @@ document.getElementById('sheep-list')?.addEventListener('click', e => {
   if(deleteButton){
     const sheepId = deleteButton.dataset.id
     if(!sheepId) return
+    const sheep = state.sheep.find(s => s.id === sheepId)
     state.sheep = state.sheep.filter(s => s.id !== sheepId)
+    if(sheep){
+      addHistory('schaap', `${sheep.tag} verwijderd uit ${paddockName(sheep.paddockId)}${sheep.zoneId ? ' / ' + zoneName(sheep.paddockId, sheep.zoneId) : ''}`)
+    }
     save(); render()
     return
   }
@@ -915,6 +991,7 @@ document.getElementById('paddock-list').addEventListener('click', e => {
     }
     state.paddocks = state.paddocks.filter(p => p.id !== paddockId)
     if(expandedPaddockId === paddockId) expandedPaddockId = null
+    addHistory('weide', `Weide ${paddock.name} verwijderd`)
     save(); render()
     return
   }
@@ -946,6 +1023,7 @@ document.getElementById('paddock-list').addEventListener('click', e => {
     }
 
     paddock.zones = paddock.zones.filter(z => z.id !== zoneId)
+    addHistory('zone', `Zone ${paddock.name} / ${zone.name} verwijderd`)
     save(); render()
     return
   }
@@ -982,6 +1060,7 @@ document.getElementById('zone-modal-form')?.addEventListener('submit', e => {
   const paddock = getPaddock(paddockId)
   if(!paddock) return
   paddock.zones.push({id:uid(),name:zoneName,emptySince: Date.now()})
+  addHistory('zone', `Zone ${zoneName} toegevoegd in weide ${paddock.name}`)
   save(); render(); closeModal('zone-modal')
 })
 
