@@ -170,6 +170,9 @@ function load(){
     state.sheep = Array.isArray(saved.sheep) ? saved.sheep.map(s => ({
       id: s.id,
       tag: s.tag,
+      gender: s.gender === 'male' || s.gender === 'female' ? s.gender : null,
+      motherId: s.motherId ?? null,
+      fatherId: s.fatherId ?? null,
       paddockId: s.paddockId,
       zoneId: s.zoneId ?? null,
       lastUpdated: s.lastUpdated ?? Date.now()
@@ -274,6 +277,9 @@ function importDataFile(file){
       state.sheep = Array.isArray(parsed.sheep) ? parsed.sheep.map(s => ({
         id: s.id,
         tag: s.tag,
+        gender: s.gender === 'male' || s.gender === 'female' ? s.gender : null,
+        motherId: s.motherId ?? null,
+        fatherId: s.fatherId ?? null,
         paddockId: s.paddockId,
         zoneId: s.zoneId ?? null,
         lastUpdated: s.lastUpdated ?? Date.now()
@@ -313,7 +319,7 @@ function render(){
   sheepList.innerHTML = state.sheep.map(s => `
       <div class="sheep-card">
         <div class="sheep-card-body">
-          <button type="button" class="sheep-tag-edit-button" data-id="${s.id}" aria-label="Naam wijzigen voor ${s.tag}">${s.tag}</button>
+          <button type="button" class="sheep-tag-edit-button" data-id="${s.id}" aria-label="Naam wijzigen voor ${s.tag}">${genderIcon(s.gender)}${s.tag}</button>
           <small>${paddockName(s.paddockId)}${s.zoneId ? ' / ' + zoneName(s.paddockId, s.zoneId) : ''}</small>
           <small>Laatst gewijzigd: ${formatDate(s.lastUpdated)} (${daysSince(s.lastUpdated)} dagen geleden)</small>
         </div>
@@ -338,6 +344,7 @@ function render(){
   if(sheepPaddockModal && sheepZoneModal){
     setSheepModalDefaultSelection()
   }
+  populateParentSheepSelects()
 
   if(movePaddockModal){
     populatePaddockSelect(movePaddockModal)
@@ -449,6 +456,26 @@ function setSheepModalDefaultSelection(){
   }
 }
 
+function populateParentSheepSelects(){
+  const motherSelect = document.getElementById('sheep-mother-modal')
+  const fatherSelect = document.getElementById('sheep-father-modal')
+  const femaleOptions = state.sheep
+    .filter(s => s.gender === 'female')
+    .map(s => `<option value="${s.id}">${s.tag}</option>`)
+    .join('')
+  const maleOptions = state.sheep
+    .filter(s => s.gender === 'male')
+    .map(s => `<option value="${s.id}">${s.tag}</option>`)
+    .join('')
+
+  if(motherSelect){
+    motherSelect.innerHTML = `<option value="">Moederdier</option>${femaleOptions}`
+  }
+  if(fatherSelect){
+    fatherSelect.innerHTML = `<option value="">Vaderdier</option>${maleOptions}`
+  }
+}
+
 function populatePaddockSelect(select){
   if(!select) return
   select.innerHTML = `<option value="" selected disabled hidden>Kies weide</option>` + state.paddocks.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
@@ -462,6 +489,12 @@ function zoneSheepNames(paddockId, zoneId){
 
 function sheepIcon(){
   return `<img src="schaap.png" alt="schaap" class="sheep-icon"/>`
+}
+
+function genderIcon(gender){
+  if(gender === 'male') return `<span class="gender-symbol male" aria-hidden="true">♂</span>`
+  if(gender === 'female') return `<span class="gender-symbol female" aria-hidden="true">♀</span>`
+  return ''
 }
 
 function uid(){ return Math.random().toString(36).slice(2,9) }
@@ -804,6 +837,28 @@ function openEditSheepTagModal(sheepId){
   if(input){
     input.value = sheep.tag
   }
+  document.querySelectorAll('input[name="sheep-edit-gender"]').forEach(radio => {
+    radio.checked = radio.value === sheep.gender
+  })
+
+  const editMotherSelect = document.getElementById('sheep-edit-mother-modal')
+  const editFatherSelect = document.getElementById('sheep-edit-father-modal')
+  const femaleOptions = state.sheep
+    .filter(s => s.gender === 'female')
+    .map(s => `<option value="${s.id}">${s.tag}</option>`)
+    .join('')
+  const maleOptions = state.sheep
+    .filter(s => s.gender === 'male')
+    .map(s => `<option value="${s.id}">${s.tag}</option>`)
+    .join('')
+  if(editMotherSelect){
+    editMotherSelect.innerHTML = `<option value="">Moederdier (optioneel, enkel ooien)</option>${femaleOptions}`
+    editMotherSelect.value = sheep.motherId || ''
+  }
+  if(editFatherSelect){
+    editFatherSelect.innerHTML = `<option value="">Vaderdier (optioneel, enkel rammen)</option>${maleOptions}`
+    editFatherSelect.value = sheep.fatherId || ''
+  }
 
   const modal = document.getElementById('sheep-tag-edit-modal')
   if(modal){
@@ -1037,12 +1092,23 @@ document.getElementById('zone-edit-form')?.addEventListener('submit', e => {
 document.getElementById('sheep-modal-form')?.addEventListener('submit', e => {
   e.preventDefault()
   const tag = document.getElementById('sheep-modal-tag').value.trim()
+  const selectedGender = document.querySelector('input[name="sheep-modal-gender"]:checked')
+  const gender = selectedGender ? selectedGender.value : null
+  const motherId = document.getElementById('sheep-mother-modal').value || null
+  const fatherId = document.getElementById('sheep-father-modal').value || null
   const paddockId = document.getElementById('sheep-paddock-modal').value
   const zoneId = document.getElementById('sheep-zone-modal').value
-  if(!tag || !paddockId) return
-  state.sheep.push({id:uid(), tag, paddockId, zoneId: zoneId || null, lastUpdated: Date.now()})
+  if(!tag || !paddockId || !gender) return
+  if(motherId && !state.sheep.some(s => s.id === motherId && s.gender === 'female')) return
+  if(fatherId && !state.sheep.some(s => s.id === fatherId && s.gender === 'male')) return
+  state.sheep.push({id:uid(), tag, gender, motherId, fatherId, paddockId, zoneId: zoneId || null, lastUpdated: Date.now()})
   addHistory('schaap', `${tag} toegevoegd in ${paddockName(paddockId)}${zoneId ? ' / ' + zoneName(paddockId, zoneId) : ''}`)
   document.getElementById('sheep-modal-tag').value = ''
+  document.querySelectorAll('input[name="sheep-modal-gender"]').forEach(radio => {
+    radio.checked = false
+  })
+  document.getElementById('sheep-mother-modal').value = ''
+  document.getElementById('sheep-father-modal').value = ''
   document.getElementById('sheep-zone-modal').value = ''
   save(); render(); closeModal('sheep-modal')
 })
@@ -1052,16 +1118,33 @@ document.getElementById('sheep-tag-edit-form')?.addEventListener('submit', e => 
   if(!activeEditSheepId) return
 
   const input = document.getElementById('sheep-tag-edit-input')
+  const selectedGender = document.querySelector('input[name="sheep-edit-gender"]:checked')
   const nextTag = input ? input.value.trim() : ''
-  if(!nextTag) return
+  const nextGender = selectedGender ? selectedGender.value : null
+  if(!nextTag || !nextGender) return
 
   const sheep = state.sheep.find(s => s.id === activeEditSheepId)
   if(!sheep) return
 
   const previousTag = sheep.tag
+  const previousGender = sheep.gender
   sheep.tag = nextTag
+  sheep.gender = nextGender
+  if(previousGender !== nextGender){
+    state.sheep.forEach(s => {
+      if(nextGender === 'male' && s.motherId === sheep.id){
+        s.motherId = null
+      }
+      if(nextGender === 'female' && s.fatherId === sheep.id){
+        s.fatherId = null
+      }
+    })
+  }
   sheep.lastUpdated = Date.now()
-  addHistory('schaap', `Naam gewijzigd van ${previousTag} naar ${nextTag}`)
+  const genderLabel = value => value === 'female' ? 'Ooi' : value === 'male' ? 'Ram' : '-'
+  if(previousTag !== nextTag || previousGender !== nextGender){
+    addHistory('schaap', `Schaap bijgewerkt: naam ${previousTag} -> ${nextTag}${previousGender !== nextGender ? `, geslacht ${genderLabel(previousGender)} -> ${genderLabel(nextGender)}` : ''}`)
+  }
   save(); render(); closeEditSheepTagModal()
 })
 
@@ -1251,6 +1334,14 @@ document.getElementById('sheep-list')?.addEventListener('click', e => {
     if(!sheepId) return
     const sheep = state.sheep.find(s => s.id === sheepId)
     state.sheep = state.sheep.filter(s => s.id !== sheepId)
+    state.sheep.forEach(s => {
+      if(s.motherId === sheepId){
+        s.motherId = null
+      }
+      if(s.fatherId === sheepId){
+        s.fatherId = null
+      }
+    })
     if(sheep){
       addHistory('schaap', `${sheep.tag} verwijderd uit ${paddockName(sheep.paddockId)}${sheep.zoneId ? ' / ' + zoneName(sheep.paddockId, sheep.zoneId) : ''}`)
     }

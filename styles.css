@@ -86,6 +86,14 @@ input,select,button,textarea{
   border-radius:4px;
 }
 
+input[type="radio"]{
+  width:auto;
+  max-width:none;
+  padding:0;
+  border:none;
+  border-radius:50%;
+}
+
 .group-form{
   display:flex;
   flex-direction:column;
@@ -242,11 +250,6 @@ button.add-zone-button:hover {
   color:#9f1239;
 }
 
-.paddock-sheep-count{
-  color:#64748b;
-  font-size:0.75rem;
-}
-
 .paddock-postcode{
   color:#475569;
   font-size:0.75rem;
@@ -258,6 +261,16 @@ button.add-zone-button:hover {
 }
 
 .paddock-metric{
+  color:#475569;
+  font-size:0.75rem;
+  background:#f4f6f8;
+  border:1px solid #dde4ea;
+  border-radius:999px;
+  padding:1px 7px;
+  white-space:nowrap;
+}
+
+.paddock-sheep-count{
   color:#475569;
   font-size:0.75rem;
   background:#f4f6f8;
@@ -865,6 +878,41 @@ form button{
   font-weight:700;
   margin-bottom:4px;
   font-size:0.9rem;
+}
+
+.gender-radio-group{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.gender-option{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  width:auto;
+  border:1px solid #d7e0e6;
+  border-radius:999px;
+  background:#f8fbf9;
+  padding:4px 10px;
+  cursor:pointer;
+}
+
+.gender-symbol{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1rem;
+  line-height:1;
+  margin-right:4px;
+}
+
+.gender-symbol.male{
+  color:#1d4ed8;
+}
+
+.gender-symbol.female{
+  color:#be185d;
 }
 
 #move-modal-sheep-name{
