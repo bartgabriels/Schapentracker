@@ -4,6 +4,18 @@
 
 ---
 
+## Changelog
+
+### Recent Updates
+- **Icon Replacements**: SVG icons replaced with PNG images for better visual customization:
+  - Syringe icon → `spuit.png`
+  - Scissors icon → `schaar.png`
+  - Calendar icon → `calender.png`
+  - Repeat icon → `repeat.png`
+  - Recycle bin icon remains as SVG
+
+---
+
 ## Translator Workflow
 
 Use `locales/translations.csv` for translation work. This file is intended for translators and contains no application logic.
@@ -69,6 +81,17 @@ De hoofdinterface gebruikt 3 tabs om drukte te verminderen:
 - Laatste wijzigingsdatum per schaap wordt bijgehouden.
 - Klik op een schaapnaam in een zone om meteen het verplaatsvenster te openen.
 - Verwijderen en verplaatsen via stijlvolle knoppen met bevestigingsmodal (geen browser-alert).
+
+### Werkstromen: Verjaardagen, Scheren en Injecties
+- **Geboortedatum**: Stel een geboortedatum in per schaap om automatisch de leeftijd te berekenen en weer te geven.
+- **Scheren (knippen wol)**: Registreer de laatste scheerdate en zichtbare kalender voor volgende scheerbeurt.
+  - Klik op het schaarknop op de schaapkaart of in de zoneweergave.
+  - Volg de workflow in de modal om de datum in te stellen.
+- **Injecties**: Beheer injectiedatums en volgende injectieschema's.
+  - Klik op het spuitknop om een injectie te registreren (laatste datum + volgende datum).
+  - Beheer zowel individuele schaapinjecties als bulkinjecties per weide.
+  - Schapen tonen beide: laatste injectiedatum en geplande volgende injectiedatum.
+  - Workflows werken zowel op individuele schaapniveau als op weideniveau (bulkacties).
 
 ### Slimme verplaats- en verwijderlogica
 - Automatische zonekeuze wanneer er maar 1 geldige doelzone bestaat.
@@ -177,6 +200,17 @@ The main interface uses 3 tabs to reduce visual clutter:
 - Last update timestamp is tracked per sheep.
 - Click a sheep name in a zone to immediately open the move dialog.
 - Delete and move via styled buttons with confirmation modal (no browser alert).
+
+### Workflows: Birthdays, Shearing and Injections
+- **Birth Date**: Set a birth date per sheep to automatically calculate and display the sheep's age.
+- **Shearing (wool trimming)**: Record the last shearing date and track the next shearing schedule.
+  - Click the scissors button on the sheep card or in the zone view.
+  - Follow the workflow in the modal to set the date.
+- **Injections**: Manage injection dates and next injection schedules.
+  - Click the syringe button to register an injection (last date + next date).
+  - Manage both individual sheep injections and bulk injections per paddock.
+  - Sheep display both: last injection date and planned next injection date.
+  - Workflows work at both individual sheep level and paddock level (bulk actions).
 
 ### Smart move and delete logic
 - Automatic zone selection when there is only 1 valid target zone.
