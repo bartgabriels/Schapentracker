@@ -8,8 +8,8 @@
 </head>
 <body>
   <main class="wrap">
-    <h1>Schapentracker</h1>
-    <div class="section-header">
+    <div class="top-bar">
+      <h1>Schapentracker</h1>
       <div class="action-row">
         <button id="download-data-btn" type="button" class="section-button">Opslaan</button>
         <button id="upload-data-btn" type="button" class="section-button">Upload</button>
@@ -58,6 +58,18 @@
           <option value="">Kies eerst een weide</option>
         </select>
         <button type="submit">Toevoegen</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="sheep-tag-edit-modal" class="modal hidden" aria-hidden="true">
+    <div id="sheep-tag-edit-modal-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button type="button" id="sheep-tag-edit-modal-close" class="modal-close">×</button>
+      <h2>Schaapnaam wijzigen</h2>
+      <form id="sheep-tag-edit-form" class="group-form">
+        <input id="sheep-tag-edit-input" placeholder="Nieuwe naam" required>
+        <button type="submit">Opslaan</button>
       </form>
     </div>
   </div>

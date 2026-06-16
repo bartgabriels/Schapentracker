@@ -1,6 +1,6 @@
 const KEY = 'schapentracker:data'
 const state = { paddocks: [], sheep: [] }
-const expandedPaddocks = new Set()
+let expandedPaddockId = null
 
 function ensureDefaultStal(){
   if(state.paddocks.length > 0) return
@@ -128,7 +128,7 @@ function render(){
   sheepList.innerHTML = state.sheep.map(s => `
       <div class="sheep-card">
         <div class="sheep-card-body">
-          <strong>${s.tag}</strong>
+          <button type="button" class="sheep-tag-edit-button" data-id="${s.id}" aria-label="Naam wijzigen voor ${s.tag}">${s.tag}</button>
           <small>${paddockName(s.paddockId)}${s.zoneId ? ' / ' + zoneName(s.paddockId, s.zoneId) : ''}</small>
           <small>Laatst gewijzigd: ${formatDate(s.lastUpdated)} (${daysSince(s.lastUpdated)} dagen geleden)</small>
         </div>
@@ -157,7 +157,7 @@ function render(){
 }
 
 function renderPaddock(p){
-  const isExpanded = expandedPaddocks.has(p.id)
+  const isExpanded = expandedPaddockId === p.id
   const sheepCount = state.sheep.filter(s => s.paddockId === p.id).length
   const sheepLabel = sheepCount === 1 ? 'schaap' : 'schapen'
   const canDeletePaddock = !isStalPaddock(p)
@@ -269,6 +269,7 @@ function isStalZone(paddock, zone){
 }
 
 let activeMoveSheepId = null
+let activeEditSheepId = null
 let pendingZoneDeletion = null
 let pendingPaddockDeletion = null
 let pendingZoneBulkMove = null
@@ -481,7 +482,7 @@ function openPaddockDeleteMoveModal(sourcePaddockId, sheepCount){
       }
     })
     state.paddocks = state.paddocks.filter(p => p.id !== sourcePaddockId)
-    expandedPaddocks.delete(sourcePaddockId)
+    if(expandedPaddockId === sourcePaddockId) expandedPaddockId = null
     save(); render()
     return
   }
@@ -555,6 +556,33 @@ function openMoveModal(sheepId){
   }
 }
 
+function openEditSheepTagModal(sheepId){
+  const sheep = state.sheep.find(s => s.id === sheepId)
+  if(!sheep) return
+  activeEditSheepId = sheepId
+
+  const input = document.getElementById('sheep-tag-edit-input')
+  if(input){
+    input.value = sheep.tag
+  }
+
+  const modal = document.getElementById('sheep-tag-edit-modal')
+  if(modal){
+    modal.classList.remove('hidden')
+    modal.setAttribute('aria-hidden', 'false')
+  }
+
+  if(input){
+    input.focus()
+    input.select()
+  }
+}
+
+function closeEditSheepTagModal(){
+  activeEditSheepId = null
+  closeModal('sheep-tag-edit-modal')
+}
+
 function openModal(id){
   const modal = document.getElementById(id)
   if(!modal) return
@@ -579,7 +607,7 @@ document.getElementById('clear-data-btn')?.addEventListener('click', () => {
   if(!confirm('Weet je zeker dat je alle gegevens wilt wissen? Dit kan niet ongedaan worden gemaakt.')) return
   state.paddocks = []
   state.sheep = []
-  expandedPaddocks.clear()
+  expandedPaddockId = null
   ensureDefaultStal()
   localStorage.removeItem(KEY)
   save()
@@ -600,6 +628,9 @@ document.getElementById('paddock-modal-backdrop')?.addEventListener('click', () 
 
 document.getElementById('sheep-modal-close')?.addEventListener('click', () => closeModal('sheep-modal'))
 document.getElementById('sheep-modal-backdrop')?.addEventListener('click', () => closeModal('sheep-modal'))
+
+document.getElementById('sheep-tag-edit-modal-close')?.addEventListener('click', closeEditSheepTagModal)
+document.getElementById('sheep-tag-edit-modal-backdrop')?.addEventListener('click', closeEditSheepTagModal)
 
 document.getElementById('zone-modal-close')?.addEventListener('click', () => closeModal('zone-modal'))
 document.getElementById('zone-modal-backdrop')?.addEventListener('click', () => closeModal('zone-modal'))
@@ -645,6 +676,22 @@ document.getElementById('sheep-modal-form')?.addEventListener('submit', e => {
   document.getElementById('sheep-modal-tag').value = ''
   document.getElementById('sheep-zone-modal').value = ''
   save(); render(); closeModal('sheep-modal')
+})
+
+document.getElementById('sheep-tag-edit-form')?.addEventListener('submit', e => {
+  e.preventDefault()
+  if(!activeEditSheepId) return
+
+  const input = document.getElementById('sheep-tag-edit-input')
+  const nextTag = input ? input.value.trim() : ''
+  if(!nextTag) return
+
+  const sheep = state.sheep.find(s => s.id === activeEditSheepId)
+  if(!sheep) return
+
+  sheep.tag = nextTag
+  sheep.lastUpdated = Date.now()
+  save(); render(); closeEditSheepTagModal()
 })
 
 const sheepPaddockModal = document.getElementById('sheep-paddock-modal')
@@ -773,7 +820,7 @@ document.getElementById('paddock-delete-move-form')?.addEventListener('submit', 
   })
 
   state.paddocks = state.paddocks.filter(p => p.id !== pendingPaddockDeletion.sourcePaddockId)
-  expandedPaddocks.delete(pendingPaddockDeletion.sourcePaddockId)
+  if(expandedPaddockId === pendingPaddockDeletion.sourcePaddockId) expandedPaddockId = null
   save(); render(); closePaddockDeleteMoveModal()
 })
 
@@ -801,6 +848,12 @@ document.getElementById('move-modal-close')?.addEventListener('click', () => clo
 document.getElementById('move-modal-backdrop')?.addEventListener('click', () => closeModal('move-modal'))
 
 document.getElementById('sheep-list')?.addEventListener('click', e => {
+  const editButton = e.target.closest('.sheep-tag-edit-button')
+  if(editButton){
+    openEditSheepTagModal(editButton.dataset.id)
+    return
+  }
+
   const button = e.target.closest('.move-button')
   if(button){
     openMoveModal(button.dataset.id)
@@ -861,7 +914,7 @@ document.getElementById('paddock-list').addEventListener('click', e => {
       return
     }
     state.paddocks = state.paddocks.filter(p => p.id !== paddockId)
-    expandedPaddocks.delete(paddockId)
+    if(expandedPaddockId === paddockId) expandedPaddockId = null
     save(); render()
     return
   }
@@ -913,10 +966,10 @@ document.getElementById('paddock-list').addEventListener('click', e => {
   if(!header) return
   const paddockId = header.dataset.paddockId
   if(!paddockId) return
-  if(expandedPaddocks.has(paddockId)){
-    expandedPaddocks.delete(paddockId)
+  if(expandedPaddockId === paddockId){
+    expandedPaddockId = null
   } else {
-    expandedPaddocks.add(paddockId)
+    expandedPaddockId = paddockId
   }
   render()
 })
