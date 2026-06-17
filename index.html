@@ -75,9 +75,11 @@
             <span id="auth-toggle-dot" class="auth-indicator is-offline" aria-hidden="true"></span>
             <span id="auth-toggle-label">Inloggen / Registreren</span>
           </button>
-          <div id="auth-profile-block" class="auth-profile-block" tabindex="0">
-            <span class="auth-indicator is-online" aria-hidden="true"></span>
-            <span id="auth-user-label" class="auth-user-label"></span>
+          <div id="auth-profile-block" class="auth-profile-block">
+            <button id="auth-profile-toggle-btn" type="button" class="section-button auth-profile-toggle-button" aria-expanded="false" aria-controls="auth-profile-dropdown">
+              <span class="auth-indicator is-online" aria-hidden="true"></span>
+              <span id="auth-user-label" class="auth-user-label"></span>
+            </button>
             <div id="auth-profile-dropdown" class="auth-profile-dropdown" aria-hidden="true">
               <button id="auth-logout-menu-btn" type="button" class="section-button auth-logout-menu-btn">Afmelden</button>
             </div>

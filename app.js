@@ -169,6 +169,7 @@ function updateAuthUi(){
   const userBlock = document.getElementById('auth-user-block')
   const toggleButton = document.getElementById('auth-toggle-btn')
   const profileBlock = document.getElementById('auth-profile-block')
+  const profileToggleButton = document.getElementById('auth-profile-toggle-btn')
   const dropdown = document.getElementById('auth-profile-dropdown')
   const logoutMenuButton = document.getElementById('auth-logout-menu-btn')
   if(indicator){
@@ -190,8 +191,13 @@ function updateAuthUi(){
   if(profileBlock){
     profileBlock.style.display = authToken ? 'inline-flex' : 'none'
   }
+  if(profileToggleButton){
+    profileToggleButton.style.display = authToken ? 'inline-flex' : 'none'
+    profileToggleButton.setAttribute('aria-expanded', 'false')
+  }
   if(dropdown){
-    dropdown.setAttribute('aria-hidden', authToken ? 'false' : 'true')
+    dropdown.classList.remove('is-open')
+    dropdown.setAttribute('aria-hidden', 'true')
   }
   if(logoutMenuButton){
     logoutMenuButton.style.display = authToken ? 'inline-flex' : 'none'
@@ -906,6 +912,44 @@ function initActionsMenu(){
   menuPanel.addEventListener('click', (event) => {
     const clickedButton = event.target.closest('button')
     if(clickedButton) closeMenu()
+  })
+}
+
+function initAuthProfileMenu(){
+  const profileBlock = document.getElementById('auth-profile-block')
+  const profileToggleButton = document.getElementById('auth-profile-toggle-btn')
+  const dropdown = document.getElementById('auth-profile-dropdown')
+  if(!profileBlock || !profileToggleButton || !dropdown) return
+
+  const closeDropdown = () => {
+    dropdown.classList.remove('is-open')
+    dropdown.setAttribute('aria-hidden', 'true')
+    profileToggleButton.setAttribute('aria-expanded', 'false')
+  }
+
+  const openDropdown = () => {
+    dropdown.classList.add('is-open')
+    dropdown.setAttribute('aria-hidden', 'false')
+    profileToggleButton.setAttribute('aria-expanded', 'true')
+  }
+
+  profileToggleButton.addEventListener('click', (event) => {
+    event.preventDefault()
+    if(dropdown.classList.contains('is-open')){
+      closeDropdown()
+    } else {
+      openDropdown()
+    }
+  })
+
+  document.addEventListener('click', (event) => {
+    if(profileBlock.contains(event.target)) return
+    closeDropdown()
+  })
+
+  document.addEventListener('keydown', (event) => {
+    if(event.key !== 'Escape') return
+    closeDropdown()
   })
 }
 
@@ -3411,6 +3455,13 @@ document.getElementById('auth-logout-menu-btn')?.addEventListener('click', async
     console.warn('Cloud logout failed:', error.message)
   }
   clearAuthSession()
+  const profileToggleButton = document.getElementById('auth-profile-toggle-btn')
+  const dropdown = document.getElementById('auth-profile-dropdown')
+  if(profileToggleButton) profileToggleButton.setAttribute('aria-expanded', 'false')
+  if(dropdown){
+    dropdown.classList.remove('is-open')
+    dropdown.setAttribute('aria-hidden', 'true')
+  }
 })
 
 document.getElementById('download-data-btn')?.addEventListener('click', exportData)
@@ -4522,6 +4573,7 @@ if(document.readyState === 'loading'){
     initTabs()
     initLanguageSelector()
     initActionsMenu()
+    initAuthProfileMenu()
     applyStaticTranslations()
     load()
     render()
@@ -4533,6 +4585,7 @@ if(document.readyState === 'loading'){
   initTabs()
   initLanguageSelector()
   initActionsMenu()
+  initAuthProfileMenu()
   applyStaticTranslations()
   load()
   render()

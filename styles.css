@@ -313,12 +313,17 @@ button.add-zone-button:hover {
   display:none;
   position:relative;
   align-items:center;
+}
+
+.auth-profile-toggle-button{
+  display:inline-flex;
+  align-items:center;
   gap:8px;
 }
 
 .auth-profile-dropdown{
   position:absolute;
-  top:100%;
+  top:calc(100% + 6px);
   right:0;
   display:flex;
   opacity:0;
@@ -335,10 +340,7 @@ button.add-zone-button:hover {
   z-index:30;
 }
 
-.auth-profile-block:hover .auth-profile-dropdown,
-.auth-user-label:hover + .auth-profile-dropdown,
-.auth-profile-dropdown:hover,
-.auth-profile-block:focus-within .auth-profile-dropdown{
+.auth-profile-dropdown.is-open{
   opacity:1;
   visibility:visible;
   pointer-events:auto;
@@ -361,7 +363,7 @@ button.add-zone-button:hover {
   font-size:0.75rem;
   font-weight:600;
   white-space:nowrap;
-  cursor:pointer;
+  cursor:default;
 }
 
 .auth-user-label:empty{
