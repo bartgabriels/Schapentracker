@@ -1208,7 +1208,15 @@ form button{
   border:1px solid #c3d1df;
   border-radius:999px;
   min-height:28px;
+  padding:2px 8px;
+  font-size:0.8rem;
+  font-weight:600;
+  line-height:1;
+  white-space:nowrap;
   cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .sheep-out-visibility-button:hover{
@@ -1221,7 +1229,15 @@ form button{
   border:1px solid #E8B5B5;
   border-radius:999px;
   min-height:28px;
+  padding:2px 8px;
+  font-size:0.8rem;
+  font-weight:600;
+  line-height:1;
+  white-space:nowrap;
   cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .sheep-out-delete-button:hover{
