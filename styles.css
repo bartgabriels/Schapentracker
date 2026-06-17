@@ -378,48 +378,6 @@ button.add-zone-button:hover {
   display:none;
 }
 
-.actions-menu{
-  position:relative;
-}
-
-.menu-gear-button{
-  width:38px;
-  min-width:38px;
-  height:38px;
-  padding:0;
-  border-radius:999px;
-  font-size:1.35rem;
-  line-height:1;
-  font-weight:700;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.action-menu{
-  position:absolute;
-  right:0;
-  top:calc(100% + 6px);
-  z-index:35;
-  min-width:260px;
-  padding:8px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--card);
-  box-shadow:0 10px 20px rgba(2,6,23,0.15);
-  display:none;
-  flex-direction:column;
-  gap:6px;
-}
-
-.action-menu.is-open{
-  display:flex;
-}
-
-.action-menu .section-button{
-  width:100%;
-}
-
 .auth-mode-row{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));

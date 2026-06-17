@@ -658,12 +658,6 @@ function applyStaticTranslations(){
     const el = document.getElementById(id)
     if(el) el.textContent = value
   }
-  const setButtonLabel = (id, value) => {
-    const el = document.getElementById(id)
-    if(!el) return
-    el.setAttribute('aria-label', value)
-    el.setAttribute('title', value)
-  }
   const setIconButton = (id, label) => {
     const el = document.getElementById(id)
     if(!el) return
@@ -681,7 +675,6 @@ function applyStaticTranslations(){
   setText('app-subtitle', t('app.subtitle'))
   setText('download-data-btn', t('ui.save'))
   setText('upload-data-btn', t('ui.upload'))
-  setText('clear-data-btn', t('ui.clear'))
   setText('auth-toggle-label', t('auth.toggle.loginRegister'))
   setText('auth-modal-title', t('auth.modal.title'))
   setText('auth-email-label', t('auth.email'))
@@ -690,7 +683,6 @@ function applyStaticTranslations(){
   setText('auth-mode-login-btn', t('auth.mode.login'))
   setText('auth-submit-btn', authFormMode === 'register' ? t('auth.register') : t('auth.login'))
   setText('auth-logout-menu-btn', t('auth.toggle.logout'))
-  setButtonLabel('actions-menu-toggle-btn', t('ui.menu'))
   setText('empty-storage-modal-title', t('onboarding.empty.title'))
   setText('empty-storage-modal-description', t('onboarding.empty.description'))
   setText('empty-storage-start-zero', t('onboarding.empty.startZero'))
@@ -899,49 +891,6 @@ function initLanguageSelector(){
   })
 }
 
-function initActionsMenu(){
-  const menuRoot = document.getElementById('actions-menu')
-  const toggleButton = document.getElementById('actions-menu-toggle-btn')
-  const menuPanel = document.getElementById('actions-menu-panel')
-  if(!menuRoot || !toggleButton || !menuPanel) return
-
-  const closeMenu = () => {
-    menuPanel.classList.remove('is-open')
-    menuPanel.setAttribute('aria-hidden', 'true')
-    toggleButton.setAttribute('aria-expanded', 'false')
-  }
-
-  const openMenu = () => {
-    menuPanel.classList.add('is-open')
-    menuPanel.setAttribute('aria-hidden', 'false')
-    toggleButton.setAttribute('aria-expanded', 'true')
-  }
-
-  toggleButton.addEventListener('click', (event) => {
-    event.preventDefault()
-    if(menuPanel.classList.contains('is-open')){
-      closeMenu()
-    } else {
-      openMenu()
-    }
-  })
-
-  document.addEventListener('click', (event) => {
-    if(menuRoot.contains(event.target)) return
-    closeMenu()
-  })
-
-  document.addEventListener('keydown', (event) => {
-    if(event.key !== 'Escape') return
-    closeMenu()
-  })
-
-  menuPanel.addEventListener('click', (event) => {
-    const clickedButton = event.target.closest('button')
-    if(clickedButton) closeMenu()
-  })
-}
-
 function initAuthProfileMenu(){
   const profileBlock = document.getElementById('auth-profile-block')
   const profileToggleButton = document.getElementById('auth-profile-toggle-btn')
@@ -977,6 +926,11 @@ function initAuthProfileMenu(){
   document.addEventListener('keydown', (event) => {
     if(event.key !== 'Escape') return
     closeDropdown()
+  })
+
+  dropdown.addEventListener('click', (event) => {
+    const clickedButton = event.target.closest('button')
+    if(clickedButton) closeDropdown()
   })
 }
 
@@ -3528,22 +3482,6 @@ document.getElementById('upload-data-btn')?.addEventListener('click', () => {
   triggerUploadDataPicker(false)
 })
 
-document.getElementById('clear-data-btn')?.addEventListener('click', () => {
-  if(!confirm(t('confirm.clearAll'))) return
-  state.paddocks = []
-  state.sheep = []
-  state.history = []
-  state.events = []
-  state.planningItems = []
-  collapsedPaddockIds.clear()
-  expandedWeatherPaddocks.clear()
-  ensureDefaultStal()
-  collapseAllPaddocks()
-  localStorage.removeItem(KEY)
-  render()
-  maybeOpenEmptyStorageModal()
-})
-
 document.getElementById('upload-data-input')?.addEventListener('change', e => {
   const files = e.target.files
   if(files && files.length){
@@ -4625,7 +4563,6 @@ if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', () => {
     initTabs()
     initLanguageSelector()
-    initActionsMenu()
     initAuthProfileMenu()
     applyStaticTranslations()
     load()
@@ -4637,7 +4574,6 @@ if(document.readyState === 'loading'){
   // DOM is already loaded (e.g., when script is deferred or at end of body)
   initTabs()
   initLanguageSelector()
-  initActionsMenu()
   initAuthProfileMenu()
   applyStaticTranslations()
   load()
