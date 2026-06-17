@@ -350,9 +350,12 @@ button.add-zone-button:hover {
   transform:translateY(0);
 }
 
-.auth-profile-dropdown .section-button{
-  width:100%;
-  min-width:100%;
+#auth-logout-menu-btn{
+  display:block;
+  align-self:stretch;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:none;
   box-sizing:border-box;
 }
 
