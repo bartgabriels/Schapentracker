@@ -427,6 +427,12 @@ function applyStaticTranslations(){
     const el = document.getElementById(id)
     if(el) el.textContent = value
   }
+  const setButtonLabel = (id, value) => {
+    const el = document.getElementById(id)
+    if(!el) return
+    el.setAttribute('aria-label', value)
+    el.setAttribute('title', value)
+  }
   const setIconButton = (id, label) => {
     const el = document.getElementById(id)
     if(!el) return
@@ -445,6 +451,7 @@ function applyStaticTranslations(){
   setText('download-data-btn', t('ui.save'))
   setText('upload-data-btn', t('ui.upload'))
   setText('clear-data-btn', t('ui.clear'))
+  setButtonLabel('actions-menu-toggle-btn', t('ui.menu'))
   setText('exit-download-toggle-label', t('ui.exitDownload.label'))
   setAutoDownloadOnClose(isAutoDownloadOnCloseEnabled())
   setText('empty-storage-modal-title', t('onboarding.empty.title'))
@@ -458,7 +465,7 @@ function applyStaticTranslations(){
   setText('tab-pedigree-btn', t('tab.pedigree'))
   setText('tab-billing-btn', t('tab.billing'))
   setText('section-paddocks-title', t('section.paddocks'))
-  setText('section-sheep-title', t('section.sheep'))
+  setText('section-sheep-title', t('sheep.active.title'))
   setText('section-history-title', t('section.history'))
   setText('section-planning-title', t('section.planning'))
   setText('section-pedigree-title', t('section.pedigree'))
@@ -652,6 +659,49 @@ function initLanguageSelector(){
   })
 }
 
+function initActionsMenu(){
+  const menuRoot = document.getElementById('actions-menu')
+  const toggleButton = document.getElementById('actions-menu-toggle-btn')
+  const menuPanel = document.getElementById('actions-menu-panel')
+  if(!menuRoot || !toggleButton || !menuPanel) return
+
+  const closeMenu = () => {
+    menuPanel.classList.remove('is-open')
+    menuPanel.setAttribute('aria-hidden', 'true')
+    toggleButton.setAttribute('aria-expanded', 'false')
+  }
+
+  const openMenu = () => {
+    menuPanel.classList.add('is-open')
+    menuPanel.setAttribute('aria-hidden', 'false')
+    toggleButton.setAttribute('aria-expanded', 'true')
+  }
+
+  toggleButton.addEventListener('click', (event) => {
+    event.preventDefault()
+    if(menuPanel.classList.contains('is-open')){
+      closeMenu()
+    } else {
+      openMenu()
+    }
+  })
+
+  document.addEventListener('click', (event) => {
+    if(menuRoot.contains(event.target)) return
+    closeMenu()
+  })
+
+  document.addEventListener('keydown', (event) => {
+    if(event.key !== 'Escape') return
+    closeMenu()
+  })
+
+  menuPanel.addEventListener('click', (event) => {
+    const clickedButton = event.target.closest('button')
+    if(clickedButton) closeMenu()
+  })
+}
+
 function initTabs(){
   const tabButtons = Array.from(document.querySelectorAll('.tab-button[data-tab]'))
   const panels = {
@@ -841,7 +891,7 @@ function ensureDefaultStal(){
     id: paddockId,
     name: 'Stal',
     postcode: '',
-    zones: [{ id: zoneId, name: 'Stal', area: null, perimeter: null, emptySince: Date.now() }]
+    zones: [{ id: zoneId, name: 'Stal', area: null, perimeter: null, emptySince: Date.now(), occupiedSince: null }]
   })
 }
 
@@ -856,7 +906,8 @@ function hydrateState(saved){
       area: Number.isFinite(Number(z.area)) ? Number(z.area) : null,
       perimeter: Number.isFinite(Number(z.perimeter)) ? Number(z.perimeter) : null,
       notes: typeof z.notes === 'string' ? z.notes.trim() : '',
-      emptySince: z.emptySince ?? Date.now()
+      emptySince: z.emptySince ?? Date.now(),
+      occupiedSince: z.occupiedSince ?? null
     })) : []
   })) : []
   state.sheep = Array.isArray(saved?.sheep) ? saved.sheep.map(s => ({
@@ -1091,14 +1142,26 @@ function daysSince(timestamp){
   return Math.floor(diff / 86400000)
 }
 
+function occupancyAgeClass(days){
+  if(!Number.isFinite(days)) return 'zone-status--age-green'
+  if(days < 7) return 'zone-status--age-green'
+  if(days <= 10) return 'zone-status--age-yellow'
+  if(days <= 14) return 'zone-status--age-orange'
+  return 'zone-status--age-red'
+}
+
 function updateZoneEmptyStates(){
   state.paddocks.forEach(p => {
     p.zones.forEach(z => {
       const assigned = state.sheep.some(s => s.paddockId === p.id && s.zoneId === z.id)
       if(assigned){
+        if(!z.occupiedSince){
+          z.occupiedSince = Date.now()
+        }
         z.emptySince = null
       } else if(!z.emptySince){
         z.emptySince = Date.now()
+        z.occupiedSince = null
       }
     })
   })
@@ -1984,7 +2047,14 @@ function render(){
   const moveZoneModal = document.getElementById('move-zone-modal')
 
   const euroLocale = currentLang === 'fr' ? 'fr-BE' : currentLang === 'en' ? 'en-IE' : 'nl-BE'
-  const formatEuro = (value) => new Intl.NumberFormat(euroLocale, { style: 'currency', currency: 'EUR', minimumFractionDigits: value % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 }).format(value)
+  const formatEuro = (value) => {
+    const numeric = Number.isFinite(Number(value)) ? Number(value) : 0
+    const amount = new Intl.NumberFormat(euroLocale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(numeric)
+    return `${amount} €`
+  }
   const paddockCount = state.paddocks.length
   const zoneCount = state.paddocks.reduce((sum, paddock) => sum + paddock.zones.length, 0)
   const activeSheep = state.sheep.filter(isActiveFlockSheep)
@@ -2299,16 +2369,25 @@ function renderPaddock(p){
       ${p.zones.map(z => {
         const sheepInZone = state.sheep.filter(s => isActiveFlockSheep(s) && s.paddockId === p.id && s.zoneId === z.id)
         const sheepCount = sheepInZone.length
+        const isZoneEmpty = sheepCount === 0
+        const occupiedDays = sheepCount ? daysSince(z.occupiedSince) : null
+        const zoneStatus = sheepCount
+          ? t('zone.status.occupiedSince', { days: occupiedDays })
+          : t('zone.status.empty', { days: daysSince(z.emptySince) })
+        const zoneStatusClass = isZoneEmpty
+          ? 'zone-status zone-status--empty'
+          : `zone-status ${occupancyAgeClass(occupiedDays)}`
         const zoneArea = z.area !== null ? `${z.area} m2` : ''
         const zonePerimeter = z.perimeter !== null ? `${z.perimeter} m` : ''
         const bulkMoveButton = sheepCount > 1 ? `<button type="button" class="zone-bulk-move-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('zone.bulkMove')}" title="${t('zone.bulkMove')}">${doubleArrowIcon()}</button>` : ''
         const sheepList = sheepCount
           ? `<div class="zone-sheep-list${sheepCount > 4 ? ' is-scrollable' : ''}">${sheepInZone.map(s => `<button type="button" class="zone-sheep-link" data-sheep-id="${s.id}" aria-label="${t('aria.moveSheep', { tag: s.tag })}">${sheepIcon()}${s.tag}</button>`).join('')}</div>${bulkMoveButton}`
-          : t('zone.sheep.empty')
+          : ''
+        const headerZoneStatus = `<div class="${zoneStatusClass}">${zoneStatus}</div>`
         const stallZone = isStalZone(p, z)
         const useStallBackground = isStalPaddock(p)
         const canDeleteZone = !stallZone && p.zones.length > 1
-        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">${recycleBinIcon()}</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name}</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}<span class="zone-metric">${sheepCount}</span></div></div><div class="zone-bottom">${sheepList}</div></div>`
+        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">${recycleBinIcon()}</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name} (${sheepCount})</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}${headerZoneStatus}</div></div><div class="zone-bottom">${sheepList}</div></div>`
       }).join('')}
       <button type="button" class="zone-item add-zone-button${isStalPaddock(p) ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" aria-label="${t('aria.addZone')}">
         <span class="add-zone-icon">+</span>
@@ -4188,7 +4267,7 @@ document.getElementById('zone-modal-form')?.addEventListener('submit', e => {
   const paddock = getPaddock(paddockId)
   if(!paddock) return
   const zoneId = uid()
-  paddock.zones.push({id:zoneId,name:zoneName,area,perimeter,notes,emptySince: Date.now()})
+  paddock.zones.push({id:zoneId,name:zoneName,area,perimeter,notes,emptySince: Date.now(),occupiedSince:null})
   addEvent('ZONE_CREATED', {
     zoneId,
     paddockId,
@@ -4205,6 +4284,7 @@ if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', () => {
     initTabs()
     initLanguageSelector()
+    initActionsMenu()
     applyStaticTranslations()
     load()
     render()
@@ -4214,6 +4294,7 @@ if(document.readyState === 'loading'){
   // DOM is already loaded (e.g., when script is deferred or at end of body)
   initTabs()
   initLanguageSelector()
+  initActionsMenu()
   applyStaticTranslations()
   load()
   render()

@@ -58,13 +58,18 @@
           <option value="en">English</option>
           <option value="fr">Français</option>
         </select>
-        <button id="exit-download-toggle-btn" type="button" class="section-button exit-download-toggle-button" aria-pressed="false">
-          <span id="exit-download-toggle-label">Auto-download bij sluiten</span>
-          <span id="exit-download-toggle-state">Uit</span>
-        </button>
-        <button id="download-data-btn" type="button" class="section-button">Opslaan</button>
-        <button id="upload-data-btn" type="button" class="section-button">Upload</button>
-        <button id="clear-data-btn" type="button" class="section-button">Wissen</button>
+        <div class="actions-menu" id="actions-menu">
+          <button id="actions-menu-toggle-btn" type="button" class="section-button menu-gear-button" aria-expanded="false" aria-controls="actions-menu-panel" aria-label="Menu" title="Menu">⚙</button>
+          <div id="actions-menu-panel" class="action-menu" aria-hidden="true">
+            <button id="exit-download-toggle-btn" type="button" class="section-button exit-download-toggle-button" aria-pressed="false">
+              <span id="exit-download-toggle-label">Auto-download bij sluiten</span>
+              <span id="exit-download-toggle-state">Uit</span>
+            </button>
+            <button id="download-data-btn" type="button" class="section-button">Opslaan</button>
+            <button id="upload-data-btn" type="button" class="section-button">Upload</button>
+            <button id="clear-data-btn" type="button" class="section-button">Wissen</button>
+          </div>
+        </div>
       </div>
       <input id="upload-data-input" type="file" accept="application/json" style="display:none">
     </div>
@@ -138,7 +143,7 @@
     <div id="tab-sheep-panel" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-sheep-btn">
       <section>
         <div class="section-header">
-          <h2 id="section-sheep-title">Schapen</h2>
+          <h2 id="section-sheep-title">In de kudde</h2>
         </div>
         <div id="sheep-list" class="sheep-overview"></div>
       </section>

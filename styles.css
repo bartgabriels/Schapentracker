@@ -268,11 +268,55 @@ button.add-zone-button:hover {
   display:flex;
   gap:8px;
   flex-wrap:wrap;
+  align-items:center;
+}
+
+.actions-menu{
+  position:relative;
+}
+
+.menu-gear-button{
+  width:38px;
+  min-width:38px;
+  height:38px;
+  padding:0;
+  border-radius:999px;
+  font-size:1.35rem;
+  line-height:1;
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.action-menu{
+  position:absolute;
+  right:0;
+  top:calc(100% + 6px);
+  z-index:35;
+  min-width:260px;
+  padding:8px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--card);
+  box-shadow:0 10px 20px rgba(2,6,23,0.15);
+  display:none;
+  flex-direction:column;
+  gap:6px;
+}
+
+.action-menu.is-open{
+  display:flex;
+}
+
+.action-menu .section-button{
+  width:100%;
 }
 
 .exit-download-toggle-button{
   display:inline-flex;
   align-items:center;
+  justify-content:space-between;
   gap:8px;
 }
 
@@ -590,7 +634,7 @@ button.add-zone-button:hover {
 
 .zone-list{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:8px;
   margin:0;
   padding:0 4px;
@@ -617,7 +661,7 @@ button.add-zone-button:hover {
   display:flex;
   flex-direction:column;
   justify-content:space-between;
-  aspect-ratio:3/4;
+  aspect-ratio:1/1;
   padding:6px;
   min-width:0;
   overflow:hidden;
@@ -752,6 +796,55 @@ button.add-zone-button:hover {
   color:var(--text-secondary);
   font-size:0.7rem;
   margin-top:auto;
+}
+
+.zone-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  align-self:auto;
+  width:auto;
+  max-width:100%;
+  min-height:0;
+  margin-top:0;
+  padding:1px 6px;
+  border-radius:999px;
+  font-size:0.68rem;
+  font-weight:400;
+  line-height:1.2;
+  text-shadow:none;
+  border:1px solid #BFD3EA;
+  white-space:nowrap;
+}
+
+.zone-status--empty{
+  color:#234A75;
+  background:#E6EEF8;
+  border-color:#BFD3EA;
+}
+
+.zone-status--age-green{
+  color:#124f25;
+  background:rgba(211, 244, 217, 0.95);
+  border-color:rgba(66, 150, 84, 0.45);
+}
+
+.zone-status--age-yellow{
+  color:#715200;
+  background:rgba(255, 247, 200, 0.95);
+  border-color:rgba(201, 163, 60, 0.55);
+}
+
+.zone-status--age-orange{
+  color:#7a3400;
+  background:rgba(255, 232, 201, 0.95);
+  border-color:rgba(207, 134, 63, 0.5);
+}
+
+.zone-status--age-red{
+  color:#7f1d1d;
+  background:rgba(254, 215, 215, 0.95);
+  border-color:rgba(220, 92, 92, 0.55);
 }
 
 .zone-bottom{
