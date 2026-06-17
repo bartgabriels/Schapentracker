@@ -338,6 +338,8 @@ button.add-zone-button:hover {
   border-radius:10px;
   background:var(--card);
   box-shadow:0 10px 20px rgba(2,6,23,0.15);
+  flex-direction:column;
+  gap:6px;
   z-index:30;
 }
 
@@ -348,8 +350,7 @@ button.add-zone-button:hover {
   transform:translateY(0);
 }
 
-.auth-logout-menu-btn{
-  display:block;
+.auth-profile-dropdown .section-button{
   width:100%;
   min-width:100%;
   box-sizing:border-box;
