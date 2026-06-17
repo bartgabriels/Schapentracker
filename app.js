@@ -218,6 +218,50 @@ function setAuthFormMode(mode){
   if(submitBtn){
     submitBtn.textContent = authFormMode === 'register' ? t('auth.register') : t('auth.login')
   }
+  syncAuthRegisterValidation(false)
+}
+
+function syncAuthRegisterValidation(showMismatchMessage = false){
+  const passwordInput = document.getElementById('auth-password')
+  const passwordConfirmField = document.getElementById('auth-password-confirm-field')
+  const passwordConfirmInput = document.getElementById('auth-password-confirm')
+  const submitBtn = document.getElementById('auth-submit-btn')
+  const isRegister = authFormMode === 'register'
+
+  if(passwordConfirmField){
+    passwordConfirmField.style.display = isRegister ? '' : 'none'
+  }
+  if(passwordInput){
+    passwordInput.setAttribute('autocomplete', isRegister ? 'new-password' : 'current-password')
+  }
+  if(passwordConfirmInput){
+    passwordConfirmInput.required = isRegister
+    passwordConfirmInput.setAttribute('autocomplete', isRegister ? 'new-password' : 'off')
+    if(!isRegister){
+      passwordConfirmInput.value = ''
+    }
+  }
+
+  if(!isRegister){
+    if(submitBtn) submitBtn.disabled = false
+    return true
+  }
+
+  const password = passwordInput ? passwordInput.value : ''
+  const passwordConfirm = passwordConfirmInput ? passwordConfirmInput.value : ''
+  const bothFilled = password.length > 0 && passwordConfirm.length > 0
+  const passwordsMatch = bothFilled && password === passwordConfirm
+
+  if(submitBtn){
+    submitBtn.disabled = !passwordsMatch
+  }
+  if(showMismatchMessage && bothFilled && !passwordsMatch){
+    setAuthStatusMessage(t('auth.status.passwordMismatch'), true)
+  } else if(showMismatchMessage && passwordsMatch){
+    setAuthStatusMessage('')
+  }
+
+  return passwordsMatch
 }
 
 function cloudStatePayload(){
@@ -268,9 +312,11 @@ function openAuthModal(){
   setAuthStatusMessage('')
   const emailInput = document.getElementById('auth-email')
   const passwordInput = document.getElementById('auth-password')
+  const passwordConfirmInput = document.getElementById('auth-password-confirm')
   setAuthFormMode('login')
   if(emailInput) emailInput.value = authUsername || ''
   if(passwordInput) passwordInput.value = ''
+  if(passwordConfirmInput) passwordConfirmInput.value = ''
   openModal('auth-modal')
 }
 
@@ -679,6 +725,7 @@ function applyStaticTranslations(){
   setText('auth-modal-title', t('auth.modal.title'))
   setText('auth-email-label', t('auth.email'))
   setText('auth-password-label', t('auth.password'))
+  setText('auth-password-confirm-label', t('auth.passwordConfirm'))
   setText('auth-mode-register-btn', t('auth.mode.register'))
   setText('auth-mode-login-btn', t('auth.mode.login'))
   setText('auth-submit-btn', authFormMode === 'register' ? t('auth.register') : t('auth.login'))
@@ -723,8 +770,10 @@ function applyStaticTranslations(){
   setPlaceholder('planning-item-detail', t('planning.add.detailPlaceholder'))
   setPlaceholder('auth-email', t('auth.emailPlaceholder'))
   setPlaceholder('auth-password', t('auth.passwordPlaceholder'))
+  setPlaceholder('auth-password-confirm', t('auth.passwordConfirmPlaceholder'))
   setIconButton('planning-item-submit', t('ui.add'))
   updateAuthUi()
+  syncAuthRegisterValidation(false)
 
   setText('sheep-modal-title', t('sheep.add.title'))
   setPlaceholder('sheep-modal-tag', t('sheep.add.tagPlaceholder'))
@@ -3427,12 +3476,23 @@ document.getElementById('auth-modal-close')?.addEventListener('click', () => clo
 document.getElementById('auth-modal-backdrop')?.addEventListener('click', () => closeModal('auth-modal'))
 document.getElementById('auth-mode-register-btn')?.addEventListener('click', () => setAuthFormMode('register'))
 document.getElementById('auth-mode-login-btn')?.addEventListener('click', () => setAuthFormMode('login'))
+document.getElementById('auth-password')?.addEventListener('input', () => {
+  if(authFormMode === 'register') syncAuthRegisterValidation(true)
+})
+document.getElementById('auth-password-confirm')?.addEventListener('input', () => {
+  if(authFormMode === 'register') syncAuthRegisterValidation(true)
+})
 
 document.getElementById('auth-form')?.addEventListener('submit', async (event) => {
   event.preventDefault()
   const email = (document.getElementById('auth-email')?.value || '').trim().toLowerCase()
   const password = (document.getElementById('auth-password')?.value || '').trim()
+  const passwordConfirm = (document.getElementById('auth-password-confirm')?.value || '').trim()
   const isRegister = authFormMode === 'register'
+  if(isRegister && password !== passwordConfirm){
+    syncAuthRegisterValidation(true)
+    return
+  }
   try {
     setAuthStatusMessage(isRegister ? t('auth.status.registering') : t('auth.status.loggingIn'))
     const result = await apiFetch(isRegister ? '/auth/register' : '/auth/login', {
