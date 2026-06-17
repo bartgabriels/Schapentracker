@@ -319,6 +319,7 @@ button.add-zone-button:hover {
   display:inline-flex;
   align-items:center;
   gap:8px;
+  justify-content:flex-start;
 }
 
 .auth-profile-dropdown{
@@ -359,9 +360,9 @@ button.add-zone-button:hover {
   border:none;
   border-radius:0;
   background:transparent;
-  color:var(--chip-text);
-  font-size:0.75rem;
-  font-weight:600;
+  color:inherit;
+  font-size:inherit;
+  font-weight:inherit;
   white-space:nowrap;
   cursor:default;
 }
