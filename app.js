@@ -2364,6 +2364,7 @@ function initPlanningFilters(){
 
 function render(){
   updateZoneEmptyStates()
+  const sheepSectionTitle = document.getElementById('section-sheep-title')
   const paddockList = document.getElementById('paddock-list')
   const sheepList = document.getElementById('sheep-list')
   const sheepOutList = document.getElementById('sheep-out-list')
@@ -2396,6 +2397,9 @@ function render(){
     ? outOfFlockSheep
     : outOfFlockSheep.filter(sheep => !sheep.outHidden)
   const sheepCount = activeSheep.length
+  if(sheepSectionTitle){
+    sheepSectionTitle.textContent = `${t('sheep.active.title')} (${sheepCount})`
+  }
   const billingLines = [
     { label: t('billing.fields'), countLabel: `${t('billing.unlimited')} ${t('billing.fields').toLowerCase()}`, rate: 0, total: 0, included: true },
     { label: t('billing.zones'), countLabel: `${zoneCount}`, rate: 0.3, total: zoneCount * 0.3, included: false },
@@ -2478,7 +2482,7 @@ function render(){
   if(sheepOutList){
     sheepOutList.innerHTML = `
       <div class="section-header sheep-out-header">
-        <h3>${t('sheep.out.title')}</h3>
+        <h3>${t('sheep.out.title')} (${outOfFlockSheep.length})</h3>
         <label class="out-of-flock-toggle" for="out-of-flock-show-all-toggle">
           <span>${t('sheep.out.showAll')}</span>
           <input type="checkbox" id="out-of-flock-show-all-toggle" class="out-of-flock-toggle-slider" ${showAllOutOfFlockSheep ? 'checked' : ''}>
