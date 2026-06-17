@@ -350,9 +350,9 @@ button.add-zone-button:hover {
 
 .auth-logout-menu-btn{
   display:block;
-  width:calc(100% + 16px);
-  margin:-8px;
-  border-radius:10px;
+  width:100%;
+  min-width:100%;
+  box-sizing:border-box;
 }
 
 .auth-user-label{
