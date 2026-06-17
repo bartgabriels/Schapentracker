@@ -349,7 +349,10 @@ button.add-zone-button:hover {
 }
 
 .auth-logout-menu-btn{
-  width:100%;
+  display:block;
+  width:calc(100% + 16px);
+  margin:-8px;
+  border-radius:10px;
 }
 
 .auth-user-label{
