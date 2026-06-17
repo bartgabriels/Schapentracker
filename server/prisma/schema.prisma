@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum SheepGender {
+  FEMALE
+  MALE
+}
+
+enum FlockStatus {
+  ACTIVE
+  OUT
+}
+
+model Workspace {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  paddocks  Paddock[]
+  sheep     Sheep[]
+}
+
+model Paddock {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  postcode    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  zones       Zone[]
+  sheep       Sheep[]
+
+  @@index([workspaceId])
+}
+
+model Zone {
+  id            String    @id @default(cuid())
+  paddockId     String
+  name          String
+  area          Float?
+  perimeter     Float?
+  notes         String?
+  emptySince    DateTime?
+  occupiedSince DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  paddock       Paddock   @relation(fields: [paddockId], references: [id], onDelete: Cascade)
+  sheep         Sheep[]
+
+  @@index([paddockId])
+}
+
+model Sheep {
+  id          String      @id @default(cuid())
+  workspaceId String
+  paddockId   String?
+  zoneId      String?
+  tag         String
+  earmark     String?
+  birthDate   DateTime?
+  gender      SheepGender?
+  flockStatus FlockStatus @default(ACTIVE)
+  outReason   String?
+  outDate     DateTime?
+  outNotes    String?
+  outHidden   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  paddock   Paddock?  @relation(fields: [paddockId], references: [id], onDelete: SetNull)
+  zone      Zone?     @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, tag])
+  @@unique([workspaceId, earmark])
+  @@index([workspaceId])
+  @@index([paddockId])
+  @@index([zoneId])
+}
