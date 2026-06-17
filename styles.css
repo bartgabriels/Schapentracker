@@ -275,6 +275,7 @@ button.add-zone-button:hover {
   display:inline-flex;
   align-items:center;
   gap:8px;
+  justify-content:flex-start;
 }
 
 .auth-user-block{
@@ -282,6 +283,8 @@ button.add-zone-button:hover {
   align-items:center;
   gap:8px;
   margin-left:auto;
+  min-height:34px;
+  border-radius:999px;
 }
 
 .auth-indicator{
@@ -303,11 +306,11 @@ button.add-zone-button:hover {
 .auth-user-label{
   display:inline-flex;
   align-items:center;
-  min-height:34px;
-  padding:4px 10px;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:var(--surface-soft);
+  min-height:0;
+  padding:0;
+  border:none;
+  border-radius:0;
+  background:transparent;
   color:var(--chip-text);
   font-size:0.75rem;
   font-weight:600;

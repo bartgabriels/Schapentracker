@@ -70,13 +70,11 @@
             <button id="clear-data-btn" type="button" class="section-button">Wissen</button>
           </div>
         </div>
-        <div id="auth-user-block" class="auth-user-block">
+        <button id="auth-toggle-btn" type="button" class="section-button auth-toggle-button auth-user-block">
+          <span id="auth-toggle-dot" class="auth-indicator is-offline" aria-hidden="true"></span>
           <span id="auth-user-label" class="auth-user-label"></span>
-          <button id="auth-toggle-btn" type="button" class="section-button auth-toggle-button">
-            <span id="auth-toggle-dot" class="auth-indicator is-offline" aria-hidden="true"></span>
-            <span id="auth-toggle-label">Inloggen / Registreren</span>
-          </button>
-        </div>
+          <span id="auth-toggle-label">Inloggen / Registreren</span>
+        </button>
       </div>
       <input id="upload-data-input" type="file" accept="application/json" style="display:none">
     </div>
