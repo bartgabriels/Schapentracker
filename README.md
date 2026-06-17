@@ -15,6 +15,8 @@ De frontend draait in de browser (HTML/CSS/JavaScript) en kan lokaal werken, maa
 
 - Weides en zones beheren
 - Schapen beheren (verplaatsen, injecties, scheren)
+- Verplaats-modals met checkboxselectie (2 kolommen, standaard alles geselecteerd)
+- Zone verwijderen met selectieve verplaatsing van enkel aangevinkte schapen
 - Schapen uit de kudde zetten in plaats van verwijderen
 - Historiek en planning bijhouden
 - Stamboom per schaap tonen
@@ -126,6 +128,8 @@ The frontend runs in the browser (HTML/CSS/JavaScript) and can run locally, with
 
 - Manage paddocks and zones
 - Manage sheep (moves, injections, shearing)
+- Move modals with checkbox selection (2 columns, all selected by default)
+- Zone deletion with selective move of checked sheep only
 - Move sheep out of flock instead of deleting them
 - Keep history and planning items
 - View pedigree per sheep
@@ -154,6 +158,12 @@ Visible tabs:
 - History
 - Planning
 - Pedigree
+
+Move behavior:
+- Zone move modals use a two-column checkbox list.
+- All sheep are selected by default.
+- Only checked sheep are moved.
+- The same selective behavior is used in zone delete -> move flow.
 
 Billing:
 - Billing is intentionally not a visible tab button.
@@ -237,6 +247,8 @@ Le frontend tourne dans le navigateur (HTML/CSS/JavaScript), avec mode local et 
 
 - Gerer les paturages et les zones
 - Gerer les moutons (deplacements, injections, tonte)
+- Modales de deplacement avec cases a cocher (2 colonnes, tout selectionne par defaut)
+- Suppression de zone avec deplacement selectif des seuls moutons coches
 - Sortir un mouton du troupeau au lieu de le supprimer
 - Suivre l'historique et la planification
 - Afficher le pedigree par mouton
