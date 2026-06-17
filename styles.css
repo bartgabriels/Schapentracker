@@ -271,25 +271,44 @@ button.add-zone-button:hover {
   align-items:center;
 }
 
-.auth-status-chip{
+.auth-toggle-button{
   display:inline-flex;
   align-items:center;
-  justify-content:center;
+  gap:8px;
+}
+
+.auth-indicator{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  display:inline-block;
+  flex:0 0 auto;
+}
+
+.auth-indicator.is-offline{
+  background:#D22E2E;
+}
+
+.auth-indicator.is-online{
+  background:#1E9F44;
+}
+
+.auth-user-label{
+  display:inline-flex;
+  align-items:center;
   min-height:34px;
   padding:4px 10px;
   border:1px solid var(--border);
   border-radius:999px;
   background:var(--surface-soft);
-  color:var(--text-secondary);
+  color:var(--chip-text);
   font-size:0.75rem;
   font-weight:600;
   white-space:nowrap;
 }
 
-.auth-status-chip.is-online{
-  background:#E6F6EA;
-  color:#165C2D;
-  border-color:#B9DFC4;
+.auth-user-label:empty{
+  display:none;
 }
 
 .actions-menu{
@@ -334,10 +353,16 @@ button.add-zone-button:hover {
   width:100%;
 }
 
-.auth-action-row{
+.auth-mode-row{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px;
+}
+
+.auth-mode-row .section-button.is-active{
+  background:var(--accent);
+  color:#ffffff;
+  border-color:var(--accent);
 }
 
 .auth-status-message{

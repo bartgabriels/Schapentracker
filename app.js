@@ -33,6 +33,7 @@ let showAllOutOfFlockSheep = false
 const MIN_SHEEP_BIRTH_DATE = '2000-01-01'
 let authToken = null
 let authUsername = null
+let authFormMode = 'login'
 let cloudSaveTimer = null
 let pendingCloudState = null
 
@@ -162,19 +163,34 @@ function clearAuthSession(){
 }
 
 function updateAuthUi(){
-  const chip = document.getElementById('auth-status-chip')
-  const logoutButton = document.getElementById('auth-logout-btn')
-  if(chip){
-    if(authToken && authUsername){
-      chip.textContent = `${authUsername}`
-      chip.classList.add('is-online')
-    } else {
-      chip.textContent = t('auth.status.offline')
-      chip.classList.remove('is-online')
-    }
+  const indicator = document.getElementById('auth-toggle-dot')
+  const label = document.getElementById('auth-toggle-label')
+  const userLabel = document.getElementById('auth-user-label')
+  if(indicator){
+    indicator.classList.toggle('is-online', !!authToken)
+    indicator.classList.toggle('is-offline', !authToken)
   }
-  if(logoutButton){
-    logoutButton.disabled = !authToken
+  if(label){
+    label.textContent = authToken ? t('auth.toggle.logout') : t('auth.toggle.loginRegister')
+  }
+  if(userLabel){
+    userLabel.textContent = authToken && authUsername ? authUsername : ''
+  }
+}
+
+function setAuthFormMode(mode){
+  authFormMode = mode === 'register' ? 'register' : 'login'
+  const registerBtn = document.getElementById('auth-mode-register-btn')
+  const loginBtn = document.getElementById('auth-mode-login-btn')
+  const submitBtn = document.getElementById('auth-submit-btn')
+  if(registerBtn){
+    registerBtn.classList.toggle('is-active', authFormMode === 'register')
+  }
+  if(loginBtn){
+    loginBtn.classList.toggle('is-active', authFormMode === 'login')
+  }
+  if(submitBtn){
+    submitBtn.textContent = authFormMode === 'register' ? t('auth.register') : t('auth.login')
   }
 }
 
@@ -222,10 +238,12 @@ function setAuthStatusMessage(message, isError = false){
 }
 
 function openAuthModal(){
+  if(authToken) return
   setAuthStatusMessage('')
-  const usernameInput = document.getElementById('auth-username')
+  const emailInput = document.getElementById('auth-email')
   const passwordInput = document.getElementById('auth-password')
-  if(usernameInput) usernameInput.value = authUsername || ''
+  setAuthFormMode('login')
+  if(emailInput) emailInput.value = authUsername || ''
   if(passwordInput) passwordInput.value = ''
   openModal('auth-modal')
 }
@@ -609,13 +627,13 @@ function applyStaticTranslations(){
   setText('download-data-btn', t('ui.save'))
   setText('upload-data-btn', t('ui.upload'))
   setText('clear-data-btn', t('ui.clear'))
-  setText('auth-open-btn', t('auth.open'))
+  setText('auth-toggle-label', t('auth.toggle.loginRegister'))
   setText('auth-modal-title', t('auth.modal.title'))
-  setText('auth-username-label', t('auth.username'))
+  setText('auth-email-label', t('auth.email'))
   setText('auth-password-label', t('auth.password'))
-  setText('auth-register-btn', t('auth.register'))
-  setText('auth-login-btn', t('auth.login'))
-  setText('auth-logout-btn', t('auth.logout'))
+  setText('auth-mode-register-btn', t('auth.mode.register'))
+  setText('auth-mode-login-btn', t('auth.mode.login'))
+  setText('auth-submit-btn', authFormMode === 'register' ? t('auth.register') : t('auth.login'))
   setButtonLabel('actions-menu-toggle-btn', t('ui.menu'))
   setText('exit-download-toggle-label', t('ui.exitDownload.label'))
   setAutoDownloadOnClose(isAutoDownloadOnCloseEnabled())
@@ -657,9 +675,10 @@ function applyStaticTranslations(){
   setText('planning-item-repeat-date-label', t('planning.add.repeatDate'))
   setText('planning-item-detail-label', t('planning.add.detail'))
   setPlaceholder('planning-item-detail', t('planning.add.detailPlaceholder'))
-  setPlaceholder('auth-username', t('auth.usernamePlaceholder'))
+  setPlaceholder('auth-email', t('auth.emailPlaceholder'))
   setPlaceholder('auth-password', t('auth.passwordPlaceholder'))
   setIconButton('planning-item-submit', t('ui.add'))
+  updateAuthUi()
 
   setText('sheep-modal-title', t('sheep.add.title'))
   setPlaceholder('sheep-modal-tag', t('sheep.add.tagPlaceholder'))
@@ -3334,57 +3353,41 @@ function closeModal(id){
   modal.setAttribute('aria-hidden', 'true')
 }
 
-document.getElementById('auth-open-btn')?.addEventListener('click', openAuthModal)
+document.getElementById('auth-toggle-btn')?.addEventListener('click', async () => {
+  if(authToken){
+    try {
+      await apiFetch('/auth/logout', { method: 'POST' })
+    } catch (error) {
+      console.warn('Cloud logout failed:', error.message)
+    }
+    clearAuthSession()
+    return
+  }
+  openAuthModal()
+})
 document.getElementById('auth-modal-close')?.addEventListener('click', () => closeModal('auth-modal'))
 document.getElementById('auth-modal-backdrop')?.addEventListener('click', () => closeModal('auth-modal'))
-
-document.getElementById('auth-register-btn')?.addEventListener('click', async () => {
-  const username = (document.getElementById('auth-username')?.value || '').trim().toLowerCase()
-  const password = (document.getElementById('auth-password')?.value || '').trim()
-  try {
-    setAuthStatusMessage(t('auth.status.registering'))
-    const result = await apiFetch('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ username, password })
-    })
-    persistAuthSession(result.token, result.username)
-    setAuthStatusMessage(t('auth.status.registered'))
-    await fetchCloudStateAndApply()
-    closeModal('auth-modal')
-  } catch (error) {
-    setAuthStatusMessage(error.message, true)
-  }
-})
+document.getElementById('auth-mode-register-btn')?.addEventListener('click', () => setAuthFormMode('register'))
+document.getElementById('auth-mode-login-btn')?.addEventListener('click', () => setAuthFormMode('login'))
 
 document.getElementById('auth-form')?.addEventListener('submit', async (event) => {
   event.preventDefault()
-  const username = (document.getElementById('auth-username')?.value || '').trim().toLowerCase()
+  const email = (document.getElementById('auth-email')?.value || '').trim().toLowerCase()
   const password = (document.getElementById('auth-password')?.value || '').trim()
+  const isRegister = authFormMode === 'register'
   try {
-    setAuthStatusMessage(t('auth.status.loggingIn'))
-    const result = await apiFetch('/auth/login', {
+    setAuthStatusMessage(isRegister ? t('auth.status.registering') : t('auth.status.loggingIn'))
+    const result = await apiFetch(isRegister ? '/auth/register' : '/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ email, password })
     })
     persistAuthSession(result.token, result.username)
-    setAuthStatusMessage(t('auth.status.loggedIn'))
+    setAuthStatusMessage(isRegister ? t('auth.status.registered') : t('auth.status.loggedIn'))
     await fetchCloudStateAndApply()
     closeModal('auth-modal')
   } catch (error) {
     setAuthStatusMessage(error.message, true)
   }
-})
-
-document.getElementById('auth-logout-btn')?.addEventListener('click', async () => {
-  try {
-    if(authToken){
-      await apiFetch('/auth/logout', { method: 'POST' })
-    }
-  } catch (error) {
-    console.warn('Cloud logout failed:', error.message)
-  }
-  clearAuthSession()
-  closeModal('auth-modal')
 })
 
 document.getElementById('download-data-btn')?.addEventListener('click', exportData)

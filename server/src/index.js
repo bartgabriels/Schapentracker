@@ -12,13 +12,13 @@ const corsOrigin = process.env.CORS_ORIGIN || '*'
 app.use(cors({ origin: corsOrigin === '*' ? true : corsOrigin }))
 app.use(express.json())
 
-function normalizeUsername(value) {
+function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase()
 }
 
-function validateCredentials(username, password) {
-  if (!username || !password) return 'Username and password are required.'
-  if (username.length < 3) return 'Username must be at least 3 characters.'
+function validateCredentials(email, password) {
+  if (!email || !password) return 'Email and password are required.'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Please provide a valid email address.'
   if (password.length < 8) return 'Password must be at least 8 characters.'
   return null
 }
@@ -70,23 +70,23 @@ async function authMiddleware(req, res, next) {
 
 app.post('/auth/register', async (req, res) => {
   try {
-    const username = normalizeUsername(req.body?.username)
+    const email = normalizeEmail(req.body?.email ?? req.body?.username)
     const password = String(req.body?.password || '')
-    const validationError = validateCredentials(username, password)
+    const validationError = validateCredentials(email, password)
     if (validationError) {
       res.status(400).json({ ok: false, message: validationError })
       return
     }
 
-    const existing = await prisma.user.findUnique({ where: { username } })
+    const existing = await prisma.user.findUnique({ where: { username: email } })
     if (existing) {
-      res.status(409).json({ ok: false, message: 'Username already exists.' })
+      res.status(409).json({ ok: false, message: 'Email is already registered.' })
       return
     }
 
     const user = await prisma.user.create({
       data: {
-        username,
+        username: email,
         passwordHash: hashPassword(password)
       }
     })
@@ -109,16 +109,16 @@ app.post('/auth/register', async (req, res) => {
 
 app.post('/auth/login', async (req, res) => {
   try {
-    const username = normalizeUsername(req.body?.username)
+    const email = normalizeEmail(req.body?.email ?? req.body?.username)
     const password = String(req.body?.password || '')
-    if (!username || !password) {
-      res.status(400).json({ ok: false, message: 'Username and password are required.' })
+    if (!email || !password) {
+      res.status(400).json({ ok: false, message: 'Email and password are required.' })
       return
     }
 
-    const user = await prisma.user.findUnique({ where: { username } })
+    const user = await prisma.user.findUnique({ where: { username: email } })
     if (!user || !verifyPassword(password, user.passwordHash)) {
-      res.status(401).json({ ok: false, message: 'Invalid username or password.' })
+      res.status(401).json({ ok: false, message: 'Invalid email or password.' })
       return
     }
 
