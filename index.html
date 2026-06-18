@@ -380,6 +380,14 @@
       <button type="button" id="auth-modal-close" class="modal-close">✕</button>
       <h2 id="auth-modal-title">Cloud account</h2>
       <form id="auth-form" class="group-form">
+        <div id="auth-language-field" class="modal-field" style="display:none">
+          <label id="auth-language-label" for="auth-language-select">Standaard taal</label>
+          <select id="auth-language-select">
+            <option id="auth-language-option-nl" value="nl">Nederlands</option>
+            <option id="auth-language-option-en" value="en">English</option>
+            <option id="auth-language-option-fr" value="fr">Français</option>
+          </select>
+        </div>
         <div class="auth-mode-row">
           <button type="button" id="auth-mode-register-btn" class="section-button">Registratie</button>
           <button type="button" id="auth-mode-login-btn" class="section-button">Aanmelden</button>

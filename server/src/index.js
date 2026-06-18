@@ -23,6 +23,11 @@ function validateCredentials(email, password) {
   return null
 }
 
+function normalizePreferredLanguage(value) {
+  const lang = String(value || '').trim().toLowerCase()
+  return lang === 'en' || lang === 'fr' ? lang : 'nl'
+}
+
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex')
   const hash = crypto.scryptSync(password, salt, 64).toString('hex')
@@ -72,6 +77,7 @@ app.post('/auth/register', async (req, res) => {
   try {
     const email = normalizeEmail(req.body?.email ?? req.body?.username)
     const password = String(req.body?.password || '')
+    const preferredLanguage = normalizePreferredLanguage(req.body?.preferredLanguage)
     const validationError = validateCredentials(email, password)
     if (validationError) {
       res.status(400).json({ ok: false, message: validationError })
@@ -87,7 +93,13 @@ app.post('/auth/register', async (req, res) => {
     const user = await prisma.user.create({
       data: {
         username: email,
-        passwordHash: hashPassword(password)
+        passwordHash: hashPassword(password),
+        cloudState: {
+          settings: {
+            language: preferredLanguage,
+            showAllOutOfFlockSheep: true
+          }
+        }
       }
     })
 

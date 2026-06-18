@@ -5,6 +5,7 @@ const AUTH_TOKEN_KEY = 'flockops:authToken'
 const AUTH_USERNAME_KEY = 'flockops:authUsername'
 const API_BASE = window.FLOCKOPS_API_BASE || 'https://flockops-hfyo.onrender.com'
 const FEEDBACK_ENDPOINT = window.FLOCKOPS_FEEDBACK_ENDPOINT || 'https://formsubmit.co/ajax/bart@weverstraat9.be'
+const DEFAULT_LANGUAGE = 'nl'
 const state = {
   paddocks: [],
   sheep: [],
@@ -12,7 +13,8 @@ const state = {
   events: [],
   planningItems: [],
   settings: {
-    showAllOutOfFlockSheep: true
+    showAllOutOfFlockSheep: true,
+    language: DEFAULT_LANGUAGE
   }
 }
 const collapsedPaddockIds = new Set()
@@ -105,15 +107,20 @@ const translations = window.FLOCKOPS_TRANSLATIONS || { nl: {} }
 if(!window.FLOCKOPS_TRANSLATIONS){
   console.warn('Translations bundle not loaded; falling back to minimal dictionary')
 }
+
+function normalizeLanguage(lang){
+  return translations[lang] ? lang : DEFAULT_LANGUAGE
+}
+
 let currentLang = (() => {
   try {
     const urlLang = new URLSearchParams(window.location.search).get('lang')
     if(urlLang && translations[urlLang]) return urlLang
     const saved = localStorage.getItem(LANG_KEY)
-    return (saved && translations[saved]) ? saved : 'nl'
+    return normalizeLanguage(saved)
   } catch (e) {
     console.warn('localStorage not available, using default language')
-    return 'nl'
+    return DEFAULT_LANGUAGE
   }
 })()
 
@@ -235,11 +242,22 @@ function syncAuthRegisterValidation(showMismatchMessage = false){
   const passwordInput = document.getElementById('auth-password')
   const passwordConfirmField = document.getElementById('auth-password-confirm-field')
   const passwordConfirmInput = document.getElementById('auth-password-confirm')
+  const languageField = document.getElementById('auth-language-field')
+  const languageSelect = document.getElementById('auth-language-select')
   const submitBtn = document.getElementById('auth-submit-btn')
   const isRegister = authFormMode === 'register'
 
   if(passwordConfirmField){
     passwordConfirmField.style.display = isRegister ? '' : 'none'
+  }
+  if(languageField){
+    languageField.style.display = isRegister ? '' : 'none'
+  }
+  if(languageSelect){
+    languageSelect.required = isRegister
+    if(!isRegister){
+      languageSelect.value = normalizeLanguage(currentLang)
+    }
   }
   if(passwordInput){
     passwordInput.setAttribute('autocomplete', isRegister ? 'new-password' : 'current-password')
@@ -334,10 +352,12 @@ function openAuthModal(){
   const emailInput = document.getElementById('auth-email')
   const passwordInput = document.getElementById('auth-password')
   const passwordConfirmInput = document.getElementById('auth-password-confirm')
+  const languageSelect = document.getElementById('auth-language-select')
   setAuthFormMode('login')
   if(emailInput) emailInput.value = authUsername || ''
   if(passwordInput) passwordInput.value = ''
   if(passwordConfirmInput) passwordConfirmInput.value = ''
+  if(languageSelect) languageSelect.value = normalizeLanguage(currentLang)
   openModal('auth-modal')
 }
 
@@ -361,9 +381,12 @@ async function fetchCloudStateAndApply(){
   const result = await apiFetch('/state')
   if(result && result.data && typeof result.data === 'object'){
     hydrateState(result.data)
+    applyStaticTranslations()
     save()
     render()
+    return true
   }
+  return false
 }
 
 function queueCloudSave(persistedState){
@@ -508,12 +531,17 @@ function setLanguage(lang){
     return
   }
   currentLang = lang
+  state.settings = {
+    ...(state.settings || {}),
+    language: lang
+  }
   try {
     localStorage.setItem(LANG_KEY, lang)
   } catch (e) {
     console.warn('Could not save language preference to localStorage')
   }
   syncLanguageUrl(lang)
+  save()
   applyStaticTranslations()
   render()
 }
@@ -844,6 +872,7 @@ function applyStaticTranslations(){
   setText('auth-email-label', t('auth.email'))
   setText('auth-password-label', t('auth.password'))
   setText('auth-password-confirm-label', t('auth.passwordConfirm'))
+  setText('auth-language-label', t('auth.defaultLanguage'))
   setText('auth-mode-register-btn', t('auth.mode.register'))
   setText('auth-mode-login-btn', t('auth.mode.login'))
   setText('auth-submit-btn', authFormMode === 'register' ? t('auth.register') : t('auth.login'))
@@ -1306,12 +1335,20 @@ function ensureDefaultStal(){
 }
 
 function hydrateState(saved){
+  const settingsLanguage = normalizeLanguage(saved?.settings?.language)
   state.settings = {
     showAllOutOfFlockSheep: saved?.settings?.showAllOutOfFlockSheep !== undefined
       ? !!saved.settings.showAllOutOfFlockSheep
-      : true
+      : true,
+    language: settingsLanguage
   }
   showAllOutOfFlockSheep = state.settings.showAllOutOfFlockSheep
+  currentLang = settingsLanguage
+  try {
+    localStorage.setItem(LANG_KEY, currentLang)
+  } catch (error) {
+    console.warn('Could not persist hydrated language setting to localStorage')
+  }
 
   state.paddocks = Array.isArray(saved?.paddocks) ? saved.paddocks.map(p => ({
     id: p.id,
@@ -1431,9 +1468,16 @@ function resetStateToDefaultConfig(){
   state.events = []
   state.planningItems = []
   state.settings = {
-    showAllOutOfFlockSheep: true
+    showAllOutOfFlockSheep: true,
+    language: DEFAULT_LANGUAGE
   }
   showAllOutOfFlockSheep = true
+  currentLang = DEFAULT_LANGUAGE
+  try {
+    localStorage.setItem(LANG_KEY, currentLang)
+  } catch (error) {
+    console.warn('Could not save default language preference to localStorage')
+  }
   collapsedPaddockIds.clear()
   expandedWeatherPaddocks.clear()
   weatherLoading.clear()
@@ -3709,12 +3753,19 @@ document.getElementById('auth-password')?.addEventListener('input', () => {
 document.getElementById('auth-password-confirm')?.addEventListener('input', () => {
   if(authFormMode === 'register') syncAuthRegisterValidation(true)
 })
+document.getElementById('auth-language-select')?.addEventListener('change', (event) => {
+  if(authFormMode !== 'register') return
+  const chosenLanguage = normalizeLanguage(event.target.value)
+  setLanguage(chosenLanguage)
+})
 
 document.getElementById('auth-form')?.addEventListener('submit', async (event) => {
   event.preventDefault()
   const email = (document.getElementById('auth-email')?.value || '').trim().toLowerCase()
   const password = (document.getElementById('auth-password')?.value || '').trim()
   const passwordConfirm = (document.getElementById('auth-password-confirm')?.value || '').trim()
+  const preferredLanguageRaw = (document.getElementById('auth-language-select')?.value || '')
+  const preferredLanguage = normalizeLanguage(preferredLanguageRaw)
   const isRegister = authFormMode === 'register'
   if(isRegister && password !== passwordConfirm){
     syncAuthRegisterValidation(true)
@@ -3722,13 +3773,19 @@ document.getElementById('auth-form')?.addEventListener('submit', async (event) =
   }
   try {
     setAuthStatusMessage(isRegister ? t('auth.status.registering') : t('auth.status.loggingIn'))
+    const authPayload = isRegister
+      ? { email, password, preferredLanguage }
+      : { email, password }
     const result = await apiFetch(isRegister ? '/auth/register' : '/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify(authPayload)
     })
     persistAuthSession(result.token, result.username)
     setAuthStatusMessage(isRegister ? t('auth.status.registered') : t('auth.status.loggedIn'))
-    await fetchCloudStateAndApply()
+    const hasCloudState = await fetchCloudStateAndApply()
+    if(isRegister && !hasCloudState){
+      setLanguage(preferredLanguage)
+    }
     closeModal('auth-modal')
   } catch (error) {
     setAuthStatusMessage(error.message, true)
@@ -4929,10 +4986,10 @@ document.getElementById('zone-modal-form')?.addEventListener('submit', e => {
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', () => {
     initTabs()
+    load()
     initLanguageSelector()
     initAuthProfileMenu()
     applyStaticTranslations()
-    load()
     render()
     initializeCloudSession()
     maybeOpenEmptyStorageModal()
@@ -4940,10 +4997,10 @@ if(document.readyState === 'loading'){
 } else {
   // DOM is already loaded (e.g., when script is deferred or at end of body)
   initTabs()
+  load()
   initLanguageSelector()
   initAuthProfileMenu()
   applyStaticTranslations()
-  load()
   render()
   initializeCloudSession()
   maybeOpenEmptyStorageModal()
