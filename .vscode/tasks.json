@@ -1,0 +1,137 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "run-refactor-translations",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"server/tmp-refactor-translations.cjs"
+			]
+		},
+		{
+			"label": "probe-nodejs-command",
+			"type": "shell",
+			"command": "where",
+			"args": [
+				"nodejs"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "probe-python-command",
+			"type": "shell",
+			"command": "where",
+			"args": [
+				"python"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "probe-pwsh-python",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Command python | Select-Object -ExpandProperty Source"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "run-python-compact-translations",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"python server/tmp_compact_translations.py"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "probe-py-launcher",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"py -3 --version"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "run-powershell-compact-translations",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"server/tmp_compact_translations.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "run-powershell-compact-translations",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"server/tmp_compact_translations.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "run-powershell-compact-translations",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"server/tmp_compact_translations.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "export-head-translations",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"git -C . show HEAD:locales/translations.js > server/tmp_head_translations.js"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "export-head-translations-cmd",
+			"type": "shell",
+			"command": "cmd",
+			"args": [
+				"/c",
+				"git -C . show HEAD:locales/translations.js > server\\tmp_head_translations.js"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "run-fix-backslashes",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"server/tmp_fix_backslashes.ps1"
+			],
+			"isBackground": false
+		}
+	]
+}
