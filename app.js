@@ -890,6 +890,7 @@ function applyStaticTranslations(){
   setText('tab-paddocks-btn', t('tab.paddocksZones'))
   setText('tab-sheep-btn', t('tab.sheep'))
   setText('tab-history-btn', t('tab.history'))
+  setText('tab-planning-btn', t('tab.planning'))
   setText('tab-pedigree-btn', t('tab.pedigree'))
   setText('tab-billing-btn', t('tab.billing'))
   setText('section-paddocks-title', t('section.paddocks'))
