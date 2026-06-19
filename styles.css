@@ -1044,8 +1044,53 @@ form button{
   padding:10px;
 }
 
+.pedigree-summary-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.pedigree-toggle-button{
+  flex-shrink:0;
+}
+
+.pedigree-summary-item{
+  min-width:0;
+  font-size:0.86rem;
+  font-weight:600;
+  line-height:1.2;
+}
+
+.pedigree-summary-item--parents{
+  font-weight:500;
+  color:var(--muted);
+}
+
+.pedigree-summary-item--inline{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.pedigree-tree-zone{
+  margin-top:10px;
+}
+
+.pedigree-tree-zone.hidden{
+  display:none;
+}
+
+.pedigree-meta{
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  color:var(--muted);
+  font-size:0.82rem;
+}
+
 .pedigree-tree-wrap{
-  overflow-x:auto;
+  overflow-x:hidden;
 }
 
 .pedigree-tree-wrap--full{
@@ -1055,8 +1100,8 @@ form button{
 
 .pedigree-tree-svg{
   width:100%;
-  min-width:760px;
-  height:220px;
+  min-width:0;
+  height:170px;
   display:block;
 }
 
@@ -1098,6 +1143,21 @@ form button{
 }
 
 @media (max-width: 700px) {
+  .pedigree-summary-row{
+    gap:6px;
+  }
+
+  .pedigree-summary-item{
+    white-space:normal;
+    line-height:1.2;
+  }
+
+  .pedigree-summary-item--inline{
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+  }
+
   .sheep-grid {
     grid-template-columns:repeat(2,minmax(0,1fr));
   }

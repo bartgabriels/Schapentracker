@@ -19,6 +19,7 @@ const state = {
 }
 const collapsedPaddockIds = new Set()
 const expandedWeatherPaddocks = new Set()
+const expandedPedigreeSheepIds = new Set()
 const weatherCache = {}
 const weatherLoading = new Set()
 const WEATHER_TTL_MS = 60 * 60 * 1000
@@ -2694,8 +2695,14 @@ function render(){
     const pedigreeCards = activePedigreeSheep
       .filter(sheep => sheep.motherId || sheep.fatherId)
       .slice()
-      .sort((a, b) => (a.tag || '').localeCompare(b.tag || '', localeTag()))
+      .sort((a, b) => {
+        const aTime = a.birthDate ? Date.parse(a.birthDate) : Number.NEGATIVE_INFINITY
+        const bTime = b.birthDate ? Date.parse(b.birthDate) : Number.NEGATIVE_INFINITY
+        if(bTime !== aTime) return bTime - aTime
+        return (a.tag || '').localeCompare(b.tag || '', localeTag())
+      })
       .map(sheep => {
+        const isExpanded = expandedPedigreeSheepIds.has(sheep.id)
         const mother = sheep.motherId ? sheepById.get(sheep.motherId) : null
         const father = sheep.fatherId ? sheepById.get(sheep.fatherId) : null
         const maternalGrandMother = mother && mother.motherId ? sheepById.get(mother.motherId) : null
@@ -2706,40 +2713,53 @@ function render(){
         const tag = sheep.tag || '-'
         const motherTag = mother ? `${sexPrefix(mother)}${mother.tag || '-'}` : '-'
         const fatherTag = father ? `${sexPrefix(father)}${father.tag || '-'}` : '-'
+        const birthDateLabel = sheep.birthDate ? formatBirthDate(sheep.birthDate) : t('labels.notAvailable')
+        const summaryLabel = `${sexPrefix(sheep)}${tag} - ${birthDateLabel} (${fatherTag} x ${motherTag})`
 
         return `
           <article class="pedigree-single">
-            <h3 class="pedigree-title">${escapeHtml(`${sexPrefix(sheep)}${tag}`)}</h3>
-            <div class="pedigree-tree-wrap">
-              <svg class="pedigree-tree-svg" viewBox="0 0 820 220" role="img" aria-label="${escapeHtml(tag)} ${t('section.pedigree')}">
-                <line class="pedigree-line" x1="200" y1="42" x2="320" y2="73"></line>
-                <line class="pedigree-line" x1="200" y1="92" x2="320" y2="73"></line>
-                <line class="pedigree-line" x1="200" y1="132" x2="320" y2="163"></line>
-                <line class="pedigree-line" x1="200" y1="182" x2="320" y2="163"></line>
-                <line class="pedigree-line" x1="500" y1="73" x2="620" y2="118"></line>
-                <line class="pedigree-line" x1="500" y1="163" x2="620" y2="118"></line>
-
-                <rect class="pedigree-node-box" x="20" y="22" width="180" height="40" rx="10"></rect>
-                <text class="pedigree-node-text" x="110" y="42" text-anchor="middle">${escapeHtml(nodeLabel(maternalGrandMother))}</text>
-                <rect class="pedigree-node-box" x="20" y="72" width="180" height="40" rx="10"></rect>
-                <text class="pedigree-node-text" x="110" y="92" text-anchor="middle">${escapeHtml(nodeLabel(maternalGrandFather))}</text>
-                <rect class="pedigree-node-box" x="20" y="112" width="180" height="40" rx="10"></rect>
-                <text class="pedigree-node-text" x="110" y="132" text-anchor="middle">${escapeHtml(nodeLabel(paternalGrandMother))}</text>
-                <rect class="pedigree-node-box" x="20" y="162" width="180" height="40" rx="10"></rect>
-                <text class="pedigree-node-text" x="110" y="182" text-anchor="middle">${escapeHtml(nodeLabel(paternalGrandFather))}</text>
-
-                <rect class="pedigree-node-box" x="320" y="53" width="180" height="40" rx="10"></rect>
-                <text class="pedigree-node-text" x="410" y="73" text-anchor="middle">${escapeHtml(nodeLabel(mother))}</text>
-                <rect class="pedigree-node-box" x="320" y="143" width="180" height="40" rx="10"></rect>
-                <text class="pedigree-node-text" x="410" y="163" text-anchor="middle">${escapeHtml(nodeLabel(father))}</text>
-
-                <rect class="pedigree-node-box pedigree-node-box--focus" x="620" y="98" width="180" height="40" rx="10"></rect>
-                <text class="pedigree-node-text pedigree-node-text--focus" x="710" y="118" text-anchor="middle">${escapeHtml(nodeLabel(sheep))}</text>
-              </svg>
+            <div class="pedigree-summary-row">
+              <button
+                type="button"
+                class="paddock-collapse-button pedigree-toggle-button"
+                data-sheep-id="${sheep.id}"
+                aria-expanded="${isExpanded ? 'true' : 'false'}"
+                aria-label="${isExpanded ? t('aria.collapsePaddock') : t('aria.expandPaddock')}"
+              >${isExpanded ? '▾' : '▸'}</button>
+              <span class="pedigree-summary-item pedigree-summary-item--inline">${escapeHtml(summaryLabel)}</span>
             </div>
-            <div class="pedigree-meta">
-              <div><strong>${t('pedigree.mother')}:</strong> ${escapeHtml(motherTag)}</div>
-              <div><strong>${t('pedigree.father')}:</strong> ${escapeHtml(fatherTag)}</div>
+            <div class="pedigree-tree-zone${isExpanded ? '' : ' hidden'}">
+              <div class="pedigree-tree-wrap">
+                <svg class="pedigree-tree-svg" viewBox="0 0 420 170" role="img" aria-label="${escapeHtml(tag)} ${t('section.pedigree')}">
+                  <line class="pedigree-line" x1="55" y1="20" x2="55" y2="55"></line>
+                  <line class="pedigree-line" x1="55" y1="37.5" x2="225" y2="42"></line>
+                  <line class="pedigree-line" x1="55" y1="100" x2="55" y2="135"></line>
+                  <line class="pedigree-line" x1="55" y1="117.5" x2="225" y2="122"></line>
+                  <line class="pedigree-line" x1="225" y1="42" x2="225" y2="122"></line>
+                  <line class="pedigree-line" x1="225" y1="82" x2="365" y2="82"></line>
+
+                  <rect class="pedigree-node-box" x="10" y="6" width="90" height="28" rx="8"></rect>
+                  <text class="pedigree-node-text" x="55" y="20" text-anchor="middle">${escapeHtml(nodeLabel(maternalGrandMother))}</text>
+                  <rect class="pedigree-node-box" x="10" y="41" width="90" height="28" rx="8"></rect>
+                  <text class="pedigree-node-text" x="55" y="55" text-anchor="middle">${escapeHtml(nodeLabel(maternalGrandFather))}</text>
+                  <rect class="pedigree-node-box" x="10" y="86" width="90" height="28" rx="8"></rect>
+                  <text class="pedigree-node-text" x="55" y="100" text-anchor="middle">${escapeHtml(nodeLabel(paternalGrandMother))}</text>
+                  <rect class="pedigree-node-box" x="10" y="121" width="90" height="28" rx="8"></rect>
+                  <text class="pedigree-node-text" x="55" y="135" text-anchor="middle">${escapeHtml(nodeLabel(paternalGrandFather))}</text>
+
+                  <rect class="pedigree-node-box" x="170" y="25" width="110" height="34" rx="8"></rect>
+                  <text class="pedigree-node-text" x="225" y="42" text-anchor="middle">${escapeHtml(nodeLabel(mother))}</text>
+                  <rect class="pedigree-node-box" x="170" y="105" width="110" height="34" rx="8"></rect>
+                  <text class="pedigree-node-text" x="225" y="122" text-anchor="middle">${escapeHtml(nodeLabel(father))}</text>
+
+                  <rect class="pedigree-node-box pedigree-node-box--focus" x="310" y="65" width="110" height="34" rx="8"></rect>
+                  <text class="pedigree-node-text pedigree-node-text--focus" x="365" y="82" text-anchor="middle">${escapeHtml(nodeLabel(sheep))}</text>
+                </svg>
+              </div>
+              <div class="pedigree-meta">
+                <div><strong>${t('pedigree.mother')}:</strong> ${escapeHtml(motherTag)}</div>
+                <div><strong>${t('pedigree.father')}:</strong> ${escapeHtml(fatherTag)}</div>
+              </div>
             </div>
           </article>
         `
@@ -4752,6 +4772,19 @@ document.getElementById('planning-list')?.addEventListener('click', e => {
   const planningId = doneButton.dataset.planningId
   if(!planningId) return
   markPlanningItemDone(planningId)
+})
+
+document.addEventListener('click', e => {
+  const toggleButton = e.target.closest('.pedigree-toggle-button')
+  if(!toggleButton) return
+  const sheepId = toggleButton.dataset.sheepId
+  if(!sheepId) return
+  if(expandedPedigreeSheepIds.has(sheepId)){
+    expandedPedigreeSheepIds.delete(sheepId)
+  } else {
+    expandedPedigreeSheepIds.add(sheepId)
+  }
+  render()
 })
 
 document.getElementById('planning-add-btn')?.addEventListener('click', () => {
