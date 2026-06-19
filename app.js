@@ -2997,7 +2997,7 @@ function render(){
   }
 
   if(pedigreeList){
-    const activePedigreeSheep = state.sheep.filter(isActiveFlockSheep)
+    const activePedigreeSheep = activeSheep
     const sheepById = new Map(state.sheep.map(s => [s.id, s]))
     const truncateTag = (value) => {
       const text = (value || '-').trim() || '-'
@@ -3380,6 +3380,26 @@ function availableTargetZones(targetPaddockId, sourcePaddockId = pendingZoneDele
   return targetPaddock.zones.filter(z => !(targetPaddockId === sourcePaddockId && z.id === sourceZoneId))
 }
 
+function populateZoneTargetSelect(zoneSelect, submitBtn, zones, emptyLabel){
+  if(!zoneSelect) return
+  if(zones.length){
+    zoneSelect.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
+    zoneSelect.disabled = false
+    if(zones.length === 1){
+      zoneSelect.value = zones[0].id
+      if(submitBtn) submitBtn.disabled = false
+    } else {
+      zoneSelect.value = ''
+      if(submitBtn) submitBtn.disabled = true
+    }
+    return
+  }
+
+  zoneSelect.innerHTML = `<option value="">${emptyLabel}</option>`
+  zoneSelect.disabled = true
+  if(submitBtn) submitBtn.disabled = true
+}
+
 function populateZoneDeleteMoveTargets(selectedPaddockId){
   const paddockSelect = document.getElementById('zone-delete-target-paddock-modal')
   const zoneSelect = document.getElementById('zone-delete-target-zone-modal')
@@ -3393,21 +3413,7 @@ function populateZoneDeleteMoveTargets(selectedPaddockId){
   paddockSelect.disabled = true
 
   const zones = availableTargetZones(sourcePaddock.id, sourcePaddock.id, pendingZoneDeletion.sourceZoneId)
-  if(zones.length){
-    zoneSelect.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
-    zoneSelect.disabled = false
-    if(zones.length === 1){
-      zoneSelect.value = zones[0].id
-      if(submitBtn) submitBtn.disabled = false
-    } else {
-      zoneSelect.value = ''
-      if(submitBtn) submitBtn.disabled = true
-    }
-  } else {
-    zoneSelect.innerHTML = `<option value="">${t('select.zone.noneAvailable')}</option>`
-    zoneSelect.disabled = true
-    if(submitBtn) submitBtn.disabled = true
-  }
+  populateZoneTargetSelect(zoneSelect, submitBtn, zones, t('select.zone.noneAvailable'))
 }
 
 function openZoneDeleteMoveModal(sourcePaddockId, sourceZoneId, sheepCount){
@@ -3650,21 +3656,7 @@ function populatePaddockDeleteMoveTargets(selectedPaddockId){
   const targetPaddockId = selectedPaddockId || paddockSelect.value
   const targetPaddock = getPaddock(targetPaddockId)
   const zones = targetPaddock ? targetPaddock.zones : []
-  if(zones.length){
-    zoneSelect.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
-    zoneSelect.disabled = false
-    if(zones.length === 1){
-      zoneSelect.value = zones[0].id
-      if(submitBtn) submitBtn.disabled = false
-    } else {
-      zoneSelect.value = ''
-      if(submitBtn) submitBtn.disabled = true
-    }
-  } else {
-    zoneSelect.innerHTML = `<option value="">${t('select.zone.noneAvailable')}</option>`
-    zoneSelect.disabled = true
-    if(submitBtn) submitBtn.disabled = true
-  }
+  populateZoneTargetSelect(zoneSelect, submitBtn, zones, t('select.zone.noneAvailable'))
 }
 
 function openPaddockDeleteMoveModal(sourcePaddockId, sheepCount){
@@ -3737,21 +3729,9 @@ function populateMoveModalPaddocks(selectedPaddockId){
   movePaddockModal.innerHTML = `<option value="" selected disabled hidden>${t('select.paddock.choose')}</option>` + state.paddocks.map(p => `<option value="${p.id}"${p.id === selectedPaddockId ? ' selected' : ''}>${p.name}</option>`).join('')
 
   const selected = getPaddock(selectedPaddockId)
-  if(selected && selected.zones.length){
-    moveZoneModal.innerHTML = `<option value="" selected disabled hidden>${t('select.zone.choose')}</option>` + selected.zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('')
-    moveZoneModal.disabled = false
-    if(selected.zones.length === 1){
-      moveZoneModal.value = selected.zones[0].id
-      if(submitBtn) submitBtn.disabled = false
-    } else {
-      moveZoneModal.value = ''
-      if(submitBtn) submitBtn.disabled = true
-    }
-  } else {
-    moveZoneModal.innerHTML = selected ? `<option value="">${t('select.zone.noneAvailable')}</option>` : `<option value="">${t('select.paddock.first')}</option>`
-    moveZoneModal.disabled = !selected || selected.zones.length === 0
-    if(submitBtn) submitBtn.disabled = true
-  }
+  const zones = selected ? selected.zones : []
+  const emptyLabel = selected ? t('select.zone.noneAvailable') : t('select.paddock.first')
+  populateZoneTargetSelect(moveZoneModal, submitBtn, zones, emptyLabel)
 }
 
 function openMoveModal(sheepId){
@@ -3895,17 +3875,7 @@ function renderPaddockSheepSelection(containerId, inputName, paddockId){
     .filter(s => s.paddockId === paddockId)
     .sort((a, b) => a.tag.localeCompare(b.tag, localeTag()))
 
-  if(!sheepInPaddock.length){
-    container.innerHTML = `<div class="empty">${t('sheep.empty')}</div>`
-    return
-  }
-
-  container.innerHTML = sheepInPaddock.map(sheep => `
-    <label class="modal-sheep-option" for="${inputName}-${sheep.id}">
-      <input id="${inputName}-${sheep.id}" type="checkbox" name="${inputName}" value="${sheep.id}" checked>
-      <span>${sheep.tag}</span>
-    </label>
-  `).join('')
+  renderModalSheepSelection(container, inputName, sheepInPaddock)
 }
 
 function renderZoneSheepSelection(containerId, inputName, paddockId, zoneId){
@@ -3916,17 +3886,7 @@ function renderZoneSheepSelection(containerId, inputName, paddockId, zoneId){
     .filter(s => s.paddockId === paddockId && s.zoneId === zoneId)
     .sort((a, b) => a.tag.localeCompare(b.tag, localeTag()))
 
-  if(!sheepInZone.length){
-    container.innerHTML = `<div class="empty">${t('sheep.empty')}</div>`
-    return
-  }
-
-  container.innerHTML = sheepInZone.map(sheep => `
-    <label class="modal-sheep-option" for="${inputName}-${sheep.id}">
-      <input id="${inputName}-${sheep.id}" type="checkbox" name="${inputName}" value="${sheep.id}" checked>
-      <span>${sheep.tag}</span>
-    </label>
-  `).join('')
+  renderModalSheepSelection(container, inputName, sheepInZone)
 }
 
 function openPaddockInjectionModal(paddockId, zoneId = null){
@@ -4095,15 +4055,49 @@ function closeModal(id){
   modal.setAttribute('aria-hidden', 'true')
 }
 
+function bindModalCloseHandlers(bindings){
+  bindings.forEach(binding => {
+    const modalId = binding.modalId
+    const closeId = binding.closeId
+    const backdropId = binding.backdropId
+    const onClose = binding.onClose || (() => closeModal(modalId))
+    document.getElementById(closeId)?.addEventListener('click', onClose)
+    document.getElementById(backdropId)?.addEventListener('click', onClose)
+  })
+}
+
+function renderModalSheepSelection(container, inputName, sheepList){
+  if(!container) return
+  if(!sheepList.length){
+    container.innerHTML = `<div class="empty">${t('sheep.empty')}</div>`
+    return
+  }
+
+  container.innerHTML = sheepList.map(sheep => `
+    <label class="modal-sheep-option" for="${inputName}-${sheep.id}">
+      <input id="${inputName}-${sheep.id}" type="checkbox" name="${inputName}" value="${sheep.id}" checked>
+      <span>${sheep.tag}</span>
+    </label>
+  `).join('')
+}
+
 document.getElementById('auth-toggle-btn')?.addEventListener('click', async () => {
   openAuthModal()
 })
 document.getElementById('feedback-menu-btn')?.addEventListener('click', () => openFeedbackModal())
 document.getElementById('auth-feedback-btn')?.addEventListener('click', () => openFeedbackModal())
-document.getElementById('auth-modal-close')?.addEventListener('click', () => closeModal('auth-modal'))
-document.getElementById('auth-modal-backdrop')?.addEventListener('click', () => closeModal('auth-modal'))
-document.getElementById('feedback-modal-close')?.addEventListener('click', () => closeModal('feedback-modal'))
-document.getElementById('feedback-modal-backdrop')?.addEventListener('click', () => closeModal('feedback-modal'))
+bindModalCloseHandlers([
+  {
+    modalId: 'auth-modal',
+    closeId: 'auth-modal-close',
+    backdropId: 'auth-modal-backdrop'
+  },
+  {
+    modalId: 'feedback-modal',
+    closeId: 'feedback-modal-close',
+    backdropId: 'feedback-modal-backdrop'
+  }
+])
 document.getElementById('auth-mode-register-btn')?.addEventListener('click', () => setAuthFormMode('register'))
 document.getElementById('auth-mode-login-btn')?.addEventListener('click', () => setAuthFormMode('login'))
 document.getElementById('auth-password')?.addEventListener('input', () => {
@@ -4260,16 +4254,95 @@ document.getElementById('empty-storage-upload-dummy')?.addEventListener('click',
 })
 
 
-document.getElementById('paddock-modal-close')?.addEventListener('click', () => closeModal('paddock-modal'))
-document.getElementById('paddock-modal-backdrop')?.addEventListener('click', () => closeModal('paddock-modal'))
+bindModalCloseHandlers([
+  {
+    modalId: 'paddock-modal',
+    closeId: 'paddock-modal-close',
+    backdropId: 'paddock-modal-backdrop'
+  },
+  {
+    modalId: 'sheep-out-modal',
+    closeId: 'sheep-out-modal-close',
+    backdropId: 'sheep-out-modal-backdrop',
+    onClose: closeSheepOutOfFlockModal
+  },
+  {
+    modalId: 'paddock-edit-modal',
+    closeId: 'paddock-edit-modal-close',
+    backdropId: 'paddock-edit-modal-backdrop',
+    onClose: closeEditPaddockModal
+  },
+  {
+    modalId: 'paddock-injection-modal',
+    closeId: 'paddock-injection-modal-close',
+    backdropId: 'paddock-injection-modal-backdrop',
+    onClose: closePaddockInjectionModal
+  },
+  {
+    modalId: 'paddock-shearing-modal',
+    closeId: 'paddock-shearing-modal-close',
+    backdropId: 'paddock-shearing-modal-backdrop',
+    onClose: closePaddockShearingModal
+  },
+  {
+    modalId: 'sheep-injection-modal',
+    closeId: 'sheep-injection-modal-close',
+    backdropId: 'sheep-injection-modal-backdrop',
+    onClose: closeSheepInjectionModal
+  },
+  {
+    modalId: 'sheep-shearing-modal',
+    closeId: 'sheep-shearing-modal-close',
+    backdropId: 'sheep-shearing-modal-backdrop',
+    onClose: closeSheepShearingModal
+  },
+  {
+    modalId: 'sheep-modal',
+    closeId: 'sheep-modal-close',
+    backdropId: 'sheep-modal-backdrop'
+  },
+  {
+    modalId: 'sheep-tag-edit-modal',
+    closeId: 'sheep-tag-edit-modal-close',
+    backdropId: 'sheep-tag-edit-modal-backdrop',
+    onClose: closeEditSheepTagModal
+  },
+  {
+    modalId: 'zone-modal',
+    closeId: 'zone-modal-close',
+    backdropId: 'zone-modal-backdrop'
+  },
+  {
+    modalId: 'zone-edit-modal',
+    closeId: 'zone-edit-modal-close',
+    backdropId: 'zone-edit-modal-backdrop',
+    onClose: closeEditZoneModal
+  },
+  {
+    modalId: 'zone-delete-move-modal',
+    closeId: 'zone-delete-move-modal-close',
+    backdropId: 'zone-delete-move-modal-backdrop',
+    onClose: closeZoneDeleteMoveModal
+  },
+  {
+    modalId: 'zone-bulk-move-modal',
+    closeId: 'zone-bulk-move-modal-close',
+    backdropId: 'zone-bulk-move-modal-backdrop',
+    onClose: closeZoneBulkMoveModal
+  },
+  {
+    modalId: 'paddock-delete-move-modal',
+    closeId: 'paddock-delete-move-modal-close',
+    backdropId: 'paddock-delete-move-modal-backdrop',
+    onClose: closePaddockDeleteMoveModal
+  }
+])
 
 document.getElementById('delete-confirm-close')?.addEventListener('click', closeDeleteConfirmModal)
 document.getElementById('delete-confirm-cancel')?.addEventListener('click', closeDeleteConfirmModal)
 document.getElementById('delete-confirm-submit')?.addEventListener('click', executeDeleteConfirmed)
 document.getElementById('delete-confirm-backdrop')?.addEventListener('click', closeDeleteConfirmModal)
 
-document.getElementById('sheep-out-modal-close')?.addEventListener('click', closeSheepOutOfFlockModal)
-document.getElementById('sheep-out-modal-backdrop')?.addEventListener('click', closeSheepOutOfFlockModal)
 document.getElementById('sheep-out-modal-form')?.addEventListener('submit', e => {
   e.preventDefault()
   const reasonInput = document.getElementById('sheep-out-modal-reason')
@@ -4282,11 +4355,6 @@ document.getElementById('sheep-out-modal-form')?.addEventListener('submit', e =>
   moveSheepOutOfFlock(reason, date, notes)
 })
 
-document.getElementById('paddock-edit-modal-close')?.addEventListener('click', closeEditPaddockModal)
-document.getElementById('paddock-edit-modal-backdrop')?.addEventListener('click', closeEditPaddockModal)
-
-document.getElementById('paddock-injection-modal-close')?.addEventListener('click', closePaddockInjectionModal)
-document.getElementById('paddock-injection-modal-backdrop')?.addEventListener('click', closePaddockInjectionModal)
 document.getElementById('paddock-injection-no-repeat')?.addEventListener('change', e => {
   const repeatDateInput = document.getElementById('paddock-injection-repeat-date')
   if(!repeatDateInput) return
@@ -4295,11 +4363,6 @@ document.getElementById('paddock-injection-no-repeat')?.addEventListener('change
   repeatDateInput.required = !noRepeat
 })
 
-document.getElementById('paddock-shearing-modal-close')?.addEventListener('click', closePaddockShearingModal)
-document.getElementById('paddock-shearing-modal-backdrop')?.addEventListener('click', closePaddockShearingModal)
-
-document.getElementById('sheep-injection-modal-close')?.addEventListener('click', closeSheepInjectionModal)
-document.getElementById('sheep-injection-modal-backdrop')?.addEventListener('click', closeSheepInjectionModal)
 document.getElementById('sheep-injection-no-repeat')?.addEventListener('change', e => {
   const repeatDateInput = document.getElementById('sheep-injection-repeat-date')
   if(!repeatDateInput) return
@@ -4308,29 +4371,6 @@ document.getElementById('sheep-injection-no-repeat')?.addEventListener('change',
   repeatDateInput.required = !noRepeat
 })
 
-document.getElementById('sheep-shearing-modal-close')?.addEventListener('click', closeSheepShearingModal)
-document.getElementById('sheep-shearing-modal-backdrop')?.addEventListener('click', closeSheepShearingModal)
-
-document.getElementById('sheep-modal-close')?.addEventListener('click', () => closeModal('sheep-modal'))
-document.getElementById('sheep-modal-backdrop')?.addEventListener('click', () => closeModal('sheep-modal'))
-
-document.getElementById('sheep-tag-edit-modal-close')?.addEventListener('click', closeEditSheepTagModal)
-document.getElementById('sheep-tag-edit-modal-backdrop')?.addEventListener('click', closeEditSheepTagModal)
-
-document.getElementById('zone-modal-close')?.addEventListener('click', () => closeModal('zone-modal'))
-document.getElementById('zone-modal-backdrop')?.addEventListener('click', () => closeModal('zone-modal'))
-
-document.getElementById('zone-edit-modal-close')?.addEventListener('click', closeEditZoneModal)
-document.getElementById('zone-edit-modal-backdrop')?.addEventListener('click', closeEditZoneModal)
-
-document.getElementById('zone-delete-move-modal-close')?.addEventListener('click', closeZoneDeleteMoveModal)
-document.getElementById('zone-delete-move-modal-backdrop')?.addEventListener('click', closeZoneDeleteMoveModal)
-
-document.getElementById('zone-bulk-move-modal-close')?.addEventListener('click', closeZoneBulkMoveModal)
-document.getElementById('zone-bulk-move-modal-backdrop')?.addEventListener('click', closeZoneBulkMoveModal)
-
-document.getElementById('paddock-delete-move-modal-close')?.addEventListener('click', closePaddockDeleteMoveModal)
-document.getElementById('paddock-delete-move-modal-backdrop')?.addEventListener('click', closePaddockDeleteMoveModal)
 
 document.getElementById('move-modal-form')?.addEventListener('submit', e => {
   e.preventDefault()
@@ -4945,9 +4985,13 @@ document.getElementById('zone-bulk-move-form')?.addEventListener('submit', e => 
   save(); render(); closeZoneBulkMoveModal()
 })
 
-document.getElementById('move-modal-close')?.addEventListener('click', () => closeModal('move-modal'))
-
-document.getElementById('move-modal-backdrop')?.addEventListener('click', () => closeModal('move-modal'))
+bindModalCloseHandlers([
+  {
+    modalId: 'move-modal',
+    closeId: 'move-modal-close',
+    backdropId: 'move-modal-backdrop'
+  }
+])
 
 document.getElementById('sheep-list')?.addEventListener('click', e => {
   const birthDateInput = e.target.closest('.sheep-birthdate-input')
