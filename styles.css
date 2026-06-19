@@ -2,7 +2,8 @@
 
 html{
   overflow-x:hidden;
-  overflow-y:auto;
+  overflow-y:scroll;
+  scrollbar-gutter:stable;
   margin:0;
   padding:0;
 }
