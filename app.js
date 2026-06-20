@@ -649,6 +649,7 @@ function outReasonLabel(reason){
   if(reason === 'slaughter') return t('sheep.out.reason.slaughter')
   if(reason === 'deceased') return t('sheep.out.reason.deceased')
   if(reason === 'sold') return t('sheep.out.reason.sold')
+  if(reason === 'administrative') return t('sheep.out.reason.administrative')
   return '-'
 }
 
@@ -656,6 +657,7 @@ function outReasonIcon(reason){
   if(reason === 'slaughter') return '🔪'
   if(reason === 'deceased') return '✝'
   if(reason === 'sold') return '💰'
+  if(reason === 'administrative') return '🗂'
   return '•'
 }
 
@@ -996,6 +998,7 @@ function applyStaticTranslations(){
   setText('sheep-out-reason-option-slaughter', t('sheep.out.reason.slaughter'))
   setText('sheep-out-reason-option-deceased', t('sheep.out.reason.deceased'))
   setText('sheep-out-reason-option-sold', t('sheep.out.reason.sold'))
+  setText('sheep-out-reason-option-administrative', t('sheep.out.reason.administrative'))
   setIconButton('sheep-out-modal-submit', t('ui.save'))
 
   setText('sheep-edit-modal-title', t('sheep.edit.title'))
@@ -3230,6 +3233,12 @@ function renderPaddock(p){
           : `zone-status ${occupancyAgeClass(occupiedDays)}`
         const zoneArea = z.area !== null ? `${z.area} m2` : ''
         const zonePerimeter = z.perimeter !== null ? `${z.perimeter} m` : ''
+        const zonePerimeterFlexinetCount = z.perimeter !== null
+          ? Math.ceil(Math.max(0, Number(z.perimeter)) / 50)
+          : null
+        const zonePerimeterFlexinetBadge = zonePerimeterFlexinetCount !== null
+          ? t('zone.perimeter.flexinets', { count: zonePerimeterFlexinetCount })
+          : ''
         const bulkMoveButton = sheepCount > 1 ? `<button type="button" class="zone-bulk-move-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('zone.bulkMove')}" title="${t('zone.bulkMove')}">${doubleArrowIcon()}</button>` : ''
         const sheepList = sheepCount
           ? `<div class="zone-sheep-list zone-sheep-grid${sheepCount > 4 ? ' is-scrollable' : ''}">${sheepInZone.map(s => `<button type="button" class="zone-sheep-link" data-sheep-id="${s.id}" aria-label="${t('aria.moveSheep', { tag: s.tag })}">${sheepIcon()}${s.tag}</button>`).join('')}</div>${bulkMoveButton}`
@@ -3238,7 +3247,7 @@ function renderPaddock(p){
         const stallZone = isStalZone(p, z)
         const useStallBackground = isStalPaddock(p)
         const canDeleteZone = !stallZone && p.zones.length > 1
-        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">${recycleBinIcon()}</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name} (${sheepCount})</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}${headerZoneStatus}</div></div><div class="zone-bottom">${sheepList}</div></div>`
+        return `<div class="zone-item${useStallBackground ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" data-zone-id="${z.id}">${canDeleteZone ? `<button type="button" class="zone-delete-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.deleteZone')}">${recycleBinIcon()}</button>` : ''}<div class="zone-header"><div class="zone-title-row"><button type="button" class="zone-edit-button" data-paddock-id="${p.id}" data-zone-id="${z.id}" aria-label="${t('aria.editZone')}">✎</button><strong>${z.name} (${sheepCount})</strong></div><div class="zone-metrics">${zoneArea ? `<span class="zone-metric">${zoneArea}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${zonePerimeter}</span>` : ''}${zonePerimeter ? `<span class="zone-metric">${escapeHtml(zonePerimeterFlexinetBadge)}</span>` : ''}${headerZoneStatus}</div></div><div class="zone-bottom">${sheepList}</div></div>`
       }).join('')}
       <button type="button" class="zone-item add-zone-button${isStalPaddock(p) ? ' stall-zone-item' : ''}" data-paddock-id="${p.id}" aria-label="${t('aria.addZone')}">
         <span class="add-zone-icon">+</span>
