@@ -3002,9 +3002,14 @@ function render(){
   if(pedigreeList){
     const activePedigreeSheep = activeSheep
     const sheepById = new Map(state.sheep.map(s => [s.id, s]))
-    const truncateTag = (value) => {
+    const truncateText = (value, maxLength) => {
       const text = (value || '-').trim() || '-'
-      return text.length > 18 ? `${text.slice(0, 15)}...` : text
+      if(text.length <= maxLength) return { display: text, full: text, truncated: false }
+      return {
+        display: `${text.slice(0, Math.max(1, maxLength - 3))}...`,
+        full: text,
+        truncated: true
+      }
     }
     const sexPrefix = (sheep) => {
       if(!sheep) return ''
@@ -3012,9 +3017,10 @@ function render(){
       if(sheep.gender === 'male') return '♂ '
       return ''
     }
-    const nodeLabel = (sheep) => {
-      if(!sheep) return '-'
-      return `${sexPrefix(sheep)}${truncateTag(sheep.tag || '-')}`
+    const nodeLabel = (sheep, maxLength = 18) => {
+      if(!sheep) return { display: '-', full: '-', truncated: false }
+      const fullLabel = `${sexPrefix(sheep)}${(sheep.tag || '-').trim() || '-'}`
+      return truncateText(fullLabel, maxLength)
     }
 
     const pedigreeCards = activePedigreeSheep
@@ -3040,6 +3046,17 @@ function render(){
         const fatherTag = father ? `${sexPrefix(father)}${father.tag || '-'}` : '-'
         const birthDateLabel = sheep.birthDate ? formatBirthDate(sheep.birthDate) : t('labels.notAvailable')
         const summaryLabel = `${sexPrefix(sheep)}${tag} - ${birthDateLabel} (${fatherTag} x ${motherTag})`
+        const sheepLabel = nodeLabel(sheep, 21)
+        const motherLabel = nodeLabel(mother, 21)
+        const fatherLabel = nodeLabel(father, 21)
+        const maternalGrandMotherLabel = nodeLabel(maternalGrandMother, 13)
+        const maternalGrandFatherLabel = nodeLabel(maternalGrandFather, 13)
+        const paternalGrandMotherLabel = nodeLabel(paternalGrandMother, 13)
+        const paternalGrandFatherLabel = nodeLabel(paternalGrandFather, 13)
+        const renderNodeText = (label, x, y, extraClass = '') => {
+          const classes = `pedigree-node-text${extraClass ? ` ${extraClass}` : ''}`
+          return `<text class="${classes}" x="${x}" y="${y}" text-anchor="middle">${label.truncated ? `<title>${escapeHtml(label.full)}</title>` : ''}${escapeHtml(label.display)}</text>`
+        }
 
         return `
           <article class="pedigree-single">
@@ -3056,37 +3073,37 @@ function render(){
             <div class="pedigree-tree-zone${isExpanded ? '' : ' hidden'}">
               <div class="pedigree-tree-wrap">
                 <svg class="pedigree-tree-svg" viewBox="0 0 680 200" role="img" aria-label="${escapeHtml(tag)} ${t('section.pedigree')}">
-                  <line class="pedigree-line" x1="175" y1="100" x2="195" y2="100"></line>
-                  <line class="pedigree-line" x1="195" y1="45" x2="195" y2="155"></line>
-                  <line class="pedigree-line" x1="195" y1="45" x2="220" y2="45"></line>
-                  <line class="pedigree-line" x1="195" y1="155" x2="220" y2="155"></line>
+                  <line class="pedigree-line" x1="200" y1="100" x2="210" y2="100"></line>
+                  <line class="pedigree-line" x1="210" y1="45" x2="210" y2="155"></line>
+                  <line class="pedigree-line" x1="210" y1="45" x2="235" y2="45"></line>
+                  <line class="pedigree-line" x1="210" y1="155" x2="235" y2="155"></line>
 
-                  <line class="pedigree-line" x1="385" y1="45" x2="415" y2="45"></line>
-                  <line class="pedigree-line" x1="415" y1="22" x2="415" y2="68"></line>
-                  <line class="pedigree-line" x1="415" y1="22" x2="445" y2="22"></line>
-                  <line class="pedigree-line" x1="415" y1="68" x2="445" y2="68"></line>
+                  <line class="pedigree-line" x1="425" y1="45" x2="450" y2="45"></line>
+                  <line class="pedigree-line" x1="450" y1="22" x2="450" y2="68"></line>
+                  <line class="pedigree-line" x1="450" y1="22" x2="480" y2="22"></line>
+                  <line class="pedigree-line" x1="450" y1="68" x2="480" y2="68"></line>
 
-                  <line class="pedigree-line" x1="385" y1="155" x2="415" y2="155"></line>
-                  <line class="pedigree-line" x1="415" y1="132" x2="415" y2="178"></line>
-                  <line class="pedigree-line" x1="415" y1="132" x2="445" y2="132"></line>
-                  <line class="pedigree-line" x1="415" y1="178" x2="445" y2="178"></line>
+                  <line class="pedigree-line" x1="425" y1="155" x2="450" y2="155"></line>
+                  <line class="pedigree-line" x1="450" y1="132" x2="450" y2="178"></line>
+                  <line class="pedigree-line" x1="450" y1="132" x2="480" y2="132"></line>
+                  <line class="pedigree-line" x1="450" y1="178" x2="480" y2="178"></line>
 
-                  <rect class="pedigree-node-box pedigree-node-box--focus" x="10" y="80" width="165" height="40" rx="8"></rect>
-                  <text class="pedigree-node-text pedigree-node-text--focus" x="92" y="100" text-anchor="middle">${escapeHtml(nodeLabel(sheep))}</text>
+                  <rect class="pedigree-node-box pedigree-node-box--focus" x="10" y="80" width="225" height="40" rx="8"></rect>
+                  ${renderNodeText(sheepLabel, 122, 100, 'pedigree-node-text--focus')}
 
-                  <rect class="pedigree-node-box" x="220" y="25" width="165" height="40" rx="8"></rect>
-                  <text class="pedigree-node-text" x="302" y="45" text-anchor="middle">${escapeHtml(nodeLabel(mother))}</text>
-                  <rect class="pedigree-node-box" x="220" y="135" width="165" height="40" rx="8"></rect>
-                  <text class="pedigree-node-text" x="302" y="155" text-anchor="middle">${escapeHtml(nodeLabel(father))}</text>
+                  <rect class="pedigree-node-box" x="235" y="25" width="225" height="40" rx="8"></rect>
+                  ${renderNodeText(motherLabel, 347, 45)}
+                  <rect class="pedigree-node-box" x="235" y="135" width="225" height="40" rx="8"></rect>
+                  ${renderNodeText(fatherLabel, 347, 155)}
 
-                  <rect class="pedigree-node-box" x="445" y="5" width="225" height="34" rx="8"></rect>
-                  <text class="pedigree-node-text" x="557" y="22" text-anchor="middle">${escapeHtml(nodeLabel(maternalGrandMother))}</text>
-                  <rect class="pedigree-node-box" x="445" y="51" width="225" height="34" rx="8"></rect>
-                  <text class="pedigree-node-text" x="557" y="68" text-anchor="middle">${escapeHtml(nodeLabel(maternalGrandFather))}</text>
-                  <rect class="pedigree-node-box" x="445" y="115" width="225" height="34" rx="8"></rect>
-                  <text class="pedigree-node-text" x="557" y="132" text-anchor="middle">${escapeHtml(nodeLabel(paternalGrandMother))}</text>
-                  <rect class="pedigree-node-box" x="445" y="161" width="225" height="34" rx="8"></rect>
-                  <text class="pedigree-node-text" x="557" y="178" text-anchor="middle">${escapeHtml(nodeLabel(paternalGrandFather))}</text>
+                  <rect class="pedigree-node-box" x="480" y="5" width="170" height="34" rx="8"></rect>
+                  ${renderNodeText(maternalGrandMotherLabel, 565, 22)}
+                  <rect class="pedigree-node-box" x="480" y="51" width="170" height="34" rx="8"></rect>
+                  ${renderNodeText(maternalGrandFatherLabel, 565, 68)}
+                  <rect class="pedigree-node-box" x="480" y="115" width="170" height="34" rx="8"></rect>
+                  ${renderNodeText(paternalGrandMotherLabel, 565, 132)}
+                  <rect class="pedigree-node-box" x="480" y="161" width="170" height="34" rx="8"></rect>
+                  ${renderNodeText(paternalGrandFatherLabel, 565, 178)}
                 </svg>
               </div>
             </div>
